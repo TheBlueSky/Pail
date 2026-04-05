@@ -1,0 +1,23 @@
+<Solution>
+    <Configurations>
+        <Platform Name="ARM64" />
+        <Platform Name="x64" />
+        <Platform Name="x86" />
+    </Configurations>
+    <Folder Name="/Solution Items/">
+        <File Path="Directory.Build.props" />
+        <File Path="Directory.Packages.props" />
+    </Folder>
+    <Folder Name="/src/">
+        <Project Path="src/Pail.App/Pail.App.csproj">
+            <Platform Solution="*|ARM64" Project="ARM64" />
+            <Platform Solution="*|x64" Project="x64" />
+            <Platform Solution="*|x86" Project="x86" />
+            <Deploy />
+        </Project>
+        <Project Path="src/Pail.Core/Pail.Core.csproj" />
+    </Folder>
+    <Folder Name="/test/">
+        <Project Path="test/Pail.Core.Tests.Unit/Pail.Core.Tests.Unit.csproj" />
+    </Folder>
+</Solution>

@@ -1,0 +1,88 @@
+name: Publish single-file app
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/publish-single-file.yaml'
+      - 'Directory.Build.props'
+      - 'Directory.Packages.props'
+      - 'NuGet.config'
+      - 'Pail.slnx'
+      - 'src/**'
+      - 'test/**'
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore
+        shell: pwsh
+        run: dotnet restore .\Pail.slnx
+
+      - name: Build
+        shell: pwsh
+        run: dotnet build .\Pail.slnx --configuration Release --no-restore
+
+      - name: Test
+        shell: pwsh
+        run: dotnet test .\Pail.slnx --configuration Release --no-build
+
+  publish:
+    needs: build-and-test
+    runs-on: windows-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        rid:
+          - win-x64
+          - win-x86
+          - win-arm64
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Publish ${{ matrix.rid }}
+        shell: pwsh
+        run: |
+          $publishDir = Join-Path $env:GITHUB_WORKSPACE "artifacts\${{ matrix.rid }}"
+
+          dotnet publish .\src\Pail.App\Pail.App.csproj `
+            --configuration Release `
+            --runtime ${{ matrix.rid }} `
+            -p:SelfContained=true `
+            -p:WindowsAppSDKSelfContained=true `
+            -p:PublishSingleFile=true `
+            -p:IncludeNativeLibrariesForSelfExtract=true `
+            -p:DebugType=none `
+            -p:DebugSymbols=false `
+            -p:CopyOutputSymbolsToPublishDirectory=false `
+            -p:PublishDir="$publishDir\"
+
+      - name: Upload ${{ matrix.rid }} artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: Pail-${{ matrix.rid }}
+          path: artifacts/${{ matrix.rid }}/Pail.exe
+          if-no-files-found: error

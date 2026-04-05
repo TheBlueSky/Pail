@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="Pail.App.Views.ObjectBrowserPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:controls="using:CommunityToolkit.WinUI.UI.Controls"
+    xmlns:models="using:Pail.Models"
+    xmlns:converters="using:Pail.App.Converters"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Page.Resources>
+        <converters:FolderIconConverter x:Key="FolderIconConverter"/>
+    </Page.Resources>
+
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,0,0,12">
+            <Button Command="{x:Bind ViewModel.GoBackCommand}">
+                <SymbolIcon Symbol="Back"/>
+            </Button>
+            <TextBlock Text="Browser" Style="{StaticResource TitleTextBlockStyle}" VerticalAlignment="Center"/>
+            <TextBlock Text="{x:Bind ViewModel.CurrentPath, Mode=OneWay}" VerticalAlignment="Center" Foreground="Gray"/>
+        </StackPanel>
+
+        <CommandBar Grid.Row="1" HorizontalAlignment="Left" Background="Transparent" DefaultLabelPosition="Right">
+            <AppBarButton Icon="Refresh" Label="Refresh" Command="{x:Bind ViewModel.LoadItemsCommand}"/>
+            <AppBarButton Icon="Download" Label="Download Selected" Click="OnDownloadClick"/>
+        </CommandBar>
+
+        <controls:DataGrid x:Name="ObjectGrid"
+            Grid.Row="2"
+            ItemsSource="{x:Bind ViewModel.Items}"
+            AutoGenerateColumns="False"
+            CanUserSortColumns="True"
+            IsReadOnly="True"
+            SelectionMode="Extended"
+            DoubleTapped="OnGridDoubleTapped">
+
+            <controls:DataGrid.Columns>
+                <controls:DataGridTemplateColumn Header="Name" Width="*">
+                    <controls:DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate x:DataType="models:S3ObjectItem">
+                            <StackPanel Orientation="Horizontal" Spacing="8" Margin="8,0">
+                                <SymbolIcon Symbol="{x:Bind IsFolder, Converter={StaticResource FolderIconConverter}}"/>
+                                <TextBlock Text="{x:Bind Name}" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </controls:DataGridTemplateColumn.CellTemplate>
+                </controls:DataGridTemplateColumn>
+                <controls:DataGridTextColumn Header="Size" Binding="{Binding SizeDisplay}" Width="100"/>
+                <controls:DataGridTextColumn Header="Last Modified" Binding="{Binding LastModified}" Width="180"/>
+            </controls:DataGrid.Columns>
+        </controls:DataGrid>
+
+        <ProgressRing Grid.Row="2" IsActive="{x:Bind ViewModel.IsBusy, Mode=OneWay}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+        <TextBlock Grid.Row="2" Text="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}" VerticalAlignment="Bottom" HorizontalAlignment="Center"/>
+    </Grid>
+</Page>
