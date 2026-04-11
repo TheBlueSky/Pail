@@ -2,21 +2,20 @@ using Pail.Services;
 
 namespace Pail.App.Services;
 
-public class NavigationService : INavigationService
+public sealed class NavigationService : INavigationService
 {
 	private Frame? _frame;
 
-	public void Initialize(Frame frame)
-	{
-		_frame = frame;
-	}
+	public void Initialize(Frame frame) => _frame = frame;
 
 	public void NavigateTo(string pageKey, object? parameter = null)
 	{
-		if (_frame == null)
+		if (_frame is null)
+		{
 			return;
+		}
 
-		Type? pageType = pageKey switch
+		var pageType = pageKey switch
 		{
 			"LoginPage" => typeof(LoginPage),
 			"BucketListPage" => typeof(BucketListPage),
@@ -24,7 +23,7 @@ public class NavigationService : INavigationService
 			_ => null
 		};
 
-		if (pageType != null)
+		if (pageType is not null)
 		{
 			_frame.Navigate(pageType, parameter);
 		}
@@ -32,7 +31,7 @@ public class NavigationService : INavigationService
 
 	public void GoBack()
 	{
-		if (_frame?.CanGoBack == true)
+		if (_frame?.CanGoBack is true)
 		{
 			_frame.GoBack();
 		}
