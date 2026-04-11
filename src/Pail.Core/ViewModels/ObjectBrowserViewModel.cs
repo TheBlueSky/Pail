@@ -107,7 +107,7 @@ public partial class ObjectBrowserViewModel : ObservableObject
 			// NOTE: In a production WinUI 3 app, use FolderPicker.
 			// FolderPicker requires a window handle (HWND) which can be retrieved via WinRT.Interop.WindowNative.GetWindowHandle(window).
 			// For this implementation, we use a default Downloads subfolder.
-			var downloadsFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads", "S3Browser");
+			var downloadsFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads", "Pail");
 			Directory.CreateDirectory(downloadsFolder);
 
 			foreach (var item in selectedItems)
