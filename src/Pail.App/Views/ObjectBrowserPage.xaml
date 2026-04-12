@@ -46,20 +46,21 @@
             IsReadOnly="True"
             SelectionMode="Extended"
             SelectionChanged="OnGridSelectionChanged"
-            DoubleTapped="OnGridDoubleTapped">
+            DoubleTapped="OnGridDoubleTapped"
+            RightTapped="OnGridRightTapped">
+
+            <controls:DataGrid.ContextFlyout>
+                <MenuFlyout>
+                    <MenuFlyoutItem Text="Copy Name" Icon="Copy" Click="OnCopyObjectNameContextClick"/>
+                    <MenuFlyoutItem Text="Copy Full Key" Icon="Copy" Click="OnCopyObjectFullKeyContextClick"/>
+                </MenuFlyout>
+            </controls:DataGrid.ContextFlyout>
 
             <controls:DataGrid.Columns>
                 <controls:DataGridTemplateColumn Header="Name" Width="*">
                     <controls:DataGridTemplateColumn.CellTemplate>
                         <DataTemplate x:DataType="models:S3ObjectItem">
                             <StackPanel Orientation="Horizontal" Spacing="8" Margin="8,0">
-                                <StackPanel.ContextFlyout>
-                                    <MenuFlyout>
-                                        <MenuFlyoutItem Text="Copy Name" Icon="Copy" Click="OnCopyObjectNameContextClick"/>
-                                        <MenuFlyoutItem Text="Copy Full Key" Icon="Copy" Click="OnCopyObjectFullKeyContextClick"/>
-                                    </MenuFlyout>
-                                </StackPanel.ContextFlyout>
-
                                 <SymbolIcon Symbol="{x:Bind IsFolder, Converter={StaticResource FolderIconConverter}}"/>
                                 <TextBlock Text="{x:Bind Name}" VerticalAlignment="Center"/>
                             </StackPanel>

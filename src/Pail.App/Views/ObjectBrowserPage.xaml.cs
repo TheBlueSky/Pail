@@ -44,25 +44,17 @@ public sealed partial class ObjectBrowserPage : Page
 	private void OnGridSelectionChanged(object sender, SelectionChangedEventArgs e) =>
 		ViewModel.SelectedItem = ObjectGrid.SelectedItem as S3ObjectItem;
 
-	private async void OnCopyObjectNameContextClick(object sender, RoutedEventArgs e)
+	private void OnGridRightTapped(object sender, RightTappedRoutedEventArgs e)
 	{
-		if (sender is not MenuFlyoutItem { DataContext: S3ObjectItem item })
+		if (e.OriginalSource is FrameworkElement { DataContext: S3ObjectItem item })
 		{
-			return;
+			ViewModel.SelectedItem = item;
 		}
+	}
 
-		ViewModel.SelectedItem = item;
+	private async void OnCopyObjectNameContextClick(object sender, RoutedEventArgs e) =>
 		await ViewModel.CopyObjectNameCommand.ExecuteAsync(null);
-	}
 
-	private async void OnCopyObjectFullKeyContextClick(object sender, RoutedEventArgs e)
-	{
-		if (sender is not MenuFlyoutItem { DataContext: S3ObjectItem item })
-		{
-			return;
-		}
-
-		ViewModel.SelectedItem = item;
+	private async void OnCopyObjectFullKeyContextClick(object sender, RoutedEventArgs e) =>
 		await ViewModel.CopyObjectFullKeyCommand.ExecuteAsync(null);
-	}
 }
