@@ -11,6 +11,8 @@ public partial class ObjectBrowserViewModel : ObservableObject
 	private readonly IS3Service _s3Service;
 	private readonly INavigationService _navigationService;
 	private readonly ICopyActionService _copyActionService;
+	private readonly IFolderPickerService _folderPickerService;
+	private readonly ISettingsService _settingsService;
 	private readonly IStatusMessageService _statusMessageService;
 	private readonly Stack<string> _pathStack = new();
 
@@ -20,11 +22,15 @@ public partial class ObjectBrowserViewModel : ObservableObject
 		IS3Service s3Service,
 		INavigationService navigationService,
 		ICopyActionService copyActionService,
+		IFolderPickerService folderPickerService,
+		ISettingsService settingsService,
 		IStatusMessageService statusMessageService)
 	{
 		_s3Service = s3Service;
 		_navigationService = navigationService;
 		_copyActionService = copyActionService;
+		_folderPickerService = folderPickerService;
+		_settingsService = settingsService;
 		_statusMessageService = statusMessageService;
 	}
 
@@ -117,10 +123,28 @@ public partial class ObjectBrowserViewModel : ObservableObject
 
 		try
 		{
-			// NOTE: In a production WinUI 3 app, use FolderPicker.
-			// FolderPicker requires a window handle (HWND) which can be retrieved via WinRT.Interop.WindowNative.GetWindowHandle(window).
-			// For this implementation, we use a default Downloads subfolder.
-			var downloadsFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads", "Pail");
+			var settings = _settingsService.Settings;
+			var downloadsFolder = ResolveDownloadFolder(settings);
+
+			if (settings.AlwaysPromptDownloadLocation)
+			{
+				var selectedFolder = await _folderPickerService.PickFolderAsync(downloadsFolder);
+
+				if (string.IsNullOrWhiteSpace(selectedFolder))
+				{
+					_statusMessageService.ShowInfo("Download cancelled.");
+					return;
+				}
+
+				downloadsFolder = selectedFolder;
+
+				if (!string.Equals(settings.DownloadFolder, selectedFolder, StringComparison.Ordinal))
+				{
+					settings.DownloadFolder = selectedFolder;
+					await _settingsService.SaveAsync();
+				}
+			}
+
 			Directory.CreateDirectory(downloadsFolder);
 
 			foreach (var item in selectedItems)
@@ -145,6 +169,16 @@ public partial class ObjectBrowserViewModel : ObservableObject
 		{
 			IsBusy = false;
 		}
+	}
+
+	private static string ResolveDownloadFolder(AppSettings settings)
+	{
+		if (string.IsNullOrWhiteSpace(settings.DownloadFolder))
+		{
+			settings.DownloadFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads", "Pail");
+		}
+
+		return settings.DownloadFolder;
 	}
 
 	[RelayCommand(CanExecute = nameof(CanCopySelectedObject))]

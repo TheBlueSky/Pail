@@ -41,7 +41,15 @@
 
                         <StackPanel Spacing="8">
                             <TextBlock Text="Default download folder" />
-                            <TextBox Text="{x:Bind ViewModel.DownloadFolder, Mode=TwoWay}" PlaceholderText="C:\Downloads\Pail" />
+                            <Grid ColumnSpacing="12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <TextBox Grid.Column="0" Text="{x:Bind ViewModel.DownloadFolder, Mode=TwoWay}" PlaceholderText="e.g. C:\Downloads\Pail" />
+                                <Button Grid.Column="1" Content="Browse" Command="{x:Bind ViewModel.BrowseDownloadFolderCommand}" />
+                            </Grid>
                         </StackPanel>
 
                         <ToggleSwitch Header="Always prompt before downloading" IsOn="{x:Bind ViewModel.AlwaysPromptDownloadLocation, Mode=TwoWay}" />

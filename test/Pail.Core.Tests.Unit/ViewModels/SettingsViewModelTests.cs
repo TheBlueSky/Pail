@@ -9,6 +9,7 @@ namespace Pail.Core.Tests.Unit.ViewModels;
 public sealed class SettingsViewModelTests
 {
 	private readonly ISettingsService _settingsService = Substitute.For<ISettingsService>();
+	private readonly IFolderPickerService _folderPickerService = Substitute.For<IFolderPickerService>();
 	private readonly IStatusMessageService _statusMessageService = Substitute.For<IStatusMessageService>();
 	private readonly AppSettings _settings = new()
 	{
@@ -95,5 +96,49 @@ public sealed class SettingsViewModelTests
 		_statusMessageService.Received(1).ShowError(Arg.Is<string>(message => message.Contains("Failed to save settings: disk full")));
 	}
 
-	private SettingsViewModel CreateViewModel() => new(_settingsService, _statusMessageService);
+	[Fact]
+	internal async Task BrowseDownloadFolderCommand_WhenFolderSelected_UpdatesDownloadFolder()
+	{
+		// Arrange
+		_folderPickerService.PickFolderAsync("D:\\Downloads", Arg.Any<CancellationToken>()).Returns("F:\\Chosen");
+		var viewModel = CreateViewModel();
+
+		// Act
+		await viewModel.BrowseDownloadFolderCommand.ExecuteAsync(null);
+
+		// Assert
+		Assert.Equal("F:\\Chosen", viewModel.DownloadFolder);
+	}
+
+	[Fact]
+	internal async Task BrowseDownloadFolderCommand_WhenCancelled_KeepsDownloadFolder()
+	{
+		// Arrange
+		_folderPickerService.PickFolderAsync("D:\\Downloads", Arg.Any<CancellationToken>()).Returns((string?)null);
+		var viewModel = CreateViewModel();
+
+		// Act
+		await viewModel.BrowseDownloadFolderCommand.ExecuteAsync(null);
+
+		// Assert
+		Assert.Equal("D:\\Downloads", viewModel.DownloadFolder);
+	}
+
+	[Fact]
+	internal async Task BrowseDownloadFolderCommand_OnFailure_ShowsError()
+	{
+		// Arrange
+		_folderPickerService
+			.PickFolderAsync(Arg.Any<string?>(), Arg.Any<CancellationToken>())
+			.ThrowsAsync(new InvalidOperationException("picker unavailable"));
+		var viewModel = CreateViewModel();
+
+		// Act
+		await viewModel.BrowseDownloadFolderCommand.ExecuteAsync(null);
+
+		// Assert
+		_statusMessageService.Received(1).ShowError(Arg.Is<string>(message => message.Contains("Failed to select folder: picker unavailable")));
+	}
+
+	private SettingsViewModel CreateViewModel() => new(_settingsService, _folderPickerService, _statusMessageService);
 }

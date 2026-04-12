@@ -8,11 +8,16 @@ namespace Pail.ViewModels;
 public partial class SettingsViewModel : ObservableObject
 {
 	private readonly ISettingsService _settingsService;
+	private readonly IFolderPickerService _folderPickerService;
 	private readonly IStatusMessageService _statusMessageService;
 
-	public SettingsViewModel(ISettingsService settingsService, IStatusMessageService statusMessageService)
+	public SettingsViewModel(
+		ISettingsService settingsService,
+		IFolderPickerService folderPickerService,
+		IStatusMessageService statusMessageService)
 	{
 		_settingsService = settingsService;
+		_folderPickerService = folderPickerService;
 		_statusMessageService = statusMessageService;
 
 		var settings = _settingsService.Settings;
@@ -23,6 +28,24 @@ public partial class SettingsViewModel : ObservableObject
 		DefaultRegion = settings.DefaultRegion;
 		UseCredentialChainByDefault = settings.UseCredentialChainByDefault;
 		LastProfileName = settings.LastProfileName ?? string.Empty;
+	}
+
+	[RelayCommand]
+	private async Task BrowseDownloadFolderAsync()
+	{
+		try
+		{
+			var selectedPath = await _folderPickerService.PickFolderAsync(DownloadFolder);
+
+			if (string.IsNullOrWhiteSpace(selectedPath) is false)
+			{
+				DownloadFolder = selectedPath;
+			}
+		}
+		catch (Exception ex)
+		{
+			_statusMessageService.ShowError($"Failed to select folder: {ex.Message}");
+		}
 	}
 
 	[ObservableProperty]

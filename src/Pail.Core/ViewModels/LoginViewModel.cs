@@ -13,18 +13,26 @@ public partial class LoginViewModel : ObservableObject
 	private readonly IAwsProfileService _awsProfileService;
 	private readonly IS3Service _s3Service;
 	private readonly INavigationService _navigationService;
+	private readonly ISettingsService _settingsService;
 	private readonly IStatusMessageService _statusMessageService;
 
 	public LoginViewModel(
 		IAwsProfileService awsProfileService,
 		IS3Service s3Service,
 		INavigationService navigationService,
+		ISettingsService settingsService,
 		IStatusMessageService statusMessageService)
 	{
 		_awsProfileService = awsProfileService;
 		_s3Service = s3Service;
 		_navigationService = navigationService;
+		_settingsService = settingsService;
 		_statusMessageService = statusMessageService;
+
+		var settings = _settingsService.Settings;
+		Region = string.IsNullOrWhiteSpace(settings.DefaultRegion) ? Region : settings.DefaultRegion;
+		UseDefaultChain = settings.UseCredentialChainByDefault;
+		SelectedProfileName = string.IsNullOrWhiteSpace(settings.LastProfileName) ? AutomaticProfileOption : settings.LastProfileName;
 	}
 
 	[ObservableProperty]

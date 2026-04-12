@@ -18,6 +18,8 @@ public partial class PailApp : Application
 		InitializeComponent();
 	}
 
+	public static Window? MainWindow { get; private set; }
+
 	public static IServiceProvider Services { get; private set; } = ConfigureServices();
 
 	private static ServiceProvider ConfigureServices()
@@ -49,6 +51,7 @@ public partial class PailApp : Application
 		await Services.GetRequiredService<ISettingsService>().LoadAsync();
 
 		_window = new Window { Title = "Pail – AWS S3 Browser" };
+		MainWindow = _window;
 
 		if (_window.Content is not Frame rootFrame)
 		{

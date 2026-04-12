@@ -12,10 +12,14 @@ public sealed partial class StatusOverlayHost : UserControl
 	{
 		InitializeComponent();
 
+		var settings = PailApp.Services.GetRequiredService<ISettingsService>().Settings;
+		var displayDuration = TimeSpan.FromSeconds(Math.Max(1, settings.StatusOverlayDurationSeconds));
+
 		_statusPresenter = new StatusInfoBarPresenter(
 			DispatcherQueue,
 			StatusInfoBar,
-			PailApp.Services.GetRequiredService<IStatusMessageService>());
+			PailApp.Services.GetRequiredService<IStatusMessageService>(),
+			displayDuration);
 
 		Loaded += OnLoaded;
 		Unloaded += OnUnloaded;
