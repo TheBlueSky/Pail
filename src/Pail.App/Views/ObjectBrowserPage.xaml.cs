@@ -1,7 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Navigation;
+using Pail.App.Services;
 using Pail.Models;
 using Pail.Services;
 using Pail.ViewModels;
@@ -10,8 +10,7 @@ namespace Pail.App.Views;
 
 public sealed partial class ObjectBrowserPage : Page
 {
-	private readonly IStatusMessageService _statusMessageService;
-	private readonly DispatcherQueueTimer _statusTimer;
+	private readonly StatusInfoBarPresenter _statusPresenter;
 
 	public ObjectBrowserPage()
 	{
@@ -19,10 +18,10 @@ public sealed partial class ObjectBrowserPage : Page
 
 		ViewModel = PailApp.Services.GetRequiredService<ObjectBrowserViewModel>();
 
-		_statusMessageService = PailApp.Services.GetRequiredService<IStatusMessageService>();
-		_statusTimer = DispatcherQueue.CreateTimer();
-		_statusTimer.Interval = TimeSpan.FromSeconds(3);
-		_statusTimer.Tick += OnStatusTimerTick;
+		_statusPresenter = new StatusInfoBarPresenter(
+			DispatcherQueue,
+			StatusInfoBar,
+			PailApp.Services.GetRequiredService<IStatusMessageService>());
 
 		Loaded += OnLoaded;
 		Unloaded += OnUnloaded;
@@ -80,25 +79,8 @@ public sealed partial class ObjectBrowserPage : Page
 	}
 
 	private void OnLoaded(object sender, RoutedEventArgs e) =>
-		_statusMessageService.MessageRaised += OnStatusMessageRaised;
+		_statusPresenter.Attach();
 
 	private void OnUnloaded(object sender, RoutedEventArgs e) =>
-		_statusMessageService.MessageRaised -= OnStatusMessageRaised;
-
-	private void OnStatusTimerTick(DispatcherQueueTimer sender, object args)
-	{
-		sender.Stop();
-		StatusInfoBar.IsOpen = false;
-	}
-
-	private void OnStatusMessageRaised(object? sender, StatusMessage message) =>
-		DispatcherQueue.TryEnqueue(() =>
-		{
-			StatusInfoBar.Severity = message.Level == StatusMessageLevel.Error ? InfoBarSeverity.Error : InfoBarSeverity.Informational;
-			StatusInfoBar.Message = message.Message;
-			StatusInfoBar.IsOpen = true;
-
-			_statusTimer.Stop();
-			_statusTimer.Start();
-		});
+		_statusPresenter.Detach();
 }
