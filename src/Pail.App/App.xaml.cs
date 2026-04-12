@@ -26,8 +26,10 @@ public partial class PailApp : Application
 
 		// Services
 		services.AddSingleton<IAwsProfileService, AwsProfileService>();
+		services.AddSingleton<IClipboardService, ClipboardService>();
 		services.AddSingleton<INavigationService, NavigationService>();
 		services.AddSingleton<IS3Service, S3Service>();
+		services.AddSingleton<IStatusMessageService, StatusMessageService>();
 
 		// ViewModels
 		services.AddTransient<BucketListViewModel>();

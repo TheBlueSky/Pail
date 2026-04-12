@@ -32,6 +32,8 @@
 
         <CommandBar Grid.Row="1" HorizontalAlignment="Left" Background="Transparent" DefaultLabelPosition="Right">
             <AppBarButton Icon="Refresh" Label="Refresh" Command="{x:Bind ViewModel.LoadItemsCommand}"/>
+            <AppBarButton Icon="Copy" Label="Copy Name" Command="{x:Bind ViewModel.CopyObjectNameCommand}"/>
+            <AppBarButton Icon="Copy" Label="Copy Full Key" Command="{x:Bind ViewModel.CopyObjectFullKeyCommand}"/>
             <AppBarButton Icon="Download" Label="Download Selected" Click="OnDownloadClick"/>
         </CommandBar>
 
@@ -42,6 +44,7 @@
             CanUserSortColumns="True"
             IsReadOnly="True"
             SelectionMode="Extended"
+            SelectionChanged="OnGridSelectionChanged"
             DoubleTapped="OnGridDoubleTapped">
 
             <controls:DataGrid.Columns>
@@ -49,6 +52,13 @@
                     <controls:DataGridTemplateColumn.CellTemplate>
                         <DataTemplate x:DataType="models:S3ObjectItem">
                             <StackPanel Orientation="Horizontal" Spacing="8" Margin="8,0">
+                                <StackPanel.ContextFlyout>
+                                    <MenuFlyout>
+                                        <MenuFlyoutItem Text="Copy Name" Icon="Copy" Click="OnCopyObjectNameContextClick"/>
+                                        <MenuFlyoutItem Text="Copy Full Key" Icon="Copy" Click="OnCopyObjectFullKeyContextClick"/>
+                                    </MenuFlyout>
+                                </StackPanel.ContextFlyout>
+
                                 <SymbolIcon Symbol="{x:Bind IsFolder, Converter={StaticResource FolderIconConverter}}"/>
                                 <TextBlock Text="{x:Bind Name}" VerticalAlignment="Center"/>
                             </StackPanel>
@@ -62,5 +72,16 @@
 
         <ProgressRing Grid.Row="2" IsActive="{x:Bind ViewModel.IsBusy, Mode=OneWay}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
         <TextBlock Grid.Row="2" Text="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}" VerticalAlignment="Bottom" HorizontalAlignment="Center"/>
+
+        <InfoBar x:Name="StatusInfoBar"
+            Grid.Row="0"
+            Grid.RowSpan="3"
+            Canvas.ZIndex="10"
+            IsOpen="False"
+            IsClosable="True"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Top"
+            MaxWidth="420"
+            Margin="0,0,0,12"/>
     </Grid>
 </Page>

@@ -18,16 +18,26 @@
         <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,0,0,12">
             <TextBlock Text="S3 Buckets" Style="{StaticResource TitleTextBlockStyle}" VerticalAlignment="Center"/>
             <Button Content="Refresh" Command="{x:Bind ViewModel.LoadBucketsCommand}" VerticalAlignment="Center"/>
+            <Button Content="Copy Bucket Name" Command="{x:Bind ViewModel.CopyBucketNameCommand}" VerticalAlignment="Center"/>
         </StackPanel>
 
-        <ListView Grid.Row="1" 
-                  ItemsSource="{x:Bind ViewModel.Buckets}"
-                  SelectionMode="None"
-                  IsItemClickEnabled="True"
-                  ItemClick="OnBucketClick">
+        <ListView
+            Grid.Row="1"
+            ItemsSource="{x:Bind ViewModel.Buckets}"
+            SelectedItem="{x:Bind ViewModel.SelectedBucket, Mode=TwoWay}"
+            SelectionMode="Single"
+            IsItemClickEnabled="True"
+            ItemClick="OnBucketClick">
+
             <ListView.ItemTemplate>
                 <DataTemplate x:DataType="models:S3BucketItem">
                     <Grid Padding="12">
+                        <Grid.ContextFlyout>
+                            <MenuFlyout>
+                                <MenuFlyoutItem Text="Copy Bucket Name" Icon="Copy" Click="OnBucketCopyNameContextClick"/>
+                            </MenuFlyout>
+                        </Grid.ContextFlyout>
+
                         <StackPanel>
                             <TextBlock Text="{x:Bind Name}" FontSize="16" FontWeight="SemiBold"/>
                             <TextBlock Text="{x:Bind CreationDate}" FontSize="12" Foreground="Gray"/>
@@ -39,5 +49,16 @@
 
         <ProgressRing Grid.Row="1" IsActive="{x:Bind ViewModel.IsBusy, Mode=OneWay}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
         <TextBlock Grid.Row="1" Text="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}" Foreground="Red" VerticalAlignment="Bottom" HorizontalAlignment="Center"/>
+
+        <InfoBar x:Name="StatusInfoBar"
+            Grid.Row="0"
+            Grid.RowSpan="2"
+            Canvas.ZIndex="10"
+            IsOpen="False"
+            IsClosable="True"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Top"
+            MaxWidth="420"
+            Margin="0,0,0,12"/>
     </Grid>
 </Page>

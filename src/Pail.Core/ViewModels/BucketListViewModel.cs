@@ -10,18 +10,31 @@ public partial class BucketListViewModel : ObservableObject
 {
 	private readonly IS3Service _s3Service;
 	private readonly INavigationService _navigationService;
+	private readonly IClipboardService _clipboardService;
+	private readonly IStatusMessageService _statusMessageService;
 
-	public BucketListViewModel(IS3Service s3Service, INavigationService navigationService)
+	public BucketListViewModel(
+		IS3Service s3Service,
+		INavigationService navigationService,
+		IClipboardService clipboardService,
+		IStatusMessageService statusMessageService)
 	{
 		_s3Service = s3Service;
 		_navigationService = navigationService;
+		_clipboardService = clipboardService;
+		_statusMessageService = statusMessageService;
 	}
 
 	[ObservableProperty]
+	[NotifyCanExecuteChangedFor(nameof(CopyBucketNameCommand))]
 	public partial bool IsBusy { get; set; }
 
 	[ObservableProperty]
 	public partial string ErrorMessage { get; set; } = string.Empty;
+
+	[ObservableProperty]
+	[NotifyCanExecuteChangedFor(nameof(CopyBucketNameCommand))]
+	public partial S3BucketItem? SelectedBucket { get; set; }
 
 	public ObservableCollection<S3BucketItem> Buckets { get; } = [];
 
@@ -56,7 +69,30 @@ public partial class BucketListViewModel : ObservableObject
 	{
 		if (bucket is not null)
 		{
+			SelectedBucket = bucket;
+
 			_navigationService.NavigateTo("ObjectBrowserPage", bucket.Name);
 		}
 	}
+
+	[RelayCommand(CanExecute = nameof(CanCopySelectedBucket))]
+	private async Task CopyBucketNameAsync()
+	{
+		if (SelectedBucket is null)
+		{
+			return;
+		}
+
+		var copied = await _clipboardService.CopyTextAsync(SelectedBucket.Name);
+
+		if (copied)
+		{
+			_statusMessageService.ShowInfo($"Copied bucket name: {SelectedBucket.Name}");
+			return;
+		}
+
+		_statusMessageService.ShowError("Failed to copy bucket name.");
+	}
+
+	private bool CanCopySelectedBucket() => IsBusy is false && SelectedBucket is not null;
 }

@@ -10,24 +10,39 @@ public partial class ObjectBrowserViewModel : ObservableObject
 {
 	private readonly IS3Service _s3Service;
 	private readonly INavigationService _navigationService;
+	private readonly IClipboardService _clipboardService;
+	private readonly IStatusMessageService _statusMessageService;
 	private readonly Stack<string> _pathStack = new();
 
 	private string _bucketName = string.Empty;
 
-	public ObjectBrowserViewModel(IS3Service s3Service, INavigationService navigationService)
+	public ObjectBrowserViewModel(
+		IS3Service s3Service,
+		INavigationService navigationService,
+		IClipboardService clipboardService,
+		IStatusMessageService statusMessageService)
 	{
 		_s3Service = s3Service;
 		_navigationService = navigationService;
+		_clipboardService = clipboardService;
+		_statusMessageService = statusMessageService;
 	}
 
 	[ObservableProperty]
 	public partial string CurrentPath { get; set; } = string.Empty;
 
 	[ObservableProperty]
+	[NotifyCanExecuteChangedFor(nameof(CopyObjectNameCommand))]
+	[NotifyCanExecuteChangedFor(nameof(CopyObjectFullKeyCommand))]
 	public partial bool IsBusy { get; set; }
 
 	[ObservableProperty]
 	public partial string ErrorMessage { get; set; } = string.Empty;
+
+	[ObservableProperty]
+	[NotifyCanExecuteChangedFor(nameof(CopyObjectNameCommand))]
+	[NotifyCanExecuteChangedFor(nameof(CopyObjectFullKeyCommand))]
+	public partial S3ObjectItem? SelectedItem { get; set; }
 
 	public ObservableCollection<S3ObjectItem> Items { get; } = [];
 
@@ -133,4 +148,44 @@ public partial class ObjectBrowserViewModel : ObservableObject
 			IsBusy = false;
 		}
 	}
+
+	[RelayCommand(CanExecute = nameof(CanCopySelectedObject))]
+	private async Task CopyObjectNameAsync()
+	{
+		if (SelectedItem is null)
+		{
+			return;
+		}
+
+		var copied = await _clipboardService.CopyTextAsync(SelectedItem.Name);
+
+		if (copied)
+		{
+			_statusMessageService.ShowInfo($"Copied object name: {SelectedItem.Name}");
+			return;
+		}
+
+		_statusMessageService.ShowError("Failed to copy object name.");
+	}
+
+	[RelayCommand(CanExecute = nameof(CanCopySelectedObject))]
+	private async Task CopyObjectFullKeyAsync()
+	{
+		if (SelectedItem is null)
+		{
+			return;
+		}
+
+		var copied = await _clipboardService.CopyTextAsync(SelectedItem.Key);
+
+		if (copied)
+		{
+			_statusMessageService.ShowInfo($"Copied full key: {SelectedItem.Key}");
+			return;
+		}
+
+		_statusMessageService.ShowError("Failed to copy full key.");
+	}
+
+	private bool CanCopySelectedObject() => IsBusy is false && SelectedItem is not null;
 }
