@@ -8,15 +8,30 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-    <NavigationView x:Name="NavView"
+    <NavigationView
+        x:Name="NavView"
+        AlwaysShowHeader="False"
+        BackRequested="OnBackRequested"
         IsBackButtonVisible="Visible"
+        IsPaneOpen="False"
         IsSettingsVisible="False"
-        PaneDisplayMode="Top">
+        PaneDisplayMode="LeftCompact"
+        SelectionChanged="OnNavigationSelectionChanged">
+
+        <NavigationView.Header>
+            <Grid Margin="0,0,0,12">
+                <TextBlock Text="Pail" FontSize="28" FontWeight="SemiBold" />
+            </Grid>
+        </NavigationView.Header>
 
         <NavigationView.MenuItems>
-            <NavigationViewItem Content="Buckets" Icon="List" Tag="BucketListPage"/>
+            <NavigationViewItem x:Name="BucketsNavItem" Content="Buckets" Tag="BucketListPage">
+                <NavigationViewItem.Icon>
+                    <SymbolIcon Symbol="List" />
+                </NavigationViewItem.Icon>
+            </NavigationViewItem>
         </NavigationView.MenuItems>
 
-        <Frame x:Name="ContentFrame"/>
+        <Frame x:Name="ContentFrame" Navigated="OnContentFrameNavigated" />
     </NavigationView>
 </Page>

@@ -1,16 +1,19 @@
-using Pail.Services;
-
 namespace Pail.App.Services;
 
-public sealed class NavigationService : INavigationService
+public sealed class NavigationService : INavigationHostService
 {
-	private Frame? _frame;
+	private Frame? _rootFrame;
+	private Frame? _contentFrame;
 
-	public void Initialize(Frame frame) => _frame = frame;
+	public void Initialize(Frame rootFrame) => _rootFrame = rootFrame;
+
+	public void RegisterContentFrame(Frame contentFrame) => _contentFrame = contentFrame;
 
 	public void NavigateTo(string pageKey, object? parameter = null)
 	{
-		if (_frame is null)
+		var frame = GetTargetFrame(pageKey);
+
+		if (frame is null)
 		{
 			return;
 		}
@@ -18,6 +21,7 @@ public sealed class NavigationService : INavigationService
 		var pageType = pageKey switch
 		{
 			"LoginPage" => typeof(LoginPage),
+			"MainPage" => typeof(MainPage),
 			"BucketListPage" => typeof(BucketListPage),
 			"ObjectBrowserPage" => typeof(ObjectBrowserPage),
 			_ => null
@@ -25,15 +29,27 @@ public sealed class NavigationService : INavigationService
 
 		if (pageType is not null)
 		{
-			_frame.Navigate(pageType, parameter);
+			frame.Navigate(pageType, parameter);
 		}
 	}
 
 	public void GoBack()
 	{
-		if (_frame?.CanGoBack is true)
+		if (_contentFrame?.CanGoBack is true)
 		{
-			_frame.GoBack();
+			_contentFrame.GoBack();
+			return;
+		}
+
+		if (_rootFrame?.CanGoBack is true)
+		{
+			_rootFrame.GoBack();
 		}
 	}
+
+	private Frame? GetTargetFrame(string pageKey) => pageKey switch
+	{
+		"LoginPage" or "MainPage" => _rootFrame,
+		_ => _contentFrame ?? _rootFrame,
+	};
 }

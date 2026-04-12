@@ -28,7 +28,8 @@ public partial class PailApp : Application
 		services.AddSingleton<IAwsProfileService, AwsProfileService>();
 		services.AddSingleton<IClipboardService, ClipboardService>();
 		services.AddSingleton<ICopyActionService, CopyActionService>();
-		services.AddSingleton<INavigationService, NavigationService>();
+		services.AddSingleton<INavigationHostService, NavigationService>();
+		services.AddSingleton<INavigationService>(serviceProvider => serviceProvider.GetRequiredService<INavigationHostService>());
 		services.AddSingleton<IS3Service, S3Service>();
 		services.AddSingleton<ISettingsService, SettingsService>();
 		services.AddSingleton<IStatusMessageService, StatusMessageService>();
@@ -59,7 +60,7 @@ public partial class PailApp : Application
 		CenterWindow(_window);
 
 		// Register the frame with the navigation service
-		var navService = (NavigationService)Services.GetRequiredService<INavigationService>();
+		var navService = Services.GetRequiredService<INavigationHostService>();
 		navService.Initialize(rootFrame);
 
 		navService.NavigateTo("LoginPage");

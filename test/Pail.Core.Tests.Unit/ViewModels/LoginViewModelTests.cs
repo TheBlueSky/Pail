@@ -42,7 +42,7 @@ public sealed class LoginViewModelTests
 	}
 
 	[Fact]
-	internal async Task LoginCommand_Successful_NavigatesToBucketListPage()
+	internal async Task LoginCommand_Successful_NavigatesToMainPage()
 	{
 		// Arrange
 		_s3Service.GetBucketsAsync().Returns([]);
@@ -53,7 +53,7 @@ public sealed class LoginViewModelTests
 		await viewModel.LoginCommand.ExecuteAsync(null);
 
 		// Assert
-		_navigationService.Received(1).NavigateTo("BucketListPage", null);
+		_navigationService.Received(1).NavigateTo("MainPage", null);
 		Assert.False(viewModel.IsBusy);
 	}
 

@@ -93,7 +93,7 @@ public partial class LoginViewModel : ObservableObject
 			// Attempt a simple call to verify credentials
 			await _s3Service.GetBucketsAsync();
 
-			_navigationService.NavigateTo("BucketListPage");
+			_navigationService.NavigateTo("MainPage");
 		}
 		catch (Exception ex)
 		{
