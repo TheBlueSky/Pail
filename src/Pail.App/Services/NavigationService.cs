@@ -23,6 +23,7 @@ public sealed class NavigationService : INavigationHostService
 			"LoginPage" => typeof(LoginPage),
 			"MainPage" => typeof(MainPage),
 			"BucketListPage" => typeof(BucketListPage),
+			"SettingsPage" => typeof(SettingsPage),
 			"ObjectBrowserPage" => typeof(ObjectBrowserPage),
 			_ => null
 		};

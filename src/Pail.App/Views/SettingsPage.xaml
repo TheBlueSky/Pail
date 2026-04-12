@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="Pail.App.Views.SettingsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:appControls="using:Pail.App.Controls"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Grid>
+        <ScrollViewer>
+            <StackPanel Spacing="20" Padding="24">
+                <Grid ColumnSpacing="16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Settings" Style="{StaticResource TitleTextBlockStyle}" />
+                        <TextBlock Text="Configure downloads, notifications, and AWS login defaults." Opacity="0.72" />
+                    </StackPanel>
+
+                    <Button Grid.Column="1" MinWidth="120" Content="Save" Command="{x:Bind ViewModel.SaveCommand}" />
+                </Grid>
+
+                <Border
+                    Padding="20"
+                    CornerRadius="12"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+
+                    <StackPanel Spacing="16">
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Downloads" FontSize="20" FontWeight="SemiBold" />
+                            <TextBlock Text="Choose where downloaded objects go by default." Opacity="0.72" TextWrapping="Wrap" />
+                        </StackPanel>
+
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="Default download folder" />
+                            <TextBox Text="{x:Bind ViewModel.DownloadFolder, Mode=TwoWay}" PlaceholderText="C:\Downloads\Pail" />
+                        </StackPanel>
+
+                        <ToggleSwitch Header="Always prompt before downloading" IsOn="{x:Bind ViewModel.AlwaysPromptDownloadLocation, Mode=TwoWay}" />
+                    </StackPanel>
+                </Border>
+
+                <Border
+                    Padding="20"
+                    CornerRadius="12"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+
+                    <StackPanel Spacing="16">
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Notifications" FontSize="20" FontWeight="SemiBold" />
+                            <TextBlock Text="Control how long transient status messages stay visible." Opacity="0.72" TextWrapping="Wrap" />
+                        </StackPanel>
+
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="Status overlay duration (seconds)" />
+                            <NumberBox Minimum="1" SmallChange="1" SpinButtonPlacementMode="Compact" Value="{x:Bind ViewModel.StatusOverlayDurationSeconds, Mode=TwoWay}" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <Border
+                    Padding="20"
+                    CornerRadius="12"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+
+                    <StackPanel Spacing="16">
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="AWS Login Defaults" FontSize="20" FontWeight="SemiBold" />
+                            <TextBlock Text="Preselect the login options users see on the sign-in page." Opacity="0.72" TextWrapping="Wrap" />
+                        </StackPanel>
+
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="Default region" />
+                            <ComboBox ItemsSource="{x:Bind ViewModel.AvailableRegions}" SelectedItem="{x:Bind ViewModel.DefaultRegion, Mode=TwoWay}" />
+                        </StackPanel>
+
+                        <ToggleSwitch Header="Use credential chain by default" IsOn="{x:Bind ViewModel.UseCredentialChainByDefault, Mode=TwoWay}" />
+
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="Preferred profile name" />
+                            <TextBox Text="{x:Bind ViewModel.LastProfileName, Mode=TwoWay}" PlaceholderText="Automatic (recommended)" />
+                            <TextBlock Text="Leave blank to fall back to Automatic (recommended)." Opacity="0.72" TextWrapping="Wrap" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+
+        <appControls:StatusOverlayHost Canvas.ZIndex="10" />
+    </Grid>
+</Page>

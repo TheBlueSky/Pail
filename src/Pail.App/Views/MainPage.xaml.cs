@@ -7,6 +7,7 @@ namespace Pail.App.Views;
 public sealed partial class MainPage : Page
 {
 	private INavigationHostService? _navigationService;
+	private bool _isUpdatingSelection;
 
 	public MainPage()
 	{
@@ -21,15 +22,25 @@ public sealed partial class MainPage : Page
 
 		if (ContentFrame.Content is null)
 		{
-			_navigationService.NavigateTo("BucketListPage");
+			NavigateToTopLevelPage("BucketListPage");
 			return;
 		}
 
+		SyncSelectedItem(ContentFrame.CurrentSourcePageType);
 		UpdateBackButtonState();
 	}
 
 	private void OnNavigationSelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
 	{
+		if (_isUpdatingSelection)
+		{
+			return;
+		}
+
+		if (args.SelectedItem is NavigationViewItem { Tag: string pageKey })
+		{
+			NavigateToTopLevelPage(pageKey);
+		}
 	}
 
 	private void OnBackRequested(NavigationView sender, NavigationViewBackRequestedEventArgs args)
@@ -40,6 +51,34 @@ public sealed partial class MainPage : Page
 
 	private void OnContentFrameNavigated(object sender, NavigationEventArgs e)
 	{
+		SyncSelectedItem(e.SourcePageType);
+		UpdateBackButtonState();
+	}
+
+	private void NavigateToTopLevelPage(string pageKey)
+	{
+		_navigationService ??= PailApp.Services.GetRequiredService<INavigationHostService>();
+
+		var currentPageType = ContentFrame.CurrentSourcePageType;
+
+		if ((pageKey == "BucketListPage" && currentPageType == typeof(BucketListPage)) ||
+			(pageKey == "SettingsPage" && currentPageType == typeof(SettingsPage)))
+		{
+			SyncSelectedItem(currentPageType);
+			UpdateBackButtonState();
+			return;
+		}
+
+		_navigationService.NavigateTo(pageKey);
+		ContentFrame.BackStack.Clear();
+		UpdateBackButtonState();
+	}
+
+	private void SyncSelectedItem(Type? pageType)
+	{
+		_isUpdatingSelection = true;
+		NavView.SelectedItem = pageType == typeof(SettingsPage) ? SettingsNavItem : BucketsNavItem;
+		_isUpdatingSelection = false;
 	}
 
 	private void UpdateBackButtonState() => NavView.IsBackEnabled = ContentFrame.CanGoBack;
