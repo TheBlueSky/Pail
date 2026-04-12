@@ -13,12 +13,18 @@ public partial class LoginViewModel : ObservableObject
 	private readonly IAwsProfileService _awsProfileService;
 	private readonly IS3Service _s3Service;
 	private readonly INavigationService _navigationService;
+	private readonly IStatusMessageService _statusMessageService;
 
-	public LoginViewModel(IAwsProfileService awsProfileService, IS3Service s3Service, INavigationService navigationService)
+	public LoginViewModel(
+		IAwsProfileService awsProfileService,
+		IS3Service s3Service,
+		INavigationService navigationService,
+		IStatusMessageService statusMessageService)
 	{
 		_awsProfileService = awsProfileService;
 		_s3Service = s3Service;
 		_navigationService = navigationService;
+		_statusMessageService = statusMessageService;
 	}
 
 	[ObservableProperty]
@@ -42,17 +48,12 @@ public partial class LoginViewModel : ObservableObject
 	[ObservableProperty]
 	public partial bool IsBusy { get; set; }
 
-	[ObservableProperty]
-	public partial string ErrorMessage { get; set; } = string.Empty;
-
 	public ObservableCollection<string> AvailableProfiles { get; } = [AutomaticProfileOption];
 
 	public IReadOnlyList<string> AvailableRegions { get; } = AwsRegions.All;
 
 	public async Task LoadCredentialProfilesAsync()
 	{
-		ErrorMessage = string.Empty;
-
 		try
 		{
 			var profileNames = await _awsProfileService.GetProfileNamesAsync();
@@ -72,7 +73,7 @@ public partial class LoginViewModel : ObservableObject
 		}
 		catch (Exception ex)
 		{
-			ErrorMessage = $"Failed to load AWS profiles: {ex.Message}";
+			_statusMessageService.ShowError($"Failed to load AWS profiles: {ex.Message}");
 		}
 	}
 
@@ -80,7 +81,6 @@ public partial class LoginViewModel : ObservableObject
 	private async Task LoginAsync()
 	{
 		IsBusy = true;
-		ErrorMessage = string.Empty;
 
 		try
 		{
@@ -97,7 +97,7 @@ public partial class LoginViewModel : ObservableObject
 		}
 		catch (Exception ex)
 		{
-			ErrorMessage = $"Login failed: {ex.Message}";
+			_statusMessageService.ShowError($"Login failed: {ex.Message}");
 		}
 		finally
 		{

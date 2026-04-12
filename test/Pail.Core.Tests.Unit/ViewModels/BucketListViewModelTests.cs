@@ -10,12 +10,13 @@ public sealed class BucketListViewModelTests
 	private readonly IS3Service _s3Service = Substitute.For<IS3Service>();
 	private readonly INavigationService _navigationService = Substitute.For<INavigationService>();
 	private readonly ICopyActionService _copyActionService = Substitute.For<ICopyActionService>();
+	private readonly IStatusMessageService _statusMessageService = Substitute.For<IStatusMessageService>();
 
 	[Fact]
 	internal async Task LoadBuckets_PopulatesBucketsCollection()
 	{
 		// Arrange
-		var viewModel = new BucketListViewModel(_s3Service, _navigationService, _copyActionService);
+		var viewModel = new BucketListViewModel(_s3Service, _navigationService, _copyActionService, _statusMessageService);
 
 		var buckets = new List<S3BucketItem>
 		{
@@ -38,7 +39,7 @@ public sealed class BucketListViewModelTests
 	internal async Task CopyBucketNameCommand_SelectedBucket_CopiesAndShowsSuccessMessage()
 	{
 		// Arrange
-		var viewModel = new BucketListViewModel(_s3Service, _navigationService, _copyActionService)
+		var viewModel = new BucketListViewModel(_s3Service, _navigationService, _copyActionService, _statusMessageService)
 		{
 			SelectedBucket = new S3BucketItem("my-bucket", null),
 		};
@@ -57,7 +58,7 @@ public sealed class BucketListViewModelTests
 	internal async Task CopyBucketNameCommand_NoSelection_DoesNotCopy()
 	{
 		// Arrange
-		var viewModel = new BucketListViewModel(_s3Service, _navigationService, _copyActionService);
+		var viewModel = new BucketListViewModel(_s3Service, _navigationService, _copyActionService, _statusMessageService);
 
 		// Act
 		await viewModel.CopyBucketNameCommand.ExecuteAsync(null);

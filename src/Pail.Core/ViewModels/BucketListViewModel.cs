@@ -11,23 +11,23 @@ public partial class BucketListViewModel : ObservableObject
 	private readonly IS3Service _s3Service;
 	private readonly INavigationService _navigationService;
 	private readonly ICopyActionService _copyActionService;
+	private readonly IStatusMessageService _statusMessageService;
 
 	public BucketListViewModel(
 		IS3Service s3Service,
 		INavigationService navigationService,
-		ICopyActionService copyActionService)
+		ICopyActionService copyActionService,
+		IStatusMessageService statusMessageService)
 	{
 		_s3Service = s3Service;
 		_navigationService = navigationService;
 		_copyActionService = copyActionService;
+		_statusMessageService = statusMessageService;
 	}
 
 	[ObservableProperty]
 	[NotifyCanExecuteChangedFor(nameof(CopyBucketNameCommand))]
 	public partial bool IsBusy { get; set; }
-
-	[ObservableProperty]
-	public partial string ErrorMessage { get; set; } = string.Empty;
 
 	[ObservableProperty]
 	[NotifyCanExecuteChangedFor(nameof(CopyBucketNameCommand))]
@@ -39,7 +39,6 @@ public partial class BucketListViewModel : ObservableObject
 	public async Task LoadBucketsAsync()
 	{
 		IsBusy = true;
-		ErrorMessage = string.Empty;
 		Buckets.Clear();
 
 		try
@@ -53,7 +52,7 @@ public partial class BucketListViewModel : ObservableObject
 		}
 		catch (Exception ex)
 		{
-			ErrorMessage = $"Failed to load buckets: {ex.Message}";
+			_statusMessageService.ShowError($"Failed to load buckets: {ex.Message}");
 		}
 		finally
 		{

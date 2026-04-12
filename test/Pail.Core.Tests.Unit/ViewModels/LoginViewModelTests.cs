@@ -11,12 +11,13 @@ public sealed class LoginViewModelTests
 	private readonly IAwsProfileService _awsProfileService = Substitute.For<IAwsProfileService>();
 	private readonly IS3Service _s3Service = Substitute.For<IS3Service>();
 	private readonly INavigationService _navigationService = Substitute.For<INavigationService>();
+	private readonly IStatusMessageService _statusMessageService = Substitute.For<IStatusMessageService>();
 
 	[Fact]
 	internal void LoginViewModel_RegionOptions_AreSortedAndDefaultToEuWest1()
 	{
 		// Act
-		var viewModel = new LoginViewModel(_awsProfileService, _s3Service, _navigationService);
+		var viewModel = new LoginViewModel(_awsProfileService, _s3Service, _navigationService, _statusMessageService);
 
 		// Assert
 		Assert.Equal("eu-west-1", viewModel.Region);
@@ -30,7 +31,7 @@ public sealed class LoginViewModelTests
 		// Arrange
 		_awsProfileService.GetProfileNamesAsync().Returns(["dev", "prod"]);
 
-		var viewModel = new LoginViewModel(_awsProfileService, _s3Service, _navigationService);
+		var viewModel = new LoginViewModel(_awsProfileService, _s3Service, _navigationService, _statusMessageService);
 
 		// Act
 		await viewModel.LoadCredentialProfilesAsync();
@@ -46,7 +47,7 @@ public sealed class LoginViewModelTests
 		// Arrange
 		_s3Service.GetBucketsAsync().Returns([]);
 
-		var viewModel = new LoginViewModel(_awsProfileService, _s3Service, _navigationService);
+		var viewModel = new LoginViewModel(_awsProfileService, _s3Service, _navigationService, _statusMessageService);
 
 		// Act
 		await viewModel.LoginCommand.ExecuteAsync(null);
@@ -54,22 +55,21 @@ public sealed class LoginViewModelTests
 		// Assert
 		_navigationService.Received(1).NavigateTo("BucketListPage", null);
 		Assert.False(viewModel.IsBusy);
-		Assert.Empty(viewModel.ErrorMessage);
 	}
 
 	[Fact]
-	internal async Task LoginCommand_Failed_SetsErrorMessage()
+	internal async Task LoginCommand_Failed_ShowsErrorMessage()
 	{
 		// Arrange
 		_s3Service.GetBucketsAsync().Throws(new Exception("Invalid credentials"));
 
-		var viewModel = new LoginViewModel(_awsProfileService, _s3Service, _navigationService);
+		var viewModel = new LoginViewModel(_awsProfileService, _s3Service, _navigationService, _statusMessageService);
 
 		// Act
 		await viewModel.LoginCommand.ExecuteAsync(null);
 
 		// Assert
-		Assert.Contains("Login failed: Invalid credentials", viewModel.ErrorMessage);
+		_statusMessageService.Received(1).ShowError(Arg.Is<string>(s => s.Contains("Login failed: Invalid credentials")));
 		_navigationService.DidNotReceive().NavigateTo(Arg.Any<string>(), Arg.Any<object>());
 	}
 
@@ -79,7 +79,7 @@ public sealed class LoginViewModelTests
 		// Arrange
 		_s3Service.GetBucketsAsync().Returns([]);
 
-		var viewModel = new LoginViewModel(_awsProfileService, _s3Service, _navigationService)
+		var viewModel = new LoginViewModel(_awsProfileService, _s3Service, _navigationService, _statusMessageService)
 		{
 			UseDefaultChain = true,
 			SelectedProfileName = "dev-profile",

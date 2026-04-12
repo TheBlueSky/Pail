@@ -7,6 +7,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:viewmodels="using:Pail.ViewModels"
     xmlns:converters="using:Pail.App.Converters"
+    xmlns:appControls="using:Pail.App.Controls"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
@@ -14,8 +15,9 @@
         <converters:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
     </Page.Resources>
 
-    <Grid VerticalAlignment="Center" HorizontalAlignment="Center" MaxWidth="400" Width="400">
-        <StackPanel Spacing="12">
+    <Grid>
+        <Grid VerticalAlignment="Center" HorizontalAlignment="Center" MaxWidth="400" Width="400">
+            <StackPanel Spacing="12">
             <TextBlock Text="Pail" FontSize="28" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,20"/>
 
             <ComboBox
@@ -38,8 +40,9 @@
             <Button Content="Connect" Command="{x:Bind ViewModel.LoginCommand}" HorizontalAlignment="Stretch" Style="{StaticResource AccentButtonStyle}" Margin="0,10,0,0"/>
 
             <ProgressRing IsActive="{x:Bind ViewModel.IsBusy, Mode=OneWay}" HorizontalAlignment="Center" Margin="0,10,0,0"/>
+            </StackPanel>
+        </Grid>
 
-            <TextBlock Text="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}" Foreground="Red" TextWrapping="Wrap" HorizontalAlignment="Center"/>
-        </StackPanel>
+        <appControls:StatusOverlayHost Canvas.ZIndex="10"/>
     </Grid>
 </Page>

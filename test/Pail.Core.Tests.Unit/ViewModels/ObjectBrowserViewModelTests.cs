@@ -10,12 +10,13 @@ public sealed class ObjectBrowserViewModelTests
 	private readonly IS3Service _s3Service = Substitute.For<IS3Service>();
 	private readonly INavigationService _navigationService = Substitute.For<INavigationService>();
 	private readonly ICopyActionService _copyActionService = Substitute.For<ICopyActionService>();
+	private readonly IStatusMessageService _statusMessageService = Substitute.For<IStatusMessageService>();
 
 	[Fact]
 	internal async Task CopyObjectNameCommand_SelectedItem_CopiesAndShowsSuccessMessage()
 	{
 		// Arrange
-		var viewModel = new ObjectBrowserViewModel(_s3Service, _navigationService, _copyActionService)
+		var viewModel = new ObjectBrowserViewModel(_s3Service, _navigationService, _copyActionService, _statusMessageService)
 		{
 			SelectedItem = new S3ObjectItem
 			{
@@ -39,7 +40,7 @@ public sealed class ObjectBrowserViewModelTests
 	internal async Task CopyObjectFullKeyCommand_SelectedItem_CopiesAndShowsSuccessMessage()
 	{
 		// Arrange
-		var viewModel = new ObjectBrowserViewModel(_s3Service, _navigationService, _copyActionService)
+		var viewModel = new ObjectBrowserViewModel(_s3Service, _navigationService, _copyActionService, _statusMessageService)
 		{
 			SelectedItem = new S3ObjectItem
 			{
@@ -63,7 +64,7 @@ public sealed class ObjectBrowserViewModelTests
 	internal async Task CopyCommands_NoSelection_DoNotCopy()
 	{
 		// Arrange
-		var viewModel = new ObjectBrowserViewModel(_s3Service, _navigationService, _copyActionService);
+		var viewModel = new ObjectBrowserViewModel(_s3Service, _navigationService, _copyActionService, _statusMessageService);
 
 		// Act
 		await viewModel.CopyObjectNameCommand.ExecuteAsync(null);

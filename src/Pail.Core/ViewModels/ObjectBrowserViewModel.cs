@@ -11,6 +11,7 @@ public partial class ObjectBrowserViewModel : ObservableObject
 	private readonly IS3Service _s3Service;
 	private readonly INavigationService _navigationService;
 	private readonly ICopyActionService _copyActionService;
+	private readonly IStatusMessageService _statusMessageService;
 	private readonly Stack<string> _pathStack = new();
 
 	private string _bucketName = string.Empty;
@@ -18,11 +19,13 @@ public partial class ObjectBrowserViewModel : ObservableObject
 	public ObjectBrowserViewModel(
 		IS3Service s3Service,
 		INavigationService navigationService,
-		ICopyActionService copyActionService)
+		ICopyActionService copyActionService,
+		IStatusMessageService statusMessageService)
 	{
 		_s3Service = s3Service;
 		_navigationService = navigationService;
 		_copyActionService = copyActionService;
+		_statusMessageService = statusMessageService;
 	}
 
 	[ObservableProperty]
@@ -32,9 +35,6 @@ public partial class ObjectBrowserViewModel : ObservableObject
 	[NotifyCanExecuteChangedFor(nameof(CopyObjectNameCommand))]
 	[NotifyCanExecuteChangedFor(nameof(CopyObjectFullKeyCommand))]
 	public partial bool IsBusy { get; set; }
-
-	[ObservableProperty]
-	public partial string ErrorMessage { get; set; } = string.Empty;
 
 	[ObservableProperty]
 	[NotifyCanExecuteChangedFor(nameof(CopyObjectNameCommand))]
@@ -55,7 +55,6 @@ public partial class ObjectBrowserViewModel : ObservableObject
 	public async Task LoadItemsAsync()
 	{
 		IsBusy = true;
-		ErrorMessage = string.Empty;
 		Items.Clear();
 
 		try
@@ -69,9 +68,11 @@ public partial class ObjectBrowserViewModel : ObservableObject
 		}
 		catch (Exception ex)
 		{
-			ErrorMessage = ex is Amazon.S3.AmazonS3Exception s3Ex && s3Ex.ErrorCode == "PermanentRedirect"
+			var message = ex is Amazon.S3.AmazonS3Exception s3Ex && s3Ex.ErrorCode == "PermanentRedirect"
 				? "This bucket is in a different region than the one you connected with. Please reconnect with the correct region."
 				: $"Failed to load objects: {ex.Message}";
+
+			_statusMessageService.ShowError(message);
 		}
 		finally
 		{
@@ -134,11 +135,11 @@ public partial class ObjectBrowserViewModel : ObservableObject
 				}
 			}
 
-			ErrorMessage = $"Download complete! Files saved to: {downloadsFolder}";
+			_statusMessageService.ShowInfo($"Download complete! Files saved to: {downloadsFolder}");
 		}
 		catch (Exception ex)
 		{
-			ErrorMessage = $"Download failed: {ex.Message}";
+			_statusMessageService.ShowError($"Download failed: {ex.Message}");
 		}
 		finally
 		{
