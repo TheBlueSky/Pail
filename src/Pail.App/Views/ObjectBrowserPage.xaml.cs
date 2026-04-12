@@ -1,30 +1,18 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Navigation;
-using Pail.App.Services;
 using Pail.Models;
-using Pail.Services;
 using Pail.ViewModels;
 
 namespace Pail.App.Views;
 
 public sealed partial class ObjectBrowserPage : Page
 {
-	private readonly StatusInfoBarPresenter _statusPresenter;
-
 	public ObjectBrowserPage()
 	{
 		InitializeComponent();
 
 		ViewModel = PailApp.Services.GetRequiredService<ObjectBrowserViewModel>();
-
-		_statusPresenter = new StatusInfoBarPresenter(
-			DispatcherQueue,
-			StatusInfoBar,
-			PailApp.Services.GetRequiredService<IStatusMessageService>());
-
-		Loaded += OnLoaded;
-		Unloaded += OnUnloaded;
 	}
 
 	public ObjectBrowserViewModel ViewModel { get; }
@@ -77,10 +65,4 @@ public sealed partial class ObjectBrowserPage : Page
 		ViewModel.SelectedItem = item;
 		await ViewModel.CopyObjectFullKeyCommand.ExecuteAsync(null);
 	}
-
-	private void OnLoaded(object sender, RoutedEventArgs e) =>
-		_statusPresenter.Attach();
-
-	private void OnUnloaded(object sender, RoutedEventArgs e) =>
-		_statusPresenter.Detach();
 }

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UserControl
+    x:Class="Pail.App.Controls.StatusOverlayHost"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Grid IsHitTestVisible="False">
+        <InfoBar x:Name="StatusInfoBar"
+            Canvas.ZIndex="10"
+            IsOpen="False"
+            IsClosable="True"
+            IsHitTestVisible="True"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Top"
+            MaxWidth="420"
+            Margin="0,0,0,12"/>
+    </Grid>
+</UserControl>

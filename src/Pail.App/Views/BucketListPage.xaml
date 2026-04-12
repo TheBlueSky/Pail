@@ -6,6 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="using:Pail.Models"
+    xmlns:appControls="using:Pail.App.Controls"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
@@ -50,15 +51,6 @@
         <ProgressRing Grid.Row="1" IsActive="{x:Bind ViewModel.IsBusy, Mode=OneWay}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
         <TextBlock Grid.Row="1" Text="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}" Foreground="Red" VerticalAlignment="Bottom" HorizontalAlignment="Center"/>
 
-        <InfoBar x:Name="StatusInfoBar"
-            Grid.Row="0"
-            Grid.RowSpan="2"
-            Canvas.ZIndex="10"
-            IsOpen="False"
-            IsClosable="True"
-            HorizontalAlignment="Right"
-            VerticalAlignment="Top"
-            MaxWidth="420"
-            Margin="0,0,0,12"/>
+        <appControls:StatusOverlayHost Grid.Row="0" Grid.RowSpan="2" Canvas.ZIndex="10"/>
     </Grid>
 </Page>
