@@ -30,6 +30,7 @@ public partial class PailApp : Application
 		services.AddSingleton<ICopyActionService, CopyActionService>();
 		services.AddSingleton<INavigationService, NavigationService>();
 		services.AddSingleton<IS3Service, S3Service>();
+		services.AddSingleton<ISettingsService, SettingsService>();
 		services.AddSingleton<IStatusMessageService, StatusMessageService>();
 
 		// ViewModels
@@ -40,8 +41,10 @@ public partial class PailApp : Application
 		return services.BuildServiceProvider();
 	}
 
-	protected override void OnLaunched(LaunchActivatedEventArgs e)
+	protected override async void OnLaunched(LaunchActivatedEventArgs e)
 	{
+		await Services.GetRequiredService<ISettingsService>().LoadAsync();
+
 		_window = new Window { Title = "Pail – AWS S3 Browser" };
 
 		if (_window.Content is not Frame rootFrame)
