@@ -10,8 +10,7 @@ public partial class ObjectBrowserViewModel : ObservableObject
 {
 	private readonly IS3Service _s3Service;
 	private readonly INavigationService _navigationService;
-	private readonly IClipboardService _clipboardService;
-	private readonly IStatusMessageService _statusMessageService;
+	private readonly ICopyActionService _copyActionService;
 	private readonly Stack<string> _pathStack = new();
 
 	private string _bucketName = string.Empty;
@@ -19,13 +18,11 @@ public partial class ObjectBrowserViewModel : ObservableObject
 	public ObjectBrowserViewModel(
 		IS3Service s3Service,
 		INavigationService navigationService,
-		IClipboardService clipboardService,
-		IStatusMessageService statusMessageService)
+		ICopyActionService copyActionService)
 	{
 		_s3Service = s3Service;
 		_navigationService = navigationService;
-		_clipboardService = clipboardService;
-		_statusMessageService = statusMessageService;
+		_copyActionService = copyActionService;
 	}
 
 	[ObservableProperty]
@@ -157,15 +154,10 @@ public partial class ObjectBrowserViewModel : ObservableObject
 			return;
 		}
 
-		var copied = await _clipboardService.CopyTextAsync(SelectedItem.Name);
-
-		if (copied)
-		{
-			_statusMessageService.ShowInfo($"Copied object name: {SelectedItem.Name}");
-			return;
-		}
-
-		_statusMessageService.ShowError("Failed to copy object name.");
+		await _copyActionService.CopyWithFeedbackAsync(
+			SelectedItem.Name,
+			$"Copied object name: {SelectedItem.Name}",
+			"Failed to copy object name.");
 	}
 
 	[RelayCommand(CanExecute = nameof(CanCopySelectedObject))]
@@ -176,15 +168,10 @@ public partial class ObjectBrowserViewModel : ObservableObject
 			return;
 		}
 
-		var copied = await _clipboardService.CopyTextAsync(SelectedItem.Key);
-
-		if (copied)
-		{
-			_statusMessageService.ShowInfo($"Copied full key: {SelectedItem.Key}");
-			return;
-		}
-
-		_statusMessageService.ShowError("Failed to copy full key.");
+		await _copyActionService.CopyWithFeedbackAsync(
+			SelectedItem.Key,
+			$"Copied full key: {SelectedItem.Key}",
+			"Failed to copy full key.");
 	}
 
 	private bool CanCopySelectedObject() => IsBusy is false && SelectedItem is not null;

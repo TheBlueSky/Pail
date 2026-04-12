@@ -10,19 +10,16 @@ public partial class BucketListViewModel : ObservableObject
 {
 	private readonly IS3Service _s3Service;
 	private readonly INavigationService _navigationService;
-	private readonly IClipboardService _clipboardService;
-	private readonly IStatusMessageService _statusMessageService;
+	private readonly ICopyActionService _copyActionService;
 
 	public BucketListViewModel(
 		IS3Service s3Service,
 		INavigationService navigationService,
-		IClipboardService clipboardService,
-		IStatusMessageService statusMessageService)
+		ICopyActionService copyActionService)
 	{
 		_s3Service = s3Service;
 		_navigationService = navigationService;
-		_clipboardService = clipboardService;
-		_statusMessageService = statusMessageService;
+		_copyActionService = copyActionService;
 	}
 
 	[ObservableProperty]
@@ -83,15 +80,10 @@ public partial class BucketListViewModel : ObservableObject
 			return;
 		}
 
-		var copied = await _clipboardService.CopyTextAsync(SelectedBucket.Name);
-
-		if (copied)
-		{
-			_statusMessageService.ShowInfo($"Copied bucket name: {SelectedBucket.Name}");
-			return;
-		}
-
-		_statusMessageService.ShowError("Failed to copy bucket name.");
+		await _copyActionService.CopyWithFeedbackAsync(
+			SelectedBucket.Name,
+			$"Copied bucket name: {SelectedBucket.Name}",
+			"Failed to copy bucket name.");
 	}
 
 	private bool CanCopySelectedBucket() => IsBusy is false && SelectedBucket is not null;

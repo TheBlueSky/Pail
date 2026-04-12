@@ -9,14 +9,13 @@ public sealed class BucketListViewModelTests
 {
 	private readonly IS3Service _s3Service = Substitute.For<IS3Service>();
 	private readonly INavigationService _navigationService = Substitute.For<INavigationService>();
-	private readonly IClipboardService _clipboardService = Substitute.For<IClipboardService>();
-	private readonly IStatusMessageService _statusMessageService = Substitute.For<IStatusMessageService>();
+	private readonly ICopyActionService _copyActionService = Substitute.For<ICopyActionService>();
 
 	[Fact]
 	internal async Task LoadBuckets_PopulatesBucketsCollection()
 	{
 		// Arrange
-		var viewModel = new BucketListViewModel(_s3Service, _navigationService, _clipboardService, _statusMessageService);
+		var viewModel = new BucketListViewModel(_s3Service, _navigationService, _copyActionService);
 
 		var buckets = new List<S3BucketItem>
 		{
@@ -39,32 +38,31 @@ public sealed class BucketListViewModelTests
 	internal async Task CopyBucketNameCommand_SelectedBucket_CopiesAndShowsSuccessMessage()
 	{
 		// Arrange
-		var viewModel = new BucketListViewModel(_s3Service, _navigationService, _clipboardService, _statusMessageService)
+		var viewModel = new BucketListViewModel(_s3Service, _navigationService, _copyActionService)
 		{
 			SelectedBucket = new S3BucketItem("my-bucket", null),
 		};
-
-		_clipboardService.CopyTextAsync("my-bucket").Returns(true);
 
 		// Act
 		await viewModel.CopyBucketNameCommand.ExecuteAsync(null);
 
 		// Assert
-		await _clipboardService.Received(1).CopyTextAsync("my-bucket");
-		_statusMessageService.Received(1).ShowInfo("Copied bucket name: my-bucket");
+		await _copyActionService.Received(1).CopyWithFeedbackAsync(
+			"my-bucket",
+			"Copied bucket name: my-bucket",
+			"Failed to copy bucket name.");
 	}
 
 	[Fact]
 	internal async Task CopyBucketNameCommand_NoSelection_DoesNotCopy()
 	{
 		// Arrange
-		var viewModel = new BucketListViewModel(_s3Service, _navigationService, _clipboardService, _statusMessageService);
+		var viewModel = new BucketListViewModel(_s3Service, _navigationService, _copyActionService);
 
 		// Act
 		await viewModel.CopyBucketNameCommand.ExecuteAsync(null);
 
 		// Assert
-		await _clipboardService.DidNotReceive().CopyTextAsync(Arg.Any<string>());
-		_statusMessageService.DidNotReceive().ShowInfo(Arg.Any<string>());
+		await _copyActionService.DidNotReceive().CopyWithFeedbackAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>());
 	}
 }
