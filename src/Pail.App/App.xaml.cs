@@ -28,6 +28,7 @@ public partial class PailApp : Application
 		services.AddSingleton<IAwsProfileService, AwsProfileService>();
 		services.AddSingleton<IClipboardService, ClipboardService>();
 		services.AddSingleton<ICopyActionService, CopyActionService>();
+		services.AddSingleton<IFolderPickerService, FolderPickerService>();
 		services.AddSingleton<INavigationHostService, NavigationService>();
 		services.AddSingleton<INavigationService>(serviceProvider => serviceProvider.GetRequiredService<INavigationHostService>());
 		services.AddSingleton<IS3Service, S3Service>();
