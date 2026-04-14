@@ -100,7 +100,7 @@ public partial class LoginViewModel : ObservableObject
 			// Attempt a simple call to verify credentials
 			await _s3Service.GetBucketsAsync();
 
-			_navigationService.NavigateTo("MainPage");
+			_navigationService.NavigateTo("MainPage", clearBackStack: true);
 		}
 		catch (Exception ex)
 		{

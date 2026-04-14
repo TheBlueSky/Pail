@@ -164,4 +164,84 @@ public sealed class ObjectBrowserViewModelTests
 		await _settingsService.DidNotReceive().UpdateAsync(Arg.Any<Action<AppSettings>>(), Arg.Any<CancellationToken>());
 		_statusMessageService.Received(1).ShowInfo("Download cancelled.");
 	}
+
+	[Fact]
+	internal async Task OpenItemCommand_FolderSelected_UpdatesPathAndEnablesBucketBack()
+	{
+		// Arrange
+		_s3Service.GetObjectsAsync("bucket-a", "").Returns(new List<S3ObjectItem>());
+		_s3Service.GetObjectsAsync("bucket-a", "reports/").Returns(new List<S3ObjectItem>());
+
+		var viewModel = new ObjectBrowserViewModel(_s3Service, _navigationService, _copyActionService, _folderPickerService, _settingsService, _statusMessageService);
+		var folder = new S3ObjectItem
+		{
+			Name = "reports",
+			Key = "reports/",
+			IsFolder = true,
+		};
+
+		await viewModel.InitializeAsync("bucket-a");
+
+		// Act
+		await viewModel.OpenItemCommand.ExecuteAsync(folder);
+
+		// Assert
+		Assert.Equal("reports/", viewModel.CurrentPath);
+		Assert.True(viewModel.CanNavigateBackWithinBucket);
+		await _s3Service.Received(1).GetObjectsAsync("bucket-a", "reports/");
+	}
+
+	[Fact]
+	internal async Task GoBackCommand_WhenInsideBucket_GoesToParentWithoutLeavingPage()
+	{
+		// Arrange
+		_s3Service.GetObjectsAsync("bucket-a", "").Returns(new List<S3ObjectItem>());
+		_s3Service.GetObjectsAsync("bucket-a", "reports/").Returns(new List<S3ObjectItem>());
+		_s3Service.GetObjectsAsync("bucket-a", "reports/2026/").Returns(new List<S3ObjectItem>());
+
+		var viewModel = new ObjectBrowserViewModel(_s3Service, _navigationService, _copyActionService, _folderPickerService, _settingsService, _statusMessageService);
+		var parentFolder = new S3ObjectItem
+		{
+			Name = "reports",
+			Key = "reports/",
+			IsFolder = true,
+		};
+		var childFolder = new S3ObjectItem
+		{
+			Name = "2026",
+			Key = "reports/2026/",
+			IsFolder = true,
+		};
+
+		await viewModel.InitializeAsync("bucket-a");
+		await viewModel.OpenItemCommand.ExecuteAsync(parentFolder);
+		await viewModel.OpenItemCommand.ExecuteAsync(childFolder);
+
+		// Act
+		await viewModel.GoBackCommand.ExecuteAsync(null);
+
+		// Assert
+		Assert.Equal("reports/", viewModel.CurrentPath);
+		Assert.True(viewModel.CanNavigateBackWithinBucket);
+		_navigationService.DidNotReceive().GoBack();
+		await _s3Service.Received(2).GetObjectsAsync("bucket-a", "reports/");
+	}
+
+	[Fact]
+	internal async Task GoBackCommand_AtBucketRoot_DelegatesToNavigationService()
+	{
+		// Arrange
+		_s3Service.GetObjectsAsync("bucket-a", "").Returns(new List<S3ObjectItem>());
+
+		var viewModel = new ObjectBrowserViewModel(_s3Service, _navigationService, _copyActionService, _folderPickerService, _settingsService, _statusMessageService);
+
+		await viewModel.InitializeAsync("bucket-a");
+
+		// Act
+		await viewModel.GoBackCommand.ExecuteAsync(null);
+
+		// Assert
+		Assert.False(viewModel.CanNavigateBackWithinBucket);
+		_navigationService.Received(1).GoBack();
+	}
 }

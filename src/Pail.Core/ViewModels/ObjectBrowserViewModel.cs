@@ -15,6 +15,7 @@ public partial class ObjectBrowserViewModel : ObservableObject
 	private readonly ISettingsService _settingsService;
 	private readonly IStatusMessageService _statusMessageService;
 	private readonly Stack<string> _pathStack = new();
+	private bool _canNavigateBackWithinBucket;
 
 	private string _bucketName = string.Empty;
 
@@ -49,10 +50,17 @@ public partial class ObjectBrowserViewModel : ObservableObject
 
 	public ObservableCollection<S3ObjectItem> Items { get; } = [];
 
+	public bool CanNavigateBackWithinBucket
+	{
+		get => _canNavigateBackWithinBucket;
+		private set => SetProperty(ref _canNavigateBackWithinBucket, value);
+	}
+
 	public async Task InitializeAsync(string bucketName)
 	{
 		_bucketName = bucketName;
 		_pathStack.Clear();
+		UpdateCanNavigateBackWithinBucket();
 		CurrentPath = string.Empty;
 		await LoadItemsAsync();
 	}
@@ -92,6 +100,7 @@ public partial class ObjectBrowserViewModel : ObservableObject
 		if (item.IsFolder)
 		{
 			_pathStack.Push(CurrentPath);
+			UpdateCanNavigateBackWithinBucket();
 			CurrentPath = item.Key;
 			await LoadItemsAsync();
 		}
@@ -103,6 +112,7 @@ public partial class ObjectBrowserViewModel : ObservableObject
 		if (_pathStack.Count > 0)
 		{
 			CurrentPath = _pathStack.Pop();
+			UpdateCanNavigateBackWithinBucket();
 			await LoadItemsAsync();
 		}
 		else
@@ -209,4 +219,6 @@ public partial class ObjectBrowserViewModel : ObservableObject
 	}
 
 	private bool CanCopySelectedObject() => IsBusy is false && SelectedItem is not null;
+
+	private void UpdateCanNavigateBackWithinBucket() => CanNavigateBackWithinBucket = _pathStack.Count > 0;
 }

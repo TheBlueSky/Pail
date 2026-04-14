@@ -1,18 +1,22 @@
+using System.ComponentModel;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml.Navigation;
 using Pail.App.Services;
+using Pail.ViewModels;
 
 namespace Pail.App.Views;
 
 public sealed partial class MainPage : Page
 {
 	private INavigationHostService? _navigationService;
+	private ObjectBrowserViewModel? _observedObjectBrowserViewModel;
 	private bool _isUpdatingSelection;
 
 	public MainPage()
 	{
 		InitializeComponent();
 		Loaded += OnLoaded;
+		Unloaded += OnUnloaded;
 	}
 
 	private void OnLoaded(object sender, RoutedEventArgs e)
@@ -26,9 +30,12 @@ public sealed partial class MainPage : Page
 			return;
 		}
 
+		TrackObjectBrowserViewModel();
 		SyncSelectedItem(ContentFrame.CurrentSourcePageType);
 		UpdateBackButtonState();
 	}
+
+	private void OnUnloaded(object sender, RoutedEventArgs e) => TrackObjectBrowserViewModel(null);
 
 	private void OnNavigationSelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
 	{
@@ -43,14 +50,11 @@ public sealed partial class MainPage : Page
 		}
 	}
 
-	private void OnBackRequested(NavigationView sender, NavigationViewBackRequestedEventArgs args)
-	{
-		_navigationService?.GoBack();
-		UpdateBackButtonState();
-	}
+	private async void OnBackRequested(NavigationView sender, NavigationViewBackRequestedEventArgs args) => await TryGoBackAsync();
 
 	private void OnContentFrameNavigated(object sender, NavigationEventArgs e)
 	{
+		TrackObjectBrowserViewModel();
 		SyncSelectedItem(e.SourcePageType);
 		UpdateBackButtonState();
 	}
@@ -81,5 +85,58 @@ public sealed partial class MainPage : Page
 		_isUpdatingSelection = false;
 	}
 
-	private void UpdateBackButtonState() => NavView.IsBackEnabled = ContentFrame.CanGoBack;
+	private async Task<bool> TryGoBackAsync()
+	{
+		_navigationService ??= PailApp.Services.GetRequiredService<INavigationHostService>();
+
+		if (_observedObjectBrowserViewModel?.CanNavigateBackWithinBucket is true)
+		{
+			await _observedObjectBrowserViewModel.GoBackCommand.ExecuteAsync(null);
+			UpdateBackButtonState();
+			return true;
+		}
+
+		if (_navigationService.CanGoBack)
+		{
+			_navigationService.GoBack();
+			UpdateBackButtonState();
+			return true;
+		}
+
+		UpdateBackButtonState();
+		return false;
+	}
+
+	private void TrackObjectBrowserViewModel(ObjectBrowserViewModel? viewModel = null)
+	{
+		var nextViewModel = viewModel ?? (ContentFrame.Content as ObjectBrowserPage)?.ViewModel;
+
+		if (ReferenceEquals(_observedObjectBrowserViewModel, nextViewModel))
+		{
+			return;
+		}
+
+		if (_observedObjectBrowserViewModel is not null)
+		{
+			_observedObjectBrowserViewModel.PropertyChanged -= OnObjectBrowserViewModelPropertyChanged;
+		}
+
+		_observedObjectBrowserViewModel = nextViewModel;
+
+		if (_observedObjectBrowserViewModel is not null)
+		{
+			_observedObjectBrowserViewModel.PropertyChanged += OnObjectBrowserViewModelPropertyChanged;
+		}
+	}
+
+	private void OnObjectBrowserViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
+	{
+		if (e.PropertyName == nameof(ObjectBrowserViewModel.CanNavigateBackWithinBucket))
+		{
+			UpdateBackButtonState();
+		}
+	}
+
+	private void UpdateBackButtonState() =>
+		NavView.IsBackEnabled = (_navigationService?.CanGoBack ?? false) || (_observedObjectBrowserViewModel?.CanNavigateBackWithinBucket ?? false);
 }

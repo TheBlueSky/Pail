@@ -24,9 +24,6 @@
         </Grid.RowDefinitions>
 
         <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,0,0,12">
-            <Button Command="{x:Bind ViewModel.GoBackCommand}">
-                <SymbolIcon Symbol="Back"/>
-            </Button>
             <TextBlock Text="Browser" Style="{StaticResource TitleTextBlockStyle}" VerticalAlignment="Center"/>
             <TextBlock Text="{x:Bind ViewModel.CurrentPath, Mode=OneWay}" VerticalAlignment="Center" Foreground="Gray"/>
         </StackPanel>
