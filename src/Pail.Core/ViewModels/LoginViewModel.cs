@@ -29,10 +29,9 @@ public partial class LoginViewModel : ObservableObject
 		_settingsService = settingsService;
 		_statusMessageService = statusMessageService;
 
-		var settings = _settingsService.Settings;
-		Region = string.IsNullOrWhiteSpace(settings.DefaultRegion) ? Region : settings.DefaultRegion;
-		UseDefaultChain = settings.UseCredentialChainByDefault;
-		SelectedProfileName = string.IsNullOrWhiteSpace(settings.LastProfileName) ? AutomaticProfileOption : settings.LastProfileName;
+		Region = string.IsNullOrWhiteSpace(_settingsService.DefaultRegion) ? Region : _settingsService.DefaultRegion;
+		UseDefaultChain = _settingsService.UseCredentialChainByDefault;
+		SelectedProfileName = string.IsNullOrWhiteSpace(_settingsService.LastProfileName) ? AutomaticProfileOption : _settingsService.LastProfileName;
 	}
 
 	[ObservableProperty]

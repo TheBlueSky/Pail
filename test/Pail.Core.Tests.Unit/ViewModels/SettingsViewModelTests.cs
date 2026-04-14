@@ -23,7 +23,18 @@ public sealed class SettingsViewModelTests
 
 	public SettingsViewModelTests()
 	{
-		_settingsService.Settings.Returns(_settings);
+		_settingsService.DownloadFolder.Returns(_ => _settings.DownloadFolder);
+		_settingsService.AlwaysPromptDownloadLocation.Returns(_ => _settings.AlwaysPromptDownloadLocation);
+		_settingsService.StatusOverlayDurationSeconds.Returns(_ => _settings.StatusOverlayDurationSeconds);
+		_settingsService.DefaultRegion.Returns(_ => _settings.DefaultRegion);
+		_settingsService.UseCredentialChainByDefault.Returns(_ => _settings.UseCredentialChainByDefault);
+		_settingsService.LastProfileName.Returns(_ => _settings.LastProfileName);
+		_settingsService.UpdateAsync(Arg.Any<Action<AppSettings>>(), Arg.Any<CancellationToken>())
+			.Returns(callInfo =>
+			{
+				callInfo.Arg<Action<AppSettings>>().Invoke(_settings);
+				return Task.CompletedTask;
+			});
 	}
 
 	[Fact]
@@ -64,7 +75,7 @@ public sealed class SettingsViewModelTests
 		Assert.Equal("ap-south-1", _settings.DefaultRegion);
 		Assert.True(_settings.UseCredentialChainByDefault);
 		Assert.Equal("prod", _settings.LastProfileName);
-		await _settingsService.Received(1).SaveAsync();
+		await _settingsService.Received(1).UpdateAsync(Arg.Any<Action<AppSettings>>(), Arg.Any<CancellationToken>());
 		_statusMessageService.Received(1).ShowInfo("Settings saved.");
 	}
 
@@ -86,7 +97,7 @@ public sealed class SettingsViewModelTests
 	internal async Task SaveCommand_Failure_ShowsErrorMessage()
 	{
 		// Arrange
-		_settingsService.SaveAsync().ThrowsAsync(new InvalidOperationException("disk full"));
+		_settingsService.UpdateAsync(Arg.Any<Action<AppSettings>>(), Arg.Any<CancellationToken>()).ThrowsAsync(new InvalidOperationException("disk full"));
 		var viewModel = CreateViewModel();
 
 		// Act

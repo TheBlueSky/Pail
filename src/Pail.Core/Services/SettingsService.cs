@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using Pail.Models;
 
 namespace Pail.Services;
@@ -13,44 +14,63 @@ public sealed class SettingsService : ISettingsService
 		WriteIndented = true,
 	};
 
+	private readonly IConfigurationRoot? _configurationRoot;
+	private readonly IOptionsMonitor<AppSettings> _optionsMonitor;
 	private readonly string _settingsFilePath;
 
-	public SettingsService(string? settingsFilePath = null)
+	public SettingsService(IConfiguration configuration, IOptionsMonitor<AppSettings> optionsMonitor, string? settingsFilePath = null)
 	{
+		_configurationRoot = configuration as IConfigurationRoot;
+		_optionsMonitor = optionsMonitor;
 		_settingsFilePath = string.IsNullOrWhiteSpace(settingsFilePath)
 			? Path.Combine(AppContext.BaseDirectory, DefaultFileName)
 			: settingsFilePath;
 	}
 
-	public AppSettings Settings { get; private set; } = new();
+	public string DownloadFolder => _optionsMonitor.CurrentValue.DownloadFolder;
 
-	public async Task LoadAsync(CancellationToken cancellationToken = default)
+	public bool AlwaysPromptDownloadLocation => _optionsMonitor.CurrentValue.AlwaysPromptDownloadLocation;
+
+	public int StatusOverlayDurationSeconds => _optionsMonitor.CurrentValue.StatusOverlayDurationSeconds;
+
+	public string DefaultRegion => _optionsMonitor.CurrentValue.DefaultRegion;
+
+	public bool UseCredentialChainByDefault => _optionsMonitor.CurrentValue.UseCredentialChainByDefault;
+
+	public string? LastProfileName => _optionsMonitor.CurrentValue.LastProfileName;
+
+	public async Task UpdateAsync(Action<AppSettings> applyChanges, CancellationToken cancellationToken = default)
 	{
-		if (File.Exists(_settingsFilePath) is false)
-		{
-			Settings = new AppSettings();
-			return;
-		}
+		ArgumentNullException.ThrowIfNull(applyChanges);
 
-		var configuration = new ConfigurationBuilder()
-			.SetBasePath(Path.GetDirectoryName(_settingsFilePath) ?? AppContext.BaseDirectory)
-			.AddJsonFile(Path.GetFileName(_settingsFilePath), optional: true, reloadOnChange: false)
-			.Build();
+		var updatedSettings = CloneSettings(_optionsMonitor.CurrentValue);
+		applyChanges(updatedSettings);
 
-		Settings = configuration.Get<AppSettings>() ?? new AppSettings();
-
-		await Task.CompletedTask;
+		await WriteSettingsAsync(updatedSettings, cancellationToken);
+		ReloadTrackedConfiguration();
 	}
 
-	public async Task SaveAsync(CancellationToken cancellationToken = default)
+	private async Task WriteSettingsAsync(AppSettings settings, CancellationToken cancellationToken)
 	{
 		Directory.CreateDirectory(Path.GetDirectoryName(_settingsFilePath) ?? AppContext.BaseDirectory);
 
 		await using var stream = File.Create(_settingsFilePath);
 		await JsonSerializer.SerializeAsync(
 			stream,
-			Settings,
+			settings,
 			SerializerOptions,
 			cancellationToken);
 	}
+
+	private void ReloadTrackedConfiguration() => _configurationRoot?.Reload();
+
+	private static AppSettings CloneSettings(AppSettings source) => new()
+	{
+		DownloadFolder = source.DownloadFolder,
+		AlwaysPromptDownloadLocation = source.AlwaysPromptDownloadLocation,
+		StatusOverlayDurationSeconds = source.StatusOverlayDurationSeconds,
+		DefaultRegion = source.DefaultRegion,
+		UseCredentialChainByDefault = source.UseCredentialChainByDefault,
+		LastProfileName = source.LastProfileName,
+	};
 }

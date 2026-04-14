@@ -4,9 +4,17 @@ namespace Pail.Services;
 
 public interface ISettingsService
 {
-	public AppSettings Settings { get; }
+	public string DownloadFolder { get; }
 
-	public Task LoadAsync(CancellationToken cancellationToken = default);
+	public bool AlwaysPromptDownloadLocation { get; }
 
-	public Task SaveAsync(CancellationToken cancellationToken = default);
+	public int StatusOverlayDurationSeconds { get; }
+
+	public string DefaultRegion { get; }
+
+	public bool UseCredentialChainByDefault { get; }
+
+	public string? LastProfileName { get; }
+
+	public Task UpdateAsync(Action<AppSettings> applyChanges, CancellationToken cancellationToken = default);
 }

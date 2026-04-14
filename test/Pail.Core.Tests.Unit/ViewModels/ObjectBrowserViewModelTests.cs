@@ -24,7 +24,14 @@ public sealed class ObjectBrowserViewModelTests
 	public ObjectBrowserViewModelTests()
 	{
 		_appSettings.DownloadFolder = _defaultDownloadFolder;
-		_settingsService.Settings.Returns(_appSettings);
+		_settingsService.DownloadFolder.Returns(_ => _appSettings.DownloadFolder);
+		_settingsService.AlwaysPromptDownloadLocation.Returns(_ => _appSettings.AlwaysPromptDownloadLocation);
+		_settingsService.UpdateAsync(Arg.Any<Action<AppSettings>>(), Arg.Any<CancellationToken>())
+			.Returns(callInfo =>
+			{
+				callInfo.Arg<Action<AppSettings>>().Invoke(_appSettings);
+				return Task.CompletedTask;
+			});
 	}
 
 	[Fact]
@@ -107,7 +114,7 @@ public sealed class ObjectBrowserViewModelTests
 		// Assert
 		await _folderPickerService.DidNotReceive().PickFolderAsync(Arg.Any<string?>(), Arg.Any<CancellationToken>());
 		await _s3Service.Received(1).DownloadObjectAsync("bucket-a", "reports/report.csv", Path.Combine(_defaultDownloadFolder, "report.csv"));
-		await _settingsService.DidNotReceive().SaveAsync(Arg.Any<CancellationToken>());
+		await _settingsService.DidNotReceive().UpdateAsync(Arg.Any<Action<AppSettings>>(), Arg.Any<CancellationToken>());
 	}
 
 	[Fact]
@@ -130,7 +137,7 @@ public sealed class ObjectBrowserViewModelTests
 
 		// Assert
 		Assert.Equal(_pickedDownloadFolder, _appSettings.DownloadFolder);
-		await _settingsService.Received(1).SaveAsync(Arg.Any<CancellationToken>());
+		await _settingsService.Received(1).UpdateAsync(Arg.Any<Action<AppSettings>>(), Arg.Any<CancellationToken>());
 		await _s3Service.Received(1).DownloadObjectAsync("bucket-a", "reports/report.csv", Path.Combine(_pickedDownloadFolder, "report.csv"));
 	}
 
@@ -154,7 +161,7 @@ public sealed class ObjectBrowserViewModelTests
 
 		// Assert
 		await _s3Service.DidNotReceive().DownloadObjectAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>());
-		await _settingsService.DidNotReceive().SaveAsync(Arg.Any<CancellationToken>());
+		await _settingsService.DidNotReceive().UpdateAsync(Arg.Any<Action<AppSettings>>(), Arg.Any<CancellationToken>());
 		_statusMessageService.Received(1).ShowInfo("Download cancelled.");
 	}
 }

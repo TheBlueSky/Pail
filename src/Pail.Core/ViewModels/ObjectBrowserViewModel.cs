@@ -123,10 +123,10 @@ public partial class ObjectBrowserViewModel : ObservableObject
 
 		try
 		{
-			var settings = _settingsService.Settings;
-			var downloadsFolder = ResolveDownloadFolder(settings);
+			var currentDownloadFolder = _settingsService.DownloadFolder;
+			var downloadsFolder = ResolveDownloadFolder(currentDownloadFolder);
 
-			if (settings.AlwaysPromptDownloadLocation)
+			if (_settingsService.AlwaysPromptDownloadLocation)
 			{
 				var selectedFolder = await _folderPickerService.PickFolderAsync(downloadsFolder);
 
@@ -138,10 +138,9 @@ public partial class ObjectBrowserViewModel : ObservableObject
 
 				downloadsFolder = selectedFolder;
 
-				if (!string.Equals(settings.DownloadFolder, selectedFolder, StringComparison.Ordinal))
+				if (!string.Equals(currentDownloadFolder, selectedFolder, StringComparison.Ordinal))
 				{
-					settings.DownloadFolder = selectedFolder;
-					await _settingsService.SaveAsync();
+					await _settingsService.UpdateAsync(settings => settings.DownloadFolder = selectedFolder);
 				}
 			}
 
@@ -171,14 +170,14 @@ public partial class ObjectBrowserViewModel : ObservableObject
 		}
 	}
 
-	private static string ResolveDownloadFolder(AppSettings settings)
+	private static string ResolveDownloadFolder(string? downloadFolder)
 	{
-		if (string.IsNullOrWhiteSpace(settings.DownloadFolder))
+		if (string.IsNullOrWhiteSpace(downloadFolder))
 		{
-			settings.DownloadFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads", "Pail");
+			return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads", "Pail");
 		}
 
-		return settings.DownloadFolder;
+		return downloadFolder;
 	}
 
 	[RelayCommand(CanExecute = nameof(CanCopySelectedObject))]

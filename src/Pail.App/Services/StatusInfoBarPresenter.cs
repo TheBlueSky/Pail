@@ -8,6 +8,7 @@ public sealed partial class StatusInfoBarPresenter : IDisposable
 	private readonly DispatcherQueue _dispatcherQueue;
 	private readonly InfoBar _infoBar;
 	private readonly IStatusMessageService _statusMessageService;
+	private readonly ISettingsService _settingsService;
 	private readonly DispatcherQueueTimer _statusTimer;
 
 	private bool _isAttached;
@@ -16,13 +17,15 @@ public sealed partial class StatusInfoBarPresenter : IDisposable
 		DispatcherQueue dispatcherQueue,
 		InfoBar infoBar,
 		IStatusMessageService statusMessageService,
-		TimeSpan? displayDuration = null)
+		ISettingsService settingsService)
 	{
 		_dispatcherQueue = dispatcherQueue;
 		_infoBar = infoBar;
 		_statusMessageService = statusMessageService;
+		_settingsService = settingsService;
+
 		_statusTimer = dispatcherQueue.CreateTimer();
-		_statusTimer.Interval = displayDuration ?? TimeSpan.FromSeconds(3);
+		_statusTimer.Interval = ResolveDisplayDuration();
 		_statusTimer.Tick += OnStatusTimerTick;
 	}
 
@@ -69,9 +72,13 @@ public sealed partial class StatusInfoBarPresenter : IDisposable
 			_infoBar.Message = message.Message;
 			_infoBar.IsOpen = true;
 
+			_statusTimer.Interval = ResolveDisplayDuration();
 			_statusTimer.Stop();
 			_statusTimer.Start();
 		});
+
+	private TimeSpan ResolveDisplayDuration() =>
+		TimeSpan.FromSeconds(Math.Max(1, _settingsService.StatusOverlayDurationSeconds));
 
 	private static InfoBarSeverity MapSeverity(StatusMessageLevel level) =>
 		level == StatusMessageLevel.Error ? InfoBarSeverity.Error : InfoBarSeverity.Informational;

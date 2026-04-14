@@ -17,7 +17,9 @@ public sealed class LoginViewModelTests
 
 	public LoginViewModelTests()
 	{
-		_settingsService.Settings.Returns(_appSettings);
+		_settingsService.DefaultRegion.Returns(_ => _appSettings.DefaultRegion);
+		_settingsService.UseCredentialChainByDefault.Returns(_ => _appSettings.UseCredentialChainByDefault);
+		_settingsService.LastProfileName.Returns(_ => _appSettings.LastProfileName);
 	}
 
 	[Fact]
@@ -96,7 +98,7 @@ public sealed class LoginViewModelTests
 		Assert.Equal("eu-west-1", _appSettings.DefaultRegion);
 		Assert.False(_appSettings.UseCredentialChainByDefault);
 		Assert.Equal("saved-default", _appSettings.LastProfileName);
-		await _settingsService.DidNotReceive().SaveAsync();
+		await _settingsService.DidNotReceive().UpdateAsync(Arg.Any<Action<AppSettings>>(), Arg.Any<CancellationToken>());
 		Assert.False(viewModel.IsBusy);
 	}
 
@@ -114,7 +116,7 @@ public sealed class LoginViewModelTests
 		// Assert
 		_statusMessageService.Received(1).ShowError(Arg.Is<string>(s => s.Contains("Login failed: Invalid credentials")));
 		_navigationService.DidNotReceive().NavigateTo(Arg.Any<string>(), Arg.Any<object>());
-		await _settingsService.DidNotReceive().SaveAsync();
+		await _settingsService.DidNotReceive().UpdateAsync(Arg.Any<Action<AppSettings>>(), Arg.Any<CancellationToken>());
 	}
 
 	[Fact]
@@ -160,6 +162,6 @@ public sealed class LoginViewModelTests
 
 		// Assert
 		Assert.Equal("stale-profile", _appSettings.LastProfileName);
-		await _settingsService.DidNotReceive().SaveAsync();
+		await _settingsService.DidNotReceive().UpdateAsync(Arg.Any<Action<AppSettings>>(), Arg.Any<CancellationToken>());
 	}
 }

@@ -52,10 +52,8 @@ public partial class PailApp : Application
 		return services.BuildServiceProvider();
 	}
 
-	protected override async void OnLaunched(LaunchActivatedEventArgs e)
+	protected override void OnLaunched(LaunchActivatedEventArgs e)
 	{
-		await Services.GetRequiredService<ISettingsService>().LoadAsync();
-
 		_window = new Window { Title = "Pail – AWS S3 Browser" };
 		MainWindow = _window;
 

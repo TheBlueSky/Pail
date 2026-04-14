@@ -20,14 +20,12 @@ public partial class SettingsViewModel : ObservableObject
 		_folderPickerService = folderPickerService;
 		_statusMessageService = statusMessageService;
 
-		var settings = _settingsService.Settings;
-
-		DownloadFolder = settings.DownloadFolder;
-		AlwaysPromptDownloadLocation = settings.AlwaysPromptDownloadLocation;
-		StatusOverlayDurationSeconds = settings.StatusOverlayDurationSeconds;
-		DefaultRegion = settings.DefaultRegion;
-		UseCredentialChainByDefault = settings.UseCredentialChainByDefault;
-		LastProfileName = settings.LastProfileName ?? string.Empty;
+		DownloadFolder = _settingsService.DownloadFolder;
+		AlwaysPromptDownloadLocation = _settingsService.AlwaysPromptDownloadLocation;
+		StatusOverlayDurationSeconds = _settingsService.StatusOverlayDurationSeconds;
+		DefaultRegion = _settingsService.DefaultRegion;
+		UseCredentialChainByDefault = _settingsService.UseCredentialChainByDefault;
+		LastProfileName = _settingsService.LastProfileName ?? string.Empty;
 	}
 
 	[RelayCommand]
@@ -79,20 +77,22 @@ public partial class SettingsViewModel : ObservableObject
 
 		try
 		{
-			var settings = _settingsService.Settings;
-			settings.DownloadFolder = string.IsNullOrWhiteSpace(DownloadFolder) ? settings.DownloadFolder : DownloadFolder.Trim();
-			settings.AlwaysPromptDownloadLocation = AlwaysPromptDownloadLocation;
-			settings.StatusOverlayDurationSeconds = Math.Max(1, StatusOverlayDurationSeconds);
-			settings.DefaultRegion = string.IsNullOrWhiteSpace(DefaultRegion) ? settings.DefaultRegion : DefaultRegion;
-			settings.UseCredentialChainByDefault = UseCredentialChainByDefault;
-			settings.LastProfileName = string.IsNullOrWhiteSpace(LastProfileName) ? null : LastProfileName.Trim();
+			await _settingsService.UpdateAsync(
+				settings =>
+				{
+					settings.DownloadFolder = string.IsNullOrWhiteSpace(DownloadFolder) ? settings.DownloadFolder : DownloadFolder.Trim();
+					settings.AlwaysPromptDownloadLocation = AlwaysPromptDownloadLocation;
+					settings.StatusOverlayDurationSeconds = Math.Max(1, StatusOverlayDurationSeconds);
+					settings.DefaultRegion = string.IsNullOrWhiteSpace(DefaultRegion) ? settings.DefaultRegion : DefaultRegion;
+					settings.UseCredentialChainByDefault = UseCredentialChainByDefault;
+					settings.LastProfileName = string.IsNullOrWhiteSpace(LastProfileName) ? null : LastProfileName.Trim();
+				});
 
-			DownloadFolder = settings.DownloadFolder;
-			StatusOverlayDurationSeconds = settings.StatusOverlayDurationSeconds;
-			DefaultRegion = settings.DefaultRegion;
-			LastProfileName = settings.LastProfileName ?? string.Empty;
+			DownloadFolder = _settingsService.DownloadFolder;
+			StatusOverlayDurationSeconds = _settingsService.StatusOverlayDurationSeconds;
+			DefaultRegion = _settingsService.DefaultRegion;
+			LastProfileName = _settingsService.LastProfileName ?? string.Empty;
 
-			await _settingsService.SaveAsync();
 			_statusMessageService.ShowInfo("Settings saved.");
 		}
 		catch (Exception ex)
