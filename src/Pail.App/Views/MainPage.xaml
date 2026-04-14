@@ -8,6 +8,10 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
+    <Page.KeyboardAccelerators>
+        <KeyboardAccelerator Key="Left" Modifiers="Menu" Invoked="OnBackKeyboardAcceleratorInvoked"/>
+    </Page.KeyboardAccelerators>
+
     <NavigationView
         x:Name="NavView"
         AlwaysShowHeader="False"

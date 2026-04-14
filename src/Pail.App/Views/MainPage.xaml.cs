@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Navigation;
 using Pail.App.Services;
 using Pail.ViewModels;
@@ -51,6 +52,11 @@ public sealed partial class MainPage : Page
 	}
 
 	private async void OnBackRequested(NavigationView sender, NavigationViewBackRequestedEventArgs args) => await TryGoBackAsync();
+
+	private async void OnBackKeyboardAcceleratorInvoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
+	{
+		args.Handled = await TryGoBackAsync();
+	}
 
 	private void OnContentFrameNavigated(object sender, NavigationEventArgs e)
 	{

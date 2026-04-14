@@ -94,7 +94,7 @@ public sealed class LoginViewModelTests
 		await viewModel.LoginCommand.ExecuteAsync(null);
 
 		// Assert
-		_navigationService.Received(1).NavigateTo("MainPage", null);
+		_navigationService.Received(1).NavigateTo("MainPage", null, true);
 		Assert.Equal("eu-west-1", _appSettings.DefaultRegion);
 		Assert.False(_appSettings.UseCredentialChainByDefault);
 		Assert.Equal("saved-default", _appSettings.LastProfileName);
