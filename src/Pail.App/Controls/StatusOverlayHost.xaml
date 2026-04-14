@@ -7,12 +7,11 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <Grid IsHitTestVisible="False">
+    <Grid HorizontalAlignment="Right" VerticalAlignment="Top">
         <InfoBar x:Name="StatusInfoBar"
             Canvas.ZIndex="10"
             IsOpen="False"
             IsClosable="True"
-            IsHitTestVisible="True"
             HorizontalAlignment="Right"
             VerticalAlignment="Top"
             MaxWidth="420"
