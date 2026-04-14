@@ -1,7 +1,9 @@
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml.Navigation;
 using Pail.App.Services;
+using Pail.Models;
 using Pail.Services;
 using Pail.ViewModels;
 using Windows.Graphics;
@@ -25,6 +27,10 @@ public partial class PailApp : Application
 	private static ServiceProvider ConfigureServices()
 	{
 		var services = new ServiceCollection();
+
+		var settingsConfiguration = CreateSettingsConfiguration();
+		services.AddSingleton<IConfiguration>(settingsConfiguration);
+		services.AddOptions<AppSettings>().Bind(settingsConfiguration);
 
 		// Services
 		services.AddSingleton<IAwsProfileService, AwsProfileService>();
@@ -73,6 +79,9 @@ public partial class PailApp : Application
 		_window.Activate();
 	}
 
+	private void OnNavigationFailed(object sender, NavigationFailedEventArgs e) =>
+		throw new Exception($"Failed to load Page {e.SourcePageType.FullName}.");
+
 	private static void SetWindowIcon(Window window)
 	{
 		var appWindow = GetAppWindow(window);
@@ -103,6 +112,13 @@ public partial class PailApp : Application
 		return AppWindow.GetFromWindowId(windowId);
 	}
 
-	private void OnNavigationFailed(object sender, NavigationFailedEventArgs e) =>
-		throw new Exception($"Failed to load Page {e.SourcePageType.FullName}.");
+	private static IConfigurationRoot CreateSettingsConfiguration()
+	{
+		var settingsFilePath = Path.Combine(AppContext.BaseDirectory, SettingsService.DefaultFileName);
+
+		return new ConfigurationBuilder()
+			.SetBasePath(Path.GetDirectoryName(settingsFilePath) ?? AppContext.BaseDirectory)
+			.AddJsonFile(Path.GetFileName(settingsFilePath), optional: true, reloadOnChange: true)
+			.Build();
+	}
 }
