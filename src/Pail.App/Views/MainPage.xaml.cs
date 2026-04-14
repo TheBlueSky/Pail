@@ -58,6 +58,14 @@ public sealed partial class MainPage : Page
 		args.Handled = await TryGoBackAsync();
 	}
 
+	private async void OnPointerPressed(object sender, PointerRoutedEventArgs e)
+	{
+		if (e.GetCurrentPoint(this).Properties.IsXButton1Pressed)
+		{
+			e.Handled = await TryGoBackAsync();
+		}
+	}
+
 	private void OnContentFrameNavigated(object sender, NavigationEventArgs e)
 	{
 		TrackObjectBrowserViewModel();
