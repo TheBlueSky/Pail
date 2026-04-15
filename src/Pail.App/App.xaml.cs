@@ -67,18 +67,31 @@ public partial class PailApp : Application
 
 		SetWindowIcon(_window);
 		CenterWindow(_window);
+		GetAppWindow(_window).Closing += OnWindowClosing;
 
 		// Register the frame with the navigation service
 		var navService = Services.GetRequiredService<INavigationHostService>();
 		navService.Initialize(rootFrame);
 
 		navService.NavigateTo("LoginPage");
-
 		_window.Activate();
 	}
 
 	private void OnNavigationFailed(object sender, NavigationFailedEventArgs e) =>
 		throw new Exception($"Failed to load Page {e.SourcePageType.FullName}.");
+
+	private void OnWindowClosing(AppWindow sender, AppWindowClosingEventArgs args)
+	{
+		if (_window?.Content is not Frame rootFrame)
+		{
+			return;
+		}
+
+		var wasTabStop = rootFrame.IsTabStop;
+		rootFrame.IsTabStop = true;
+		rootFrame.Focus(FocusState.Programmatic);
+		rootFrame.IsTabStop = wasTabStop;
+	}
 
 	private static void SetWindowIcon(Window window)
 	{
