@@ -44,6 +44,7 @@
             IsReadOnly="True"
             SelectionMode="Extended"
             SelectionUnit="Row"
+            PreviewKeyDown="OnGridPreviewKeyDown"
             CellDoubleTapped="OnGridCellDoubleTapped"
             RowContextFlyoutOpening="OnGridRowContextFlyoutOpening">
 
