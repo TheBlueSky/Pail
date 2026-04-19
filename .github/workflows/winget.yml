@@ -1,0 +1,61 @@
+name: Submit release to WinGet
+
+on:
+  release:
+    types:
+      - published
+
+permissions:
+  contents: read
+
+jobs:
+  publish-winget:
+    if: ${{ !github.event.release.prerelease }}
+    runs-on: windows-latest
+    env:
+      WINGET_PACKAGE_IDENTIFIER: ${{ vars.WINGET_PACKAGE_IDENTIFIER }}
+      WINGET_CREATE_GITHUB_TOKEN: ${{ secrets.WINGET_CREATE_GITHUB_TOKEN }}
+
+    steps:
+      - name: Check WinGet automation prerequisites
+        id: prerequisites
+        shell: pwsh
+        run: |
+          # The initial WinGet submission is still a manual bootstrap.
+          # Once the package exists, this workflow can keep future releases updated.
+          if ([string]::IsNullOrWhiteSpace($env:WINGET_PACKAGE_IDENTIFIER)) {
+            Write-Host 'Skipping WinGet submission because WINGET_PACKAGE_IDENTIFIER is not configured.'
+            "should_submit=false" >> $env:GITHUB_OUTPUT
+            exit 0
+          }
+
+          if ([string]::IsNullOrWhiteSpace($env:WINGET_CREATE_GITHUB_TOKEN)) {
+            Write-Host 'Skipping WinGet submission because WINGET_CREATE_GITHUB_TOKEN is not configured.'
+            "should_submit=false" >> $env:GITHUB_OUTPUT
+            exit 0
+          }
+
+          "should_submit=true" >> $env:GITHUB_OUTPUT
+
+      - name: Submit package using wingetcreate
+        if: steps.prerequisites.outputs.should_submit == 'true'
+        shell: pwsh
+        run: |
+          $assets = '${{ toJSON(github.event.release.assets) }}' | ConvertFrom-Json
+          $packageVersion = '${{ github.event.release.tag_name }}'.TrimStart('v')
+
+          $installerUrlX64 = $assets | Where-Object -Property name -eq 'Pail-win-x64.exe' | Select-Object -ExpandProperty browser_download_url
+          $installerUrlX86 = $assets | Where-Object -Property name -eq 'Pail-win-x86.exe' | Select-Object -ExpandProperty browser_download_url
+          $installerUrlArm64 = $assets | Where-Object -Property name -eq 'Pail-win-arm64.exe' | Select-Object -ExpandProperty browser_download_url
+
+          if ([string]::IsNullOrWhiteSpace($installerUrlX64) -or
+              [string]::IsNullOrWhiteSpace($installerUrlX86) -or
+              [string]::IsNullOrWhiteSpace($installerUrlArm64)) {
+            throw 'Release is missing one or more WinGet installer assets.'
+          }
+
+          curl.exe -JLO https://aka.ms/wingetcreate/latest
+          .\wingetcreate.exe update $env:WINGET_PACKAGE_IDENTIFIER `
+            --version $packageVersion `
+            --urls "$installerUrlX64|x64" "$installerUrlX86|x86" "$installerUrlArm64|arm64" `
+            --submit
