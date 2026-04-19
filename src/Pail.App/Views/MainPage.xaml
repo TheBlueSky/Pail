@@ -19,19 +19,14 @@
         BackRequested="OnBackRequested"
         IsBackButtonVisible="Visible"
         IsPaneOpen="False"
-        IsSettingsVisible="False"
+        IsSettingsVisible="True"
         PaneDisplayMode="LeftCompact"
-        SelectionChanged="OnNavigationSelectionChanged">
+        ItemInvoked="OnItemInvoked">
 
         <NavigationView.MenuItems>
             <NavigationViewItem x:Name="BucketsNavItem" Content="Buckets" Tag="BucketListPage">
                 <NavigationViewItem.Icon>
                     <SymbolIcon Symbol="List" />
-                </NavigationViewItem.Icon>
-            </NavigationViewItem>
-            <NavigationViewItem x:Name="SettingsNavItem" Content="Settings" Tag="SettingsPage">
-                <NavigationViewItem.Icon>
-                    <SymbolIcon Symbol="Setting" />
                 </NavigationViewItem.Icon>
             </NavigationViewItem>
         </NavigationView.MenuItems>
