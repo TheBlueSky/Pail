@@ -7,22 +7,26 @@ namespace Pail.ViewModels;
 
 public partial class SettingsViewModel : ObservableObject
 {
+	private readonly IAppThemeService _appThemeService;
 	private readonly ISettingsService _settingsService;
 	private readonly IFolderPickerService _folderPickerService;
 	private readonly IStatusMessageService _statusMessageService;
 	private readonly INavigationService _navigationService;
 
 	public SettingsViewModel(
+		IAppThemeService appThemeService,
 		ISettingsService settingsService,
 		IFolderPickerService folderPickerService,
 		IStatusMessageService statusMessageService,
 		INavigationService navigationService)
 	{
+		_appThemeService = appThemeService;
 		_settingsService = settingsService;
 		_folderPickerService = folderPickerService;
 		_statusMessageService = statusMessageService;
 		_navigationService = navigationService;
 
+		AppTheme = _settingsService.AppTheme;
 		DownloadFolder = _settingsService.DownloadFolder;
 		AlwaysPromptDownloadLocation = _settingsService.AlwaysPromptDownloadLocation;
 		StatusOverlayDurationSeconds = _settingsService.StatusOverlayDurationSeconds;
@@ -34,6 +38,9 @@ public partial class SettingsViewModel : ObservableObject
 	[ObservableProperty]
 	[NotifyCanExecuteChangedFor(nameof(SaveCommand))]
 	public partial bool IsBusy { get; set; }
+
+	[ObservableProperty]
+	public partial AppThemeMode AppTheme { get; set; }
 
 	[ObservableProperty]
 	public partial string DownloadFolder { get; set; } = string.Empty;
@@ -52,6 +59,8 @@ public partial class SettingsViewModel : ObservableObject
 
 	[ObservableProperty]
 	public partial string LastProfileName { get; set; } = string.Empty;
+
+	public IReadOnlyList<AppThemeMode> AvailableThemes { get; } = Enum.GetValues<AppThemeMode>();
 
 	public IReadOnlyList<string> AvailableRegions { get; } = AwsRegions.All;
 
@@ -86,6 +95,7 @@ public partial class SettingsViewModel : ObservableObject
 			await _settingsService.UpdateAsync(
 				settings =>
 				{
+					settings.AppTheme = AppTheme;
 					settings.DownloadFolder = string.IsNullOrWhiteSpace(DownloadFolder) ? settings.DownloadFolder : DownloadFolder.Trim();
 					settings.AlwaysPromptDownloadLocation = AlwaysPromptDownloadLocation;
 					settings.StatusOverlayDurationSeconds = Math.Max(1, StatusOverlayDurationSeconds);
@@ -94,10 +104,17 @@ public partial class SettingsViewModel : ObservableObject
 					settings.LastProfileName = string.IsNullOrWhiteSpace(LastProfileName) ? null : LastProfileName.Trim();
 				});
 
-			DownloadFolder = _settingsService.DownloadFolder;
-			StatusOverlayDurationSeconds = _settingsService.StatusOverlayDurationSeconds;
-			DefaultRegion = _settingsService.DefaultRegion;
-			LastProfileName = _settingsService.LastProfileName ?? string.Empty;
+			ApplySettingsSnapshot();
+
+			try
+			{
+				_appThemeService.ApplyTheme(AppTheme);
+			}
+			catch (Exception ex)
+			{
+				_statusMessageService.ShowError($"Settings saved, but failed to apply theme: {ex.Message}");
+				return;
+			}
 
 			_statusMessageService.ShowInfo("Settings saved.");
 		}
@@ -112,4 +129,15 @@ public partial class SettingsViewModel : ObservableObject
 	}
 
 	private bool CanSave() => IsBusy is false;
+
+	private void ApplySettingsSnapshot()
+	{
+		AppTheme = _settingsService.AppTheme;
+		DownloadFolder = _settingsService.DownloadFolder;
+		AlwaysPromptDownloadLocation = _settingsService.AlwaysPromptDownloadLocation;
+		StatusOverlayDurationSeconds = _settingsService.StatusOverlayDurationSeconds;
+		DefaultRegion = _settingsService.DefaultRegion;
+		UseCredentialChainByDefault = _settingsService.UseCredentialChainByDefault;
+		LastProfileName = _settingsService.LastProfileName ?? string.Empty;
+	}
 }

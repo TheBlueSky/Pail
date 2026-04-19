@@ -2,6 +2,8 @@ namespace Pail.Models;
 
 public sealed class AppSettings
 {
+	public AppThemeMode AppTheme { get; set; } = AppThemeMode.System;
+
 	public string DownloadFolder { get; set; } = Path.Combine(
 		Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
 		"Downloads",

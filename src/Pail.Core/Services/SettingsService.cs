@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Pail.Models;
@@ -12,6 +13,7 @@ public sealed class SettingsService : ISettingsService
 	private static readonly JsonSerializerOptions SerializerOptions = new()
 	{
 		WriteIndented = true,
+		Converters = { new JsonStringEnumConverter() },
 	};
 
 	private readonly IConfigurationRoot? _configurationRoot;
@@ -28,6 +30,8 @@ public sealed class SettingsService : ISettingsService
 	}
 
 	public string DownloadFolder => _optionsMonitor.CurrentValue.DownloadFolder;
+
+	public AppThemeMode AppTheme => _optionsMonitor.CurrentValue.AppTheme;
 
 	public bool AlwaysPromptDownloadLocation => _optionsMonitor.CurrentValue.AlwaysPromptDownloadLocation;
 
@@ -66,6 +70,7 @@ public sealed class SettingsService : ISettingsService
 
 	private static AppSettings CloneSettings(AppSettings source) => new()
 	{
+		AppTheme = source.AppTheme,
 		DownloadFolder = source.DownloadFolder,
 		AlwaysPromptDownloadLocation = source.AlwaysPromptDownloadLocation,
 		StatusOverlayDurationSeconds = source.StatusOverlayDurationSeconds,

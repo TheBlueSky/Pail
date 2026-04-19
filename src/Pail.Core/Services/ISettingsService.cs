@@ -4,6 +4,8 @@ namespace Pail.Services;
 
 public interface ISettingsService
 {
+	public AppThemeMode AppTheme { get; }
+
 	public string DownloadFolder { get; }
 
 	public bool AlwaysPromptDownloadLocation { get; }

@@ -34,6 +34,7 @@ public partial class PailApp : Application
 
 		// Services
 		services.AddSingleton<IAwsProfileService, AwsProfileService>();
+		services.AddSingleton<IAppThemeService, AppThemeService>();
 		services.AddSingleton<IClipboardService, ClipboardService>();
 		services.AddSingleton<ICopyActionService, CopyActionService>();
 		services.AddSingleton<IFolderPickerService, FolderPickerService>();
@@ -64,6 +65,8 @@ public partial class PailApp : Application
 
 			_window.Content = rootFrame;
 		}
+
+		Services.GetRequiredService<IAppThemeService>().ApplyTheme(Services.GetRequiredService<ISettingsService>().AppTheme);
 
 		SetWindowIcon(_window);
 		CenterWindow(_window);

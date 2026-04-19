@@ -18,6 +18,7 @@ public sealed class SettingsServiceTests : IDisposable
 		var service = CreateService();
 
 		// Assert
+		Assert.Equal(AppThemeMode.System, service.AppTheme);
 		Assert.Equal(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads", "Pail"), service.DownloadFolder);
 		Assert.False(service.AlwaysPromptDownloadLocation);
 		Assert.Equal(3, service.StatusOverlayDurationSeconds);
@@ -35,6 +36,7 @@ public sealed class SettingsServiceTests : IDisposable
 			GetSettingsFilePath(),
 			"""
 			{
+				"AppTheme": "Dark",
 				"DownloadFolder": "D:\\S3Downloads",
 				"AlwaysPromptDownloadLocation": true,
 				"StatusOverlayDurationSeconds": 7,
@@ -47,6 +49,7 @@ public sealed class SettingsServiceTests : IDisposable
 		var service = CreateService();
 
 		// Assert
+		Assert.Equal(AppThemeMode.Dark, service.AppTheme);
 		Assert.Equal("D:\\S3Downloads", service.DownloadFolder);
 		Assert.True(service.AlwaysPromptDownloadLocation);
 		Assert.Equal(7, service.StatusOverlayDurationSeconds);
@@ -64,6 +67,7 @@ public sealed class SettingsServiceTests : IDisposable
 		// Act
 		await service.UpdateAsync(settings =>
 		{
+			settings.AppTheme = AppThemeMode.Light;
 			settings.DownloadFolder = "E:\\Exports";
 			settings.AlwaysPromptDownloadLocation = true;
 			settings.StatusOverlayDurationSeconds = 9;
@@ -75,6 +79,7 @@ public sealed class SettingsServiceTests : IDisposable
 		var reloadedService = CreateService();
 
 		// Assert
+		Assert.Equal(AppThemeMode.Light, reloadedService.AppTheme);
 		Assert.Equal("E:\\Exports", reloadedService.DownloadFolder);
 		Assert.True(reloadedService.AlwaysPromptDownloadLocation);
 		Assert.Equal(9, reloadedService.StatusOverlayDurationSeconds);
@@ -83,6 +88,7 @@ public sealed class SettingsServiceTests : IDisposable
 		Assert.Equal("dev", reloadedService.LastProfileName);
 
 		using var document = JsonDocument.Parse(await File.ReadAllTextAsync(GetSettingsFilePath()));
+		Assert.Equal("Light", document.RootElement.GetProperty(nameof(AppSettings.AppTheme)).GetString());
 		Assert.Equal("E:\\Exports", document.RootElement.GetProperty(nameof(AppSettings.DownloadFolder)).GetString());
 		Assert.Equal("dev", document.RootElement.GetProperty(nameof(AppSettings.LastProfileName)).GetString());
 	}
@@ -96,6 +102,7 @@ public sealed class SettingsServiceTests : IDisposable
 		// Act
 		await service.UpdateAsync(settings =>
 		{
+			settings.AppTheme = AppThemeMode.Dark;
 			settings.DownloadFolder = "F:\\Exports";
 			settings.AlwaysPromptDownloadLocation = true;
 			settings.StatusOverlayDurationSeconds = 6;
@@ -107,6 +114,7 @@ public sealed class SettingsServiceTests : IDisposable
 		var reloadedService = CreateService();
 
 		// Assert
+		Assert.Equal(AppThemeMode.Dark, service.AppTheme);
 		Assert.Equal("F:\\Exports", service.DownloadFolder);
 		Assert.True(service.AlwaysPromptDownloadLocation);
 		Assert.Equal(6, service.StatusOverlayDurationSeconds);
@@ -114,6 +122,7 @@ public sealed class SettingsServiceTests : IDisposable
 		Assert.False(service.UseCredentialChainByDefault);
 		Assert.Equal("ops", service.LastProfileName);
 
+		Assert.Equal(AppThemeMode.Dark, reloadedService.AppTheme);
 		Assert.Equal("F:\\Exports", reloadedService.DownloadFolder);
 		Assert.True(reloadedService.AlwaysPromptDownloadLocation);
 		Assert.Equal(6, reloadedService.StatusOverlayDurationSeconds);

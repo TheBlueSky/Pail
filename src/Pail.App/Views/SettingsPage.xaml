@@ -35,6 +35,26 @@
 
                     <StackPanel Spacing="16">
                         <StackPanel Spacing="4">
+                            <TextBlock Text="Appearance" FontSize="20" FontWeight="SemiBold" />
+                            <TextBlock Text="Choose whether the app follows the system theme or always uses a specific mode." Opacity="0.72" TextWrapping="Wrap" />
+                        </StackPanel>
+
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="Theme" />
+                            <ComboBox ItemsSource="{x:Bind ViewModel.AvailableThemes}" SelectedItem="{x:Bind ViewModel.AppTheme, Mode=TwoWay}" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <Border
+                    Padding="20"
+                    CornerRadius="12"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+
+                    <StackPanel Spacing="16">
+                        <StackPanel Spacing="4">
                             <TextBlock Text="Downloads" FontSize="20" FontWeight="SemiBold" />
                             <TextBlock Text="Choose where downloaded objects go by default." Opacity="0.72" TextWrapping="Wrap" />
                         </StackPanel>

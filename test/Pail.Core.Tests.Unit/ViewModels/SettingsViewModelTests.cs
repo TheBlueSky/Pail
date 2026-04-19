@@ -8,12 +8,14 @@ namespace Pail.Core.Tests.Unit.ViewModels;
 
 public sealed class SettingsViewModelTests
 {
+	private readonly IAppThemeService _appThemeService = Substitute.For<IAppThemeService>();
 	private readonly ISettingsService _settingsService = Substitute.For<ISettingsService>();
 	private readonly IFolderPickerService _folderPickerService = Substitute.For<IFolderPickerService>();
 	private readonly IStatusMessageService _statusMessageService = Substitute.For<IStatusMessageService>();
 	private readonly INavigationService _navigationService = Substitute.For<INavigationService>();
 	private readonly AppSettings _settings = new()
 	{
+		AppTheme = AppThemeMode.Dark,
 		DownloadFolder = "D:\\Downloads",
 		AlwaysPromptDownloadLocation = true,
 		StatusOverlayDurationSeconds = 5,
@@ -24,6 +26,7 @@ public sealed class SettingsViewModelTests
 
 	public SettingsViewModelTests()
 	{
+		_settingsService.AppTheme.Returns(_ => _settings.AppTheme);
 		_settingsService.DownloadFolder.Returns(_ => _settings.DownloadFolder);
 		_settingsService.AlwaysPromptDownloadLocation.Returns(_ => _settings.AlwaysPromptDownloadLocation);
 		_settingsService.StatusOverlayDurationSeconds.Returns(_ => _settings.StatusOverlayDurationSeconds);
@@ -45,12 +48,16 @@ public sealed class SettingsViewModelTests
 		var viewModel = CreateViewModel();
 
 		// Assert
+		Assert.Equal(AppThemeMode.Dark, viewModel.AppTheme);
 		Assert.Equal("D:\\Downloads", viewModel.DownloadFolder);
 		Assert.True(viewModel.AlwaysPromptDownloadLocation);
 		Assert.Equal(5, viewModel.StatusOverlayDurationSeconds);
 		Assert.Equal("us-east-1", viewModel.DefaultRegion);
 		Assert.False(viewModel.UseCredentialChainByDefault);
 		Assert.Equal("dev", viewModel.LastProfileName);
+		Assert.Contains(AppThemeMode.System, viewModel.AvailableThemes);
+		Assert.Contains(AppThemeMode.Light, viewModel.AvailableThemes);
+		Assert.Contains(AppThemeMode.Dark, viewModel.AvailableThemes);
 		Assert.Contains("eu-west-1", viewModel.AvailableRegions);
 	}
 
@@ -59,6 +66,7 @@ public sealed class SettingsViewModelTests
 	{
 		// Arrange
 		var viewModel = CreateViewModel();
+		viewModel.AppTheme = AppThemeMode.System;
 		viewModel.DownloadFolder = "E:\\Exports";
 		viewModel.AlwaysPromptDownloadLocation = false;
 		viewModel.StatusOverlayDurationSeconds = 8;
@@ -70,6 +78,7 @@ public sealed class SettingsViewModelTests
 		await viewModel.SaveCommand.ExecuteAsync(null);
 
 		// Assert
+		Assert.Equal(AppThemeMode.System, _settings.AppTheme);
 		Assert.Equal("E:\\Exports", _settings.DownloadFolder);
 		Assert.False(_settings.AlwaysPromptDownloadLocation);
 		Assert.Equal(8, _settings.StatusOverlayDurationSeconds);
@@ -77,6 +86,7 @@ public sealed class SettingsViewModelTests
 		Assert.True(_settings.UseCredentialChainByDefault);
 		Assert.Equal("prod", _settings.LastProfileName);
 		await _settingsService.Received(1).UpdateAsync(Arg.Any<Action<AppSettings>>(), Arg.Any<CancellationToken>());
+		_appThemeService.Received(1).ApplyTheme(AppThemeMode.System);
 		_statusMessageService.Received(1).ShowInfo("Settings saved.");
 	}
 
@@ -106,6 +116,24 @@ public sealed class SettingsViewModelTests
 
 		// Assert
 		_statusMessageService.Received(1).ShowError(Arg.Is<string>(message => message.Contains("Failed to save settings: disk full")));
+	}
+
+	[Fact]
+	internal async Task SaveCommand_ThemeApplyFailure_ShowsThemeErrorMessage()
+	{
+		// Arrange
+		const string message = "theme unavailable";
+		_appThemeService
+			.When(service => service.ApplyTheme(AppThemeMode.Dark))
+			.Do(_ => throw new InvalidOperationException(message));
+		var viewModel = CreateViewModel();
+
+		// Act
+		await viewModel.SaveCommand.ExecuteAsync(null);
+
+		// Assert
+		Assert.Equal(AppThemeMode.Dark, _settings.AppTheme);
+		_statusMessageService.Received(1).ShowError(Arg.Is<string>(message => message.Contains($"Settings saved, but failed to apply theme: {message}")));
 	}
 
 	[Fact]
@@ -152,5 +180,5 @@ public sealed class SettingsViewModelTests
 		_statusMessageService.Received(1).ShowError(Arg.Is<string>(message => message.Contains("Failed to select folder: picker unavailable")));
 	}
 
-	private SettingsViewModel CreateViewModel() => new(_settingsService, _folderPickerService, _statusMessageService, _navigationService);
+	private SettingsViewModel CreateViewModel() => new(_appThemeService, _settingsService, _folderPickerService, _statusMessageService, _navigationService);
 }
