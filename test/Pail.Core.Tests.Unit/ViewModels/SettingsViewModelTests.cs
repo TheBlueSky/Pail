@@ -11,6 +11,7 @@ public sealed class SettingsViewModelTests
 	private readonly ISettingsService _settingsService = Substitute.For<ISettingsService>();
 	private readonly IFolderPickerService _folderPickerService = Substitute.For<IFolderPickerService>();
 	private readonly IStatusMessageService _statusMessageService = Substitute.For<IStatusMessageService>();
+	private readonly INavigationService _navigationService = Substitute.For<INavigationService>();
 	private readonly AppSettings _settings = new()
 	{
 		DownloadFolder = "D:\\Downloads",
@@ -151,5 +152,5 @@ public sealed class SettingsViewModelTests
 		_statusMessageService.Received(1).ShowError(Arg.Is<string>(message => message.Contains("Failed to select folder: picker unavailable")));
 	}
 
-	private SettingsViewModel CreateViewModel() => new(_settingsService, _folderPickerService, _statusMessageService);
+	private SettingsViewModel CreateViewModel() => new(_settingsService, _folderPickerService, _statusMessageService, _navigationService);
 }

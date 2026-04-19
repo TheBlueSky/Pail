@@ -10,15 +10,18 @@ public partial class SettingsViewModel : ObservableObject
 	private readonly ISettingsService _settingsService;
 	private readonly IFolderPickerService _folderPickerService;
 	private readonly IStatusMessageService _statusMessageService;
+	private readonly INavigationService _navigationService;
 
 	public SettingsViewModel(
 		ISettingsService settingsService,
 		IFolderPickerService folderPickerService,
-		IStatusMessageService statusMessageService)
+		IStatusMessageService statusMessageService,
+		INavigationService navigationService)
 	{
 		_settingsService = settingsService;
 		_folderPickerService = folderPickerService;
 		_statusMessageService = statusMessageService;
+		_navigationService = navigationService;
 
 		DownloadFolder = _settingsService.DownloadFolder;
 		AlwaysPromptDownloadLocation = _settingsService.AlwaysPromptDownloadLocation;
@@ -26,24 +29,6 @@ public partial class SettingsViewModel : ObservableObject
 		DefaultRegion = _settingsService.DefaultRegion;
 		UseCredentialChainByDefault = _settingsService.UseCredentialChainByDefault;
 		LastProfileName = _settingsService.LastProfileName ?? string.Empty;
-	}
-
-	[RelayCommand]
-	private async Task BrowseDownloadFolderAsync()
-	{
-		try
-		{
-			var selectedPath = await _folderPickerService.PickFolderAsync(DownloadFolder);
-
-			if (string.IsNullOrWhiteSpace(selectedPath) is false)
-			{
-				DownloadFolder = selectedPath;
-			}
-		}
-		catch (Exception ex)
-		{
-			_statusMessageService.ShowError($"Failed to select folder: {ex.Message}");
-		}
 	}
 
 	[ObservableProperty]
@@ -69,6 +54,27 @@ public partial class SettingsViewModel : ObservableObject
 	public partial string LastProfileName { get; set; } = string.Empty;
 
 	public IReadOnlyList<string> AvailableRegions { get; } = AwsRegions.All;
+
+	[RelayCommand]
+	private async Task BrowseDownloadFolderAsync()
+	{
+		try
+		{
+			var selectedPath = await _folderPickerService.PickFolderAsync(DownloadFolder);
+
+			if (string.IsNullOrWhiteSpace(selectedPath) is false)
+			{
+				DownloadFolder = selectedPath;
+			}
+		}
+		catch (Exception ex)
+		{
+			_statusMessageService.ShowError($"Failed to select folder: {ex.Message}");
+		}
+	}
+
+	[RelayCommand]
+	private void Logout() => _navigationService.NavigateTo("LoginPage", clearBackStack: true);
 
 	[RelayCommand(CanExecute = nameof(CanSave))]
 	private async Task SaveAsync()
