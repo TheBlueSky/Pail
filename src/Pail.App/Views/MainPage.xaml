@@ -23,12 +23,6 @@
         PaneDisplayMode="LeftCompact"
         SelectionChanged="OnNavigationSelectionChanged">
 
-        <NavigationView.Header>
-            <Grid Margin="0,0,0,12">
-                <TextBlock Text="Pail" FontSize="28" FontWeight="SemiBold" />
-            </Grid>
-        </NavigationView.Header>
-
         <NavigationView.MenuItems>
             <NavigationViewItem x:Name="BucketsNavItem" Content="Buckets" Tag="BucketListPage">
                 <NavigationViewItem.Icon>
