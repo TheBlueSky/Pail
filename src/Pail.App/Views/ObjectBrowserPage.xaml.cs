@@ -1,8 +1,8 @@
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Navigation;
 using Pail.Models;
 using Pail.ViewModels;
+using WinUI.TableView;
 
 namespace Pail.App.Views;
 
@@ -27,9 +27,9 @@ public sealed partial class ObjectBrowserPage : Page
 		}
 	}
 
-	private void OnGridDoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
+	private void OnGridCellDoubleTapped(object sender, TableViewCellDoubleTappedEventArgs e)
 	{
-		if (ObjectGrid.SelectedItem is S3ObjectItem item)
+		if (e.Item is S3ObjectItem item)
 		{
 			ViewModel.OpenItemCommand.Execute(item);
 		}
@@ -41,16 +41,8 @@ public sealed partial class ObjectBrowserPage : Page
 		ViewModel.DownloadSelectedCommand.Execute(selected);
 	}
 
-	private void OnGridSelectionChanged(object sender, SelectionChangedEventArgs e) =>
-		ViewModel.SelectedItem = ObjectGrid.SelectedItem as S3ObjectItem;
-
-	private void OnGridRightTapped(object sender, RightTappedRoutedEventArgs e)
-	{
-		if (e.OriginalSource is FrameworkElement { DataContext: S3ObjectItem item })
-		{
-			ViewModel.SelectedItem = item;
-		}
-	}
+	private void OnGridRowContextFlyoutOpening(object sender, TableViewRowContextFlyoutEventArgs e) =>
+		ViewModel.SelectedItem = e.Item as S3ObjectItem;
 
 	private async void OnCopyObjectNameContextClick(object sender, RoutedEventArgs e) =>
 		await ViewModel.CopyObjectNameCommand.ExecuteAsync(null);

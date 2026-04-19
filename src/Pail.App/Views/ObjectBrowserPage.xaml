@@ -5,7 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:controls="using:CommunityToolkit.WinUI.UI.Controls"
+    xmlns:tableView="using:WinUI.TableView"
     xmlns:models="using:Pail.Models"
     xmlns:converters="using:Pail.App.Converters"
     xmlns:appControls="using:Pail.App.Controls"
@@ -35,39 +35,43 @@
             <AppBarButton Icon="Download" Label="Download Selected" Click="OnDownloadClick"/>
         </CommandBar>
 
-        <controls:DataGrid x:Name="ObjectGrid"
+        <tableView:TableView x:Name="ObjectGrid"
             Grid.Row="2"
             ItemsSource="{x:Bind ViewModel.Items}"
+            SelectedItem="{x:Bind ViewModel.SelectedItem, Mode=TwoWay}"
             AutoGenerateColumns="False"
-            CanUserSortColumns="True"
+            HeadersVisibility="Columns"
             IsReadOnly="True"
             SelectionMode="Extended"
-            SelectionChanged="OnGridSelectionChanged"
-            DoubleTapped="OnGridDoubleTapped"
-            RightTapped="OnGridRightTapped">
+            SelectionUnit="Row"
+            CellDoubleTapped="OnGridCellDoubleTapped"
+            RowContextFlyoutOpening="OnGridRowContextFlyoutOpening">
 
-            <controls:DataGrid.ContextFlyout>
+            <tableView:TableView.RowContextFlyout>
                 <MenuFlyout>
                     <MenuFlyoutItem Text="Copy Name" Icon="Copy" Click="OnCopyObjectNameContextClick"/>
                     <MenuFlyoutItem Text="Copy Full Key" Icon="Copy" Click="OnCopyObjectFullKeyContextClick"/>
                 </MenuFlyout>
-            </controls:DataGrid.ContextFlyout>
+            </tableView:TableView.RowContextFlyout>
 
-            <controls:DataGrid.Columns>
-                <controls:DataGridTemplateColumn Header="Name" Width="*">
-                    <controls:DataGridTemplateColumn.CellTemplate>
+            <tableView:TableView.Columns>
+                <tableView:TableViewTemplateColumn Header="" Width="44">
+                    <tableView:TableViewTemplateColumn.CellTemplate>
                         <DataTemplate x:DataType="models:S3ObjectItem">
-                            <StackPanel Orientation="Horizontal" Spacing="8" Margin="8,0">
-                                <SymbolIcon Symbol="{x:Bind IsFolder, Converter={StaticResource FolderIconConverter}}"/>
-                                <TextBlock Text="{x:Bind Name}" VerticalAlignment="Center"/>
-                            </StackPanel>
+                            <Grid>
+                                <SymbolIcon
+                                    Symbol="{x:Bind IsFolder, Converter={StaticResource FolderIconConverter}}"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"/>
+                            </Grid>
                         </DataTemplate>
-                    </controls:DataGridTemplateColumn.CellTemplate>
-                </controls:DataGridTemplateColumn>
-                <controls:DataGridTextColumn Header="Size" Binding="{Binding SizeDisplay}" Width="100"/>
-                <controls:DataGridTextColumn Header="Last Modified" Binding="{Binding LastModified}" Width="180"/>
-            </controls:DataGrid.Columns>
-        </controls:DataGrid>
+                    </tableView:TableViewTemplateColumn.CellTemplate>
+                </tableView:TableViewTemplateColumn>
+                <tableView:TableViewTextColumn Header="Name" Binding="{Binding Name}" Width="*"/>
+                <tableView:TableViewTextColumn Header="Size" Binding="{Binding SizeDisplay}" Width="100"/>
+                <tableView:TableViewTextColumn Header="Last Modified" Binding="{Binding LastModified}" Width="180"/>
+            </tableView:TableView.Columns>
+        </tableView:TableView>
 
         <ProgressRing Grid.Row="2" IsActive="{x:Bind ViewModel.IsBusy, Mode=OneWay}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
 
