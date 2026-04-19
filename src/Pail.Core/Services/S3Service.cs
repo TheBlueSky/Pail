@@ -33,7 +33,7 @@ public sealed class S3Service : IS3Service
 		return Task.CompletedTask;
 	}
 
-	private AmazonS3Client S3Client
+	private IAmazonS3 S3Client
 	{
 		get => field ?? throw new InvalidOperationException("S3 Client is not initialized.");
 		set;
@@ -54,35 +54,11 @@ public sealed class S3Service : IS3Service
 			Delimiter = "/",
 		};
 
-		var response = await S3Client.ListObjectsV2Async(request);
 		var items = new List<S3ObjectItem>();
 
-		foreach (var commonPrefix in response.CommonPrefixes ?? [])
+		await foreach (var response in S3Client.Paginators.ListObjectsV2(request).Responses)
 		{
-			items.Add(
-				new S3ObjectItem
-				{
-					Key = commonPrefix,
-					Name = commonPrefix[prefix.Length..].TrimEnd('/'),
-					IsFolder = true,
-				});
-		}
-
-		foreach (var s3Object in response.S3Objects ?? [])
-		{
-			if (s3Object.Key == prefix)
-			{
-				continue;
-			}
-
-			items.Add(
-				new S3ObjectItem
-				{
-					Key = s3Object.Key,
-					Name = s3Object.Key[prefix.Length..],
-					Size = s3Object.Size ?? -1,
-					LastModified = s3Object.LastModified ?? new DateTime(),
-				});
+			AddObjectItems(items, response, prefix);
 		}
 
 		return items;
@@ -130,13 +106,9 @@ public sealed class S3Service : IS3Service
 			Prefix = prefix,
 		};
 
-		ListObjectsV2Response response;
-
-		do
+		await foreach (var response in S3Client.Paginators.ListObjectsV2(request).Responses)
 		{
-			response = await S3Client.ListObjectsV2Async(request);
-
-			foreach (var s3Object in response.S3Objects)
+			foreach (var s3Object in response.S3Objects ?? [])
 			{
 				var relativeKey = s3Object.Key[prefix.Length..];
 
@@ -156,9 +128,38 @@ public sealed class S3Service : IS3Service
 					await DownloadObjectAsync(bucketName, s3Object.Key, destinationPath);
 				}
 			}
+		}
+	}
 
-			request.ContinuationToken = response.NextContinuationToken;
-		} while (response.IsTruncated is true);
+	private static void AddObjectItems(List<S3ObjectItem> items, ListObjectsV2Response response, string prefix)
+	{
+		foreach (var commonPrefix in response.CommonPrefixes ?? [])
+		{
+			items.Add(
+				new S3ObjectItem
+				{
+					Key = commonPrefix,
+					Name = commonPrefix[prefix.Length..].TrimEnd('/'),
+					IsFolder = true,
+				});
+		}
+
+		foreach (var s3Object in response.S3Objects ?? [])
+		{
+			if (s3Object.Key == prefix)
+			{
+				continue;
+			}
+
+			items.Add(
+				new S3ObjectItem
+				{
+					Key = s3Object.Key,
+					Name = s3Object.Key[prefix.Length..],
+					Size = s3Object.Size ?? -1,
+					LastModified = s3Object.LastModified ?? new DateTime(),
+				});
+		}
 	}
 
 	private static AWSCredentials GetProfileCredentials(string profileName)
