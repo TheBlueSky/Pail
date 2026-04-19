@@ -6,11 +6,11 @@ A Windows desktop application for browsing and managing Amazon S3 buckets and ob
 
 ```
 src/
-├── S3Browser.Core/         # Business logic, models, services
-└── S3Browser.App/          # WinUI 3 UI layer
+├── Pail.Core/         # Business logic, models, services
+└── Pail.App/          # WinUI 3 UI layer
 
 test/
-└── S3Browser.Tests.Unit/   # xUnit unit tests
+└── Pail.Core.Tests.Unit/   # xUnit unit tests
 ```
 
 ## Tech Stack
