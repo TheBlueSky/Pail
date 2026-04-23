@@ -3,138 +3,442 @@
     x:Class="Pail.App.Views.SettingsPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:converters="using:Pail.App.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:appControls="using:Pail.App.Controls"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
+    <Page.Resources>
+        <converters:AppThemeModeDisplayConverter x:Key="AppThemeModeDisplayConverter" />
+
+        <x:Double x:Key="SettingsCardSpacing">4</x:Double>
+
+        <Style
+            x:Key="SettingsSectionHeaderTextBlockStyle"
+            BasedOn="{StaticResource BodyStrongTextBlockStyle}"
+            TargetType="TextBlock">
+            <Setter Property="Margin" Value="0,30,0,6" />
+        </Style>
+
+        <Style x:Key="SettingsCardBorderStyle" TargetType="Border">
+            <Setter Property="Padding" Value="16" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Background" Value="{ThemeResource CardBackgroundFillColorDefaultBrush}" />
+        </Style>
+
+        <Style
+            x:Key="SettingsCardDescriptionTextBlockStyle"
+            TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+    </Page.Resources>
+
     <Grid>
-        <ScrollViewer>
-            <StackPanel Spacing="20" Padding="24">
-                <Grid ColumnSpacing="16">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
 
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="Settings" Style="{StaticResource TitleTextBlockStyle}" />
-                        <TextBlock Text="Configure downloads, notifications, and AWS login defaults." Opacity="0.72" />
-                    </StackPanel>
+        <Grid
+            MaxWidth="1064"
+            Margin="36,24,36,0"
+            ColumnSpacing="16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
 
-                    <Button Grid.Column="1" MinWidth="120" Content="Save" Command="{x:Bind ViewModel.SaveCommand}" />
-                </Grid>
+            <StackPanel Spacing="4">
+                <TextBlock
+                    AutomationProperties.HeadingLevel="Level1"
+                    Style="{StaticResource TitleTextBlockStyle}"
+                    Text="Settings" />
+                <TextBlock
+                    Style="{StaticResource SettingsCardDescriptionTextBlockStyle}"
+                    Text="Configure how Pail looks and which defaults it uses when you sign in, browse, and download." />
+            </StackPanel>
 
-                <Border
-                    Padding="20"
-                    CornerRadius="12"
-                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                    BorderThickness="1"
-                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+            <Button
+                Grid.Column="1"
+                MinWidth="120"
+                VerticalAlignment="Center"
+                Command="{x:Bind ViewModel.SaveCommand}"
+                Content="Save"
+                Style="{StaticResource PrimaryAction}" />
+        </Grid>
 
-                    <StackPanel Spacing="16">
-                        <StackPanel Spacing="4">
-                            <TextBlock Text="Appearance" FontSize="20" FontWeight="SemiBold" />
-                            <TextBlock Text="Choose whether the app follows the system theme or always uses a specific mode." Opacity="0.72" TextWrapping="Wrap" />
+        <ScrollViewer
+            Grid.Row="1"
+            Padding="36,0,36,0"
+            VerticalScrollBarVisibility="Auto"
+            VerticalScrollMode="Auto">
+            <StackPanel
+                MaxWidth="1064"
+                HorizontalAlignment="Center"
+                Spacing="{StaticResource SettingsCardSpacing}">
+                <StackPanel.ChildrenTransitions>
+                    <RepositionThemeTransition />
+                </StackPanel.ChildrenTransitions>
+
+                <TextBlock
+                    Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
+                    Text="Appearance &amp; behavior" />
+
+                <Border Style="{StaticResource SettingsCardBorderStyle}">
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <FontIcon
+                            Margin="0,4,0,0"
+                            VerticalAlignment="Top"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Glyph="&#xE790;" />
+
+                        <StackPanel
+                            Grid.Column="1"
+                            Spacing="2">
+                            <TextBlock
+                                Style="{StaticResource BodyStrongTextBlockStyle}"
+                                Text="App theme" />
+                            <TextBlock
+                                Style="{StaticResource SettingsCardDescriptionTextBlockStyle}"
+                                Text="Choose whether the app follows the system theme or always uses a specific mode." />
                         </StackPanel>
 
-                        <StackPanel Spacing="8">
-                            <TextBlock Text="Theme" />
-                            <ComboBox ItemsSource="{x:Bind ViewModel.AvailableThemes}" SelectedItem="{x:Bind ViewModel.AppTheme, Mode=TwoWay}" />
-                        </StackPanel>
-                    </StackPanel>
+                        <ComboBox
+                            Grid.Column="2"
+                            HorizontalAlignment="Right"
+                            MinWidth="220"
+                            ItemsSource="{x:Bind ViewModel.AvailableThemes}"
+                            SelectedItem="{x:Bind ViewModel.AppTheme, Mode=TwoWay}">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Converter={StaticResource AppThemeModeDisplayConverter}}" />
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                    </Grid>
                 </Border>
 
-                <Border
-                    Padding="20"
-                    CornerRadius="12"
-                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                    BorderThickness="1"
-                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                <Border Style="{StaticResource SettingsCardBorderStyle}">
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
 
-                    <StackPanel Spacing="16">
-                        <StackPanel Spacing="4">
-                            <TextBlock Text="Downloads" FontSize="20" FontWeight="SemiBold" />
-                            <TextBlock Text="Choose where downloaded objects go by default." Opacity="0.72" TextWrapping="Wrap" />
+                        <FontIcon
+                            Margin="0,4,0,0"
+                            VerticalAlignment="Top"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Glyph="&#xE7F4;" />
+
+                        <StackPanel
+                            Grid.Column="1"
+                            Spacing="2">
+                            <TextBlock
+                                Style="{StaticResource BodyStrongTextBlockStyle}"
+                                Text="Status messages" />
+                            <TextBlock
+                                Style="{StaticResource SettingsCardDescriptionTextBlockStyle}"
+                                Text="Control how long transient status overlays stay visible before they dismiss." />
                         </StackPanel>
 
-                        <StackPanel Spacing="8">
-                            <TextBlock Text="Default download folder" />
-                            <Grid ColumnSpacing="12">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-
-                                <TextBox Grid.Column="0" Text="{x:Bind ViewModel.DownloadFolder, Mode=TwoWay}" PlaceholderText="e.g. C:\Downloads\Pail" />
-                                <Button Grid.Column="1" Content="Browse" Command="{x:Bind ViewModel.BrowseDownloadFolderCommand}" />
-                            </Grid>
-                        </StackPanel>
-
-                        <ToggleSwitch Header="Always prompt before downloading" IsOn="{x:Bind ViewModel.AlwaysPromptDownloadLocation, Mode=TwoWay}" />
-                    </StackPanel>
+                        <NumberBox
+                            Grid.Column="2"
+                            HorizontalAlignment="Right"
+                            MinWidth="160"
+                            Minimum="1"
+                            SmallChange="1"
+                            SpinButtonPlacementMode="Compact"
+                            Value="{x:Bind ViewModel.StatusOverlayDurationSeconds, Mode=TwoWay}" />
+                    </Grid>
                 </Border>
 
-                <Border
-                    Padding="20"
-                    CornerRadius="12"
-                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                    BorderThickness="1"
-                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                <TextBlock
+                    Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
+                    Text="Downloads" />
 
-                    <StackPanel Spacing="16">
-                        <StackPanel Spacing="4">
-                            <TextBlock Text="Notifications" FontSize="20" FontWeight="SemiBold" />
-                            <TextBlock Text="Control how long transient status messages stay visible." Opacity="0.72" TextWrapping="Wrap" />
+                <Border Style="{StaticResource SettingsCardBorderStyle}">
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <FontIcon
+                            Margin="0,4,0,0"
+                            VerticalAlignment="Top"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Glyph="&#xE8B7;" />
+
+                        <StackPanel
+                            Grid.Column="1"
+                            Spacing="2">
+                            <TextBlock
+                                Style="{StaticResource BodyStrongTextBlockStyle}"
+                                Text="Default download folder" />
+                            <TextBlock
+                                Style="{StaticResource SettingsCardDescriptionTextBlockStyle}"
+                                Text="Choose where downloaded objects go unless you pick a different location." />
                         </StackPanel>
 
-                        <StackPanel Spacing="8">
-                            <TextBlock Text="Status overlay duration (seconds)" />
-                            <NumberBox Minimum="1" SmallChange="1" SpinButtonPlacementMode="Compact" Value="{x:Bind ViewModel.StatusOverlayDurationSeconds, Mode=TwoWay}" />
-                        </StackPanel>
-                    </StackPanel>
+                        <Grid
+                            Grid.Column="2"
+                            HorizontalAlignment="Right"
+                            MinWidth="360"
+                            ColumnSpacing="12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBox
+                                Grid.Column="0"
+                                PlaceholderText="e.g. C:\Downloads\Pail"
+                                Text="{x:Bind ViewModel.DownloadFolder, Mode=TwoWay}" />
+                            <Button
+                                Grid.Column="1"
+                                Command="{x:Bind ViewModel.BrowseDownloadFolderCommand}"
+                                Content="Browse" />
+                        </Grid>
+                    </Grid>
                 </Border>
 
-                <Border
-                    Padding="20"
-                    CornerRadius="12"
-                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                    BorderThickness="1"
-                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                <Border Style="{StaticResource SettingsCardBorderStyle}">
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
 
-                    <StackPanel Spacing="16">
-                        <StackPanel Spacing="4">
-                            <TextBlock Text="AWS Login Defaults" FontSize="20" FontWeight="SemiBold" />
-                            <TextBlock Text="Preselect the login options users see on the sign-in page." Opacity="0.72" TextWrapping="Wrap" />
+                        <FontIcon
+                            Margin="0,4,0,0"
+                            VerticalAlignment="Top"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Glyph="&#xE895;" />
+
+                        <StackPanel
+                            Grid.Column="1"
+                            Spacing="2">
+                            <TextBlock
+                                Style="{StaticResource BodyStrongTextBlockStyle}"
+                                Text="Download prompts" />
+                            <TextBlock
+                                Style="{StaticResource SettingsCardDescriptionTextBlockStyle}"
+                                Text="Ask for a location every time before downloading an object." />
                         </StackPanel>
 
-                        <StackPanel Spacing="8">
-                            <TextBlock Text="Default region" />
-                            <ComboBox ItemsSource="{x:Bind ViewModel.AvailableRegions}" SelectedItem="{x:Bind ViewModel.DefaultRegion, Mode=TwoWay}" />
-                        </StackPanel>
-
-                        <ToggleSwitch Header="Use credential chain by default" IsOn="{x:Bind ViewModel.UseCredentialChainByDefault, Mode=TwoWay}" />
-
-                        <StackPanel Spacing="8">
-                            <TextBlock Text="Preferred profile name" />
-                            <TextBox Text="{x:Bind ViewModel.LastProfileName, Mode=TwoWay}" PlaceholderText="Automatic (recommended)" />
-                            <TextBlock Text="Leave blank to fall back to Automatic (recommended)." Opacity="0.72" TextWrapping="Wrap" />
-                        </StackPanel>
-                    </StackPanel>
+                        <ToggleSwitch
+                            Grid.Column="2"
+                            HorizontalAlignment="Right"
+                            MinWidth="0"
+                            IsOn="{x:Bind ViewModel.AlwaysPromptDownloadLocation, Mode=TwoWay}" />
+                    </Grid>
                 </Border>
 
-                <Border
-                    Padding="20"
-                    CornerRadius="12"
-                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                    BorderThickness="1"
-                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                <TextBlock
+                    Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
+                    Text="AWS login defaults" />
 
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="Account" FontSize="20" FontWeight="SemiBold" />
-                        <TextBlock Text="Sign out or switch to a different AWS account." Opacity="0.72" TextWrapping="Wrap" />
-                        <Button Margin="0,12,0,0" Content="Sign out" Command="{x:Bind ViewModel.LogoutCommand}" />
+                <Border Style="{StaticResource SettingsCardBorderStyle}">
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <FontIcon
+                            Margin="0,4,0,0"
+                            VerticalAlignment="Top"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Glyph="&#xE774;" />
+
+                        <StackPanel
+                            Grid.Column="1"
+                            Spacing="2">
+                            <TextBlock
+                                Style="{StaticResource BodyStrongTextBlockStyle}"
+                                Text="Default region" />
+                            <TextBlock
+                                Style="{StaticResource SettingsCardDescriptionTextBlockStyle}"
+                                Text="Preselect the region users see first on the sign-in page." />
+                        </StackPanel>
+
+                        <ComboBox
+                            Grid.Column="2"
+                            HorizontalAlignment="Right"
+                            MinWidth="220"
+                            ItemsSource="{x:Bind ViewModel.AvailableRegions}"
+                            SelectedItem="{x:Bind ViewModel.DefaultRegion, Mode=TwoWay}" />
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource SettingsCardBorderStyle}">
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <FontIcon
+                            Margin="0,4,0,0"
+                            VerticalAlignment="Top"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Glyph="&#xE72E;" />
+
+                        <StackPanel
+                            Grid.Column="1"
+                            Spacing="2">
+                            <TextBlock
+                                Style="{StaticResource BodyStrongTextBlockStyle}"
+                                Text="Use credential chain by default" />
+                            <TextBlock
+                                Style="{StaticResource SettingsCardDescriptionTextBlockStyle}"
+                                Text="Start with the default AWS credential chain enabled when users open the sign-in page." />
+                        </StackPanel>
+
+                        <ToggleSwitch
+                            Grid.Column="2"
+                            HorizontalAlignment="Right"
+                            MinWidth="0"
+                            IsOn="{x:Bind ViewModel.UseCredentialChainByDefault, Mode=TwoWay}" />
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource SettingsCardBorderStyle}">
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <FontIcon
+                            Margin="0,4,0,0"
+                            VerticalAlignment="Top"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Glyph="&#xE77B;" />
+
+                        <StackPanel
+                            Grid.Column="1"
+                            Spacing="2">
+                            <TextBlock
+                                Style="{StaticResource BodyStrongTextBlockStyle}"
+                                Text="Preferred profile name" />
+                            <TextBlock
+                                Style="{StaticResource SettingsCardDescriptionTextBlockStyle}"
+                                Text="Leave blank to fall back to Automatic (recommended)." />
+                        </StackPanel>
+
+                        <TextBox
+                            Grid.Column="2"
+                            HorizontalAlignment="Right"
+                            MinWidth="220"
+                            PlaceholderText="Automatic (recommended)"
+                            Text="{x:Bind ViewModel.LastProfileName, Mode=TwoWay}" />
+                    </Grid>
+                </Border>
+
+                <TextBlock
+                    Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
+                    Text="Account" />
+
+                <Border Style="{StaticResource SettingsCardBorderStyle}">
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <FontIcon
+                            Margin="0,4,0,0"
+                            VerticalAlignment="Top"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Glyph="&#xE8D6;" />
+
+                        <StackPanel
+                            Grid.Column="1"
+                            Spacing="2">
+                            <TextBlock
+                                Style="{StaticResource BodyStrongTextBlockStyle}"
+                                Text="Sign out" />
+                            <TextBlock
+                                Style="{StaticResource SettingsCardDescriptionTextBlockStyle}"
+                                Text="Return to the sign-in page and switch to a different AWS account." />
+                        </StackPanel>
+
+                        <Button
+                            Grid.Column="2"
+                            HorizontalAlignment="Right"
+                            Command="{x:Bind ViewModel.LogoutCommand}"
+                            Content="Sign out" />
+                    </Grid>
+                </Border>
+
+                <TextBlock
+                    Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
+                    Text="About" />
+
+                <Border
+                    Margin="0,0,0,36"
+                    Style="{StaticResource SettingsCardBorderStyle}">
+                    <StackPanel Spacing="16">
+                        <Grid ColumnSpacing="16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <Image
+                                Width="24"
+                                Height="24"
+                                VerticalAlignment="Top"
+                                Source="ms-appx:///Assets/StoreLogo.png" />
+
+                            <StackPanel
+                                Grid.Column="1"
+                                Spacing="2">
+                                <TextBlock
+                                    Style="{StaticResource BodyStrongTextBlockStyle}"
+                                    Text="Pail" />
+                                <TextBlock
+                                    Style="{StaticResource SettingsCardDescriptionTextBlockStyle}"
+                                    Text="AWS S3 browser for Windows." />
+                            </StackPanel>
+
+                            <TextBlock
+                                Grid.Column="2"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Center"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Text="{x:Bind AppVersion}" />
+                        </Grid>
+
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <HyperlinkButton
+                                Content="GitHub repository"
+                                NavigateUri="https://github.com/TheBlueSky/Pail" />
+                            <HyperlinkButton
+                                Content="Releases"
+                                NavigateUri="https://github.com/TheBlueSky/Pail/releases" />
+                        </StackPanel>
                     </StackPanel>
                 </Border>
             </StackPanel>

@@ -60,7 +60,12 @@ public partial class SettingsViewModel : ObservableObject
 	[ObservableProperty]
 	public partial string LastProfileName { get; set; } = string.Empty;
 
-	public IReadOnlyList<AppThemeMode> AvailableThemes { get; } = Enum.GetValues<AppThemeMode>();
+	public IReadOnlyList<AppThemeMode> AvailableThemes { get; } =
+	[
+		AppThemeMode.Light,
+		AppThemeMode.Dark,
+		AppThemeMode.System,
+	];
 
 	public IReadOnlyList<string> AvailableRegions { get; } = AwsRegions.All;
 

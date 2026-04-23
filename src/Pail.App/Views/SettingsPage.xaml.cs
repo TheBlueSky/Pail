@@ -1,3 +1,4 @@
+using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Pail.ViewModels;
 
@@ -12,4 +13,12 @@ public sealed partial class SettingsPage : Page
 	}
 
 	public SettingsViewModel ViewModel { get; }
+
+	public string AppVersion { get; } = GetAppVersion();
+
+	private static string GetAppVersion()
+	{
+		var version = Assembly.GetExecutingAssembly().GetName().Version;
+		return version is null ? "Unknown version" : version.ToString(4);
+	}
 }
