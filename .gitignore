@@ -402,3 +402,7 @@ FodyWeavers.xsd
 
 # Development App Settings file
 appsettings.[Dd]evelopment.json
+
+# Ignore every .png file in art directory, except for Pail.png
+art/*.png
+!art/Pail.png
