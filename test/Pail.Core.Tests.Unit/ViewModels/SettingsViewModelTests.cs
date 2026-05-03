@@ -122,10 +122,10 @@ public sealed class SettingsViewModelTests
 	internal async Task SaveCommand_ThemeApplyFailure_ShowsThemeErrorMessage()
 	{
 		// Arrange
-		const string message = "theme unavailable";
+		const string themeErrorMessage = "theme unavailable";
 		_appThemeService
 			.When(service => service.ApplyTheme(AppThemeMode.Dark))
-			.Do(_ => throw new InvalidOperationException(message));
+			.Do(_ => throw new InvalidOperationException(themeErrorMessage));
 		var viewModel = CreateViewModel();
 
 		// Act
@@ -133,7 +133,7 @@ public sealed class SettingsViewModelTests
 
 		// Assert
 		Assert.Equal(AppThemeMode.Dark, _settings.AppTheme);
-		_statusMessageService.Received(1).ShowError(Arg.Is<string>(message => message.Contains($"Settings saved, but failed to apply theme: {message}")));
+		_statusMessageService.Received(1).ShowError(Arg.Is<string>(actualMessage => actualMessage.Contains($"Settings saved, but failed to apply theme: {themeErrorMessage}")));
 	}
 
 	[Fact]
