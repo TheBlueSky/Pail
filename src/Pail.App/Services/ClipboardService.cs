@@ -26,4 +26,25 @@ public sealed class ClipboardService : IClipboardService
 			return Task.FromResult(false);
 		}
 	}
+
+	public async Task<string?> ReadTextAsync()
+	{
+		try
+		{
+			var dataPackageView = Clipboard.GetContent();
+
+			if (dataPackageView is null || !dataPackageView.Contains(StandardDataFormats.Text))
+			{
+				return null;
+			}
+
+			var text = await dataPackageView.GetTextAsync();
+
+			return string.IsNullOrWhiteSpace(text) ? null : text;
+		}
+		catch
+		{
+			return null;
+		}
+	}
 }
