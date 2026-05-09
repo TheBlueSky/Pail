@@ -140,7 +140,7 @@ public sealed class SettingsViewModelTests
 	internal async Task BrowseDownloadFolderCommand_WhenFolderSelected_UpdatesDownloadFolder()
 	{
 		// Arrange
-		_folderPickerService.PickFolderAsync("D:\\Downloads", Arg.Any<CancellationToken>()).Returns("F:\\Chosen");
+		_folderPickerService.PickFolderAsync().Returns("F:\\Chosen");
 		var viewModel = CreateViewModel();
 
 		// Act
@@ -154,7 +154,7 @@ public sealed class SettingsViewModelTests
 	internal async Task BrowseDownloadFolderCommand_WhenCancelled_KeepsDownloadFolder()
 	{
 		// Arrange
-		_folderPickerService.PickFolderAsync("D:\\Downloads", Arg.Any<CancellationToken>()).Returns((string?)null);
+		_folderPickerService.PickFolderAsync().Returns((string?)null);
 		var viewModel = CreateViewModel();
 
 		// Act
@@ -169,7 +169,7 @@ public sealed class SettingsViewModelTests
 	{
 		// Arrange
 		_folderPickerService
-			.PickFolderAsync(Arg.Any<string?>(), Arg.Any<CancellationToken>())
+			.PickFolderAsync()
 			.ThrowsAsync(new InvalidOperationException("picker unavailable"));
 		var viewModel = CreateViewModel();
 

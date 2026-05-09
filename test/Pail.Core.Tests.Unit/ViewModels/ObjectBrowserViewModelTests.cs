@@ -112,7 +112,7 @@ public sealed class ObjectBrowserViewModelTests
 		await viewModel.DownloadSelectedCommand.ExecuteAsync(selectedItems);
 
 		// Assert
-		await _folderPickerService.DidNotReceive().PickFolderAsync(Arg.Any<string?>(), Arg.Any<CancellationToken>());
+		await _folderPickerService.DidNotReceive().PickFolderAsync();
 		await _s3Service.Received(1).DownloadObjectAsync("bucket-a", "reports/report.csv", Path.Combine(_defaultDownloadFolder, "report.csv"));
 		await _settingsService.DidNotReceive().UpdateAsync(Arg.Any<Action<AppSettings>>(), Arg.Any<CancellationToken>());
 	}
@@ -122,7 +122,7 @@ public sealed class ObjectBrowserViewModelTests
 	{
 		// Arrange
 		_appSettings.AlwaysPromptDownloadLocation = true;
-		_folderPickerService.PickFolderAsync(_defaultDownloadFolder, Arg.Any<CancellationToken>()).Returns(_pickedDownloadFolder);
+		_folderPickerService.PickFolderAsync().Returns(_pickedDownloadFolder);
 
 		var viewModel = new ObjectBrowserViewModel(_s3Service, _navigationService, _copyActionService, _folderPickerService, _settingsService, _statusMessageService);
 		await viewModel.InitializeAsync("bucket-a");
@@ -146,7 +146,7 @@ public sealed class ObjectBrowserViewModelTests
 	{
 		// Arrange
 		_appSettings.AlwaysPromptDownloadLocation = true;
-		_folderPickerService.PickFolderAsync(_defaultDownloadFolder, Arg.Any<CancellationToken>()).Returns((string?)null);
+		_folderPickerService.PickFolderAsync().Returns((string?)null);
 
 		var viewModel = new ObjectBrowserViewModel(_s3Service, _navigationService, _copyActionService, _folderPickerService, _settingsService, _statusMessageService);
 		await viewModel.InitializeAsync("bucket-a");
@@ -169,8 +169,8 @@ public sealed class ObjectBrowserViewModelTests
 	internal async Task OpenItemCommand_FolderSelected_UpdatesPathAndEnablesBucketBack()
 	{
 		// Arrange
-		_s3Service.GetObjectsAsync("bucket-a", "").Returns(new List<S3ObjectItem>());
-		_s3Service.GetObjectsAsync("bucket-a", "reports/").Returns(new List<S3ObjectItem>());
+		_s3Service.GetObjectsAsync("bucket-a", "").Returns([]);
+		_s3Service.GetObjectsAsync("bucket-a", "reports/").Returns([]);
 
 		var viewModel = new ObjectBrowserViewModel(_s3Service, _navigationService, _copyActionService, _folderPickerService, _settingsService, _statusMessageService);
 		var folder = new S3ObjectItem
@@ -195,9 +195,9 @@ public sealed class ObjectBrowserViewModelTests
 	internal async Task GoBackCommand_WhenInsideBucket_GoesToParentWithoutLeavingPage()
 	{
 		// Arrange
-		_s3Service.GetObjectsAsync("bucket-a", "").Returns(new List<S3ObjectItem>());
-		_s3Service.GetObjectsAsync("bucket-a", "reports/").Returns(new List<S3ObjectItem>());
-		_s3Service.GetObjectsAsync("bucket-a", "reports/2026/").Returns(new List<S3ObjectItem>());
+		_s3Service.GetObjectsAsync("bucket-a", "").Returns([]);
+		_s3Service.GetObjectsAsync("bucket-a", "reports/").Returns([]);
+		_s3Service.GetObjectsAsync("bucket-a", "reports/2026/").Returns([]);
 
 		var viewModel = new ObjectBrowserViewModel(_s3Service, _navigationService, _copyActionService, _folderPickerService, _settingsService, _statusMessageService);
 		var parentFolder = new S3ObjectItem
@@ -231,7 +231,7 @@ public sealed class ObjectBrowserViewModelTests
 	internal async Task GoBackCommand_AtBucketRoot_DelegatesToNavigationService()
 	{
 		// Arrange
-		_s3Service.GetObjectsAsync("bucket-a", "").Returns(new List<S3ObjectItem>());
+		_s3Service.GetObjectsAsync("bucket-a", "").Returns([]);
 
 		var viewModel = new ObjectBrowserViewModel(_s3Service, _navigationService, _copyActionService, _folderPickerService, _settingsService, _statusMessageService);
 

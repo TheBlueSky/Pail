@@ -138,7 +138,7 @@ public partial class ObjectBrowserViewModel : ObservableObject
 
 			if (_settingsService.AlwaysPromptDownloadLocation)
 			{
-				var selectedFolder = await _folderPickerService.PickFolderAsync(downloadsFolder);
+				var selectedFolder = await _folderPickerService.PickFolderAsync();
 
 				if (string.IsNullOrWhiteSpace(selectedFolder))
 				{

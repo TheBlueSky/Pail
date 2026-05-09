@@ -74,7 +74,7 @@ public partial class SettingsViewModel : ObservableObject
 	{
 		try
 		{
-			var selectedPath = await _folderPickerService.PickFolderAsync(DownloadFolder);
+			var selectedPath = await _folderPickerService.PickFolderAsync();
 
 			if (string.IsNullOrWhiteSpace(selectedPath) is false)
 			{

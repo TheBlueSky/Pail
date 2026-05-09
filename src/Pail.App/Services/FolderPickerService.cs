@@ -1,12 +1,13 @@
+using Microsoft.UI;
+using Microsoft.Windows.Storage.Pickers;
 using Pail.Services;
-using Windows.Storage.Pickers;
 using WinRT.Interop;
 
 namespace Pail.App.Services;
 
 public sealed class FolderPickerService : IFolderPickerService
 {
-	public async Task<string?> PickFolderAsync(string? suggestedPath = null, CancellationToken cancellationToken = default)
+	public async Task<string?> PickFolderAsync()
 	{
 		var window = PailApp.MainWindow;
 
@@ -15,14 +16,10 @@ public sealed class FolderPickerService : IFolderPickerService
 			return null;
 		}
 
-		var picker = new FolderPicker();
-		picker.FileTypeFilter.Add("*");
-
-		picker.SuggestedStartLocation = PickerLocationId.Downloads;
-
-		InitializeWithWindow.Initialize(picker, WindowNative.GetWindowHandle(window));
-
+		var windowId = Win32Interop.GetWindowIdFromWindow(WindowNative.GetWindowHandle(window));
+		var picker = new FolderPicker(windowId) { SuggestedStartLocation = PickerLocationId.Downloads };
 		var selectedFolder = await picker.PickSingleFolderAsync();
+
 		return selectedFolder?.Path;
 	}
 }
