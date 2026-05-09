@@ -77,6 +77,71 @@ public sealed class LoginViewModelTests
 	}
 
 	[Fact]
+	internal async Task LoadCredentialProfilesCommand_RefreshesProfilesAndPreservesSelection()
+	{
+		// Arrange
+		_awsProfileService.GetProfileNamesAsync().Returns(["dev", "prod"], ["dev", "stage", "prod"]);
+		_appSettings.LastProfileName = "prod";
+
+		var viewModel = CreateViewModel();
+		viewModel.UseDefaultChain = true;
+		await viewModel.LoadCredentialProfilesAsync();
+
+		// Act
+		await viewModel.LoadCredentialProfilesCommand.ExecuteAsync(null);
+
+		// Assert
+		Assert.Equal([LoginViewModel.AutomaticProfileOption, "dev", "stage", "prod"], viewModel.AvailableProfiles);
+		Assert.Equal("prod", viewModel.SelectedProfileName);
+	}
+
+	[Fact]
+	internal async Task LoadCredentialProfilesAsync_TracksRefreshAvailability()
+	{
+		// Arrange
+		var profilesLoaded = new TaskCompletionSource<IReadOnlyList<string>>(TaskCreationOptions.RunContinuationsAsynchronously);
+		_awsProfileService.GetProfileNamesAsync().Returns(_ => profilesLoaded.Task);
+
+		var viewModel = CreateViewModel();
+		viewModel.UseDefaultChain = true;
+
+		// Act
+		var loadTask = viewModel.LoadCredentialProfilesAsync();
+
+		// Assert
+		Assert.False(viewModel.CanRefreshProfiles);
+		Assert.True(viewModel.IsLoadingCredentialProfiles);
+
+		profilesLoaded.SetResult(["dev"]);
+		await loadTask;
+
+		Assert.True(viewModel.CanRefreshProfiles);
+		Assert.False(viewModel.IsLoadingCredentialProfiles);
+
+		viewModel.UseDefaultChain = false;
+
+		Assert.False(viewModel.CanRefreshProfiles);
+	}
+
+	[Fact]
+	internal async Task LoadCredentialProfilesCommand_Failed_ShowsErrorAndRestoresRefreshAvailability()
+	{
+		// Arrange
+		_awsProfileService.GetProfileNamesAsync().Throws(new Exception("Profile store unavailable"));
+
+		var viewModel = CreateViewModel();
+		viewModel.UseDefaultChain = true;
+
+		// Act
+		await viewModel.LoadCredentialProfilesCommand.ExecuteAsync(null);
+
+		// Assert
+		_statusMessageService.Received(1).ShowError(Arg.Is<string>(message => message.Contains("Failed to load AWS profiles: Profile store unavailable", StringComparison.Ordinal)));
+		Assert.False(viewModel.IsLoadingCredentialProfiles);
+		Assert.True(viewModel.CanRefreshProfiles);
+	}
+
+	[Fact]
 	internal async Task LoginCommand_Successful_NavigatesToMainPage()
 	{
 		// Arrange

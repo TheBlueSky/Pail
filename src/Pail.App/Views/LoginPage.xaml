@@ -42,7 +42,37 @@
 
                 <Border Height="1" Background="{ThemeResource ControlStrokeColorDefaultBrush}"/>
                 <CheckBox Content="Use Default Credential Chain" IsChecked="{x:Bind ViewModel.UseDefaultChain, Mode=TwoWay}"/>
-                <ComboBox Header="AWS Profile" HorizontalAlignment="Stretch" ItemsSource="{x:Bind ViewModel.AvailableProfiles, Mode=OneWay}" SelectedItem="{x:Bind ViewModel.SelectedProfileName, Mode=TwoWay}" IsEnabled="{x:Bind ViewModel.UseDefaultChain, Mode=OneWay}"/>
+                <StackPanel Spacing="4">
+                    <TextBlock Text="AWS Profile" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                    <Grid HorizontalAlignment="Stretch" ColumnSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <ComboBox
+                            x:Name="AwsProfileComboBox"
+                            Grid.Column="0"
+                            HorizontalAlignment="Stretch"
+                            ItemsSource="{x:Bind ViewModel.AvailableProfiles, Mode=OneWay}"
+                            SelectedItem="{x:Bind ViewModel.SelectedProfileName, Mode=TwoWay}"
+                            IsEnabled="{x:Bind ViewModel.UseDefaultChain, Mode=OneWay}"
+                            AutomationProperties.Name="AWS Profile"/>
+
+                        <Button
+                            Grid.Column="1"
+                            Width="{Binding ElementName=AwsProfileComboBox, Path=ActualHeight, Mode=OneWay}"
+                            Height="{Binding ElementName=AwsProfileComboBox, Path=ActualHeight, Mode=OneWay}"
+                            Padding="0"
+                            Command="{x:Bind ViewModel.LoadCredentialProfilesCommand}"
+                            IsEnabled="{x:Bind ViewModel.CanRefreshProfiles, Mode=OneWay}"
+                            ToolTipService.ToolTip="Refresh AWS profiles"
+                            AutomationProperties.Name="Refresh AWS profiles">
+
+                            <FontIcon Glyph="&#xE72C;" />
+                        </Button>
+                    </Grid>
+                </StackPanel>
 
                 <Button Content="Connect" Command="{x:Bind ViewModel.LoginCommand}" HorizontalAlignment="Stretch" Style="{StaticResource AccentButtonStyle}" Margin="0,10,0,0"/>
 

@@ -53,6 +53,7 @@ public partial class LoginViewModel : ObservableObject
 	public partial string SessionToken { get; set; } = string.Empty;
 
 	[ObservableProperty]
+	[NotifyPropertyChangedFor(nameof(CanRefreshProfiles))]
 	public partial bool UseDefaultChain { get; set; }
 
 	[ObservableProperty]
@@ -61,13 +62,26 @@ public partial class LoginViewModel : ObservableObject
 	[ObservableProperty]
 	public partial bool IsBusy { get; set; }
 
+	[ObservableProperty]
+	[NotifyPropertyChangedFor(nameof(CanRefreshProfiles))]
+	public partial bool IsLoadingCredentialProfiles { get; set; }
+
 	public ObservableCollection<string> AvailableProfiles { get; } = [AutomaticProfileOption];
 
 	public IReadOnlyList<string> AvailableRegions { get; } = AwsRegions.All;
 
+	public bool CanRefreshProfiles => UseDefaultChain && IsLoadingCredentialProfiles is false;
+
 	[RelayCommand]
 	public async Task LoadCredentialProfilesAsync()
 	{
+		if (IsLoadingCredentialProfiles)
+		{
+			return;
+		}
+
+		IsLoadingCredentialProfiles = true;
+
 		try
 		{
 			var profileNames = await _awsProfileService.GetProfileNamesAsync();
@@ -88,6 +102,10 @@ public partial class LoginViewModel : ObservableObject
 		catch (Exception ex)
 		{
 			_statusMessageService.ShowError($"Failed to load AWS profiles: {ex.Message}");
+		}
+		finally
+		{
+			IsLoadingCredentialProfiles = false;
 		}
 	}
 
