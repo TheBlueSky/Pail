@@ -11,6 +11,10 @@ public sealed class AppSettings
 
 	public bool AlwaysPromptDownloadLocation { get; set; }
 
+	public int InitialObjectLoadCount { get; set; } = 1000;
+
+	public int LoadMoreObjectCount { get; set; }
+
 	public int StatusOverlayDurationSeconds { get; set; } = 3;
 
 	public string DefaultRegion { get; set; } = "eu-west-1";

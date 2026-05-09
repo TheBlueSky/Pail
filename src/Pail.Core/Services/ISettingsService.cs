@@ -10,6 +10,10 @@ public interface ISettingsService
 
 	public bool AlwaysPromptDownloadLocation { get; }
 
+	public int InitialObjectLoadCount { get; }
+
+	public int LoadMoreObjectCount { get; }
+
 	public int StatusOverlayDurationSeconds { get; }
 
 	public string DefaultRegion { get; }

@@ -35,6 +35,10 @@ public sealed class SettingsService : ISettingsService
 
 	public bool AlwaysPromptDownloadLocation => _optionsMonitor.CurrentValue.AlwaysPromptDownloadLocation;
 
+	public int InitialObjectLoadCount => _optionsMonitor.CurrentValue.InitialObjectLoadCount;
+
+	public int LoadMoreObjectCount => _optionsMonitor.CurrentValue.LoadMoreObjectCount;
+
 	public int StatusOverlayDurationSeconds => _optionsMonitor.CurrentValue.StatusOverlayDurationSeconds;
 
 	public string DefaultRegion => _optionsMonitor.CurrentValue.DefaultRegion;
@@ -73,6 +77,8 @@ public sealed class SettingsService : ISettingsService
 		AppTheme = source.AppTheme,
 		DownloadFolder = source.DownloadFolder,
 		AlwaysPromptDownloadLocation = source.AlwaysPromptDownloadLocation,
+		InitialObjectLoadCount = source.InitialObjectLoadCount,
+		LoadMoreObjectCount = source.LoadMoreObjectCount,
 		StatusOverlayDurationSeconds = source.StatusOverlayDurationSeconds,
 		DefaultRegion = source.DefaultRegion,
 		UseCredentialChainByDefault = source.UseCredentialChainByDefault,

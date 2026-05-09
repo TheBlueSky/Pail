@@ -21,6 +21,8 @@ public sealed class SettingsServiceTests : IDisposable
 		Assert.Equal(AppThemeMode.System, service.AppTheme);
 		Assert.Equal(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads", "Pail"), service.DownloadFolder);
 		Assert.False(service.AlwaysPromptDownloadLocation);
+		Assert.Equal(1000, service.InitialObjectLoadCount);
+		Assert.Equal(0, service.LoadMoreObjectCount);
 		Assert.Equal(3, service.StatusOverlayDurationSeconds);
 		Assert.Equal("eu-west-1", service.DefaultRegion);
 		Assert.True(service.UseCredentialChainByDefault);
@@ -39,6 +41,8 @@ public sealed class SettingsServiceTests : IDisposable
 				"AppTheme": "Dark",
 				"DownloadFolder": "D:\\S3Downloads",
 				"AlwaysPromptDownloadLocation": true,
+				"InitialObjectLoadCount": 150,
+				"LoadMoreObjectCount": 75,
 				"StatusOverlayDurationSeconds": 7,
 				"DefaultRegion": "us-east-1",
 				"UseCredentialChainByDefault": false,
@@ -52,6 +56,8 @@ public sealed class SettingsServiceTests : IDisposable
 		Assert.Equal(AppThemeMode.Dark, service.AppTheme);
 		Assert.Equal("D:\\S3Downloads", service.DownloadFolder);
 		Assert.True(service.AlwaysPromptDownloadLocation);
+		Assert.Equal(150, service.InitialObjectLoadCount);
+		Assert.Equal(75, service.LoadMoreObjectCount);
 		Assert.Equal(7, service.StatusOverlayDurationSeconds);
 		Assert.Equal("us-east-1", service.DefaultRegion);
 		Assert.False(service.UseCredentialChainByDefault);
@@ -59,7 +65,7 @@ public sealed class SettingsServiceTests : IDisposable
 	}
 
 	[Fact]
-	internal async Task UpdateAsync_PersistsUpdatedSettings_AndCanBeLoadedAgain()
+	internal async Task UpdateAsync_PersistsUpdatedSettingsAndCanBeLoadedAgain()
 	{
 		// Arrange
 		var service = CreateService();
@@ -70,6 +76,8 @@ public sealed class SettingsServiceTests : IDisposable
 			settings.AppTheme = AppThemeMode.Light;
 			settings.DownloadFolder = "E:\\Exports";
 			settings.AlwaysPromptDownloadLocation = true;
+			settings.InitialObjectLoadCount = 325;
+			settings.LoadMoreObjectCount = 90;
 			settings.StatusOverlayDurationSeconds = 9;
 			settings.DefaultRegion = "ap-southeast-2";
 			settings.UseCredentialChainByDefault = false;
@@ -82,6 +90,8 @@ public sealed class SettingsServiceTests : IDisposable
 		Assert.Equal(AppThemeMode.Light, reloadedService.AppTheme);
 		Assert.Equal("E:\\Exports", reloadedService.DownloadFolder);
 		Assert.True(reloadedService.AlwaysPromptDownloadLocation);
+		Assert.Equal(325, reloadedService.InitialObjectLoadCount);
+		Assert.Equal(90, reloadedService.LoadMoreObjectCount);
 		Assert.Equal(9, reloadedService.StatusOverlayDurationSeconds);
 		Assert.Equal("ap-southeast-2", reloadedService.DefaultRegion);
 		Assert.False(reloadedService.UseCredentialChainByDefault);
@@ -90,11 +100,13 @@ public sealed class SettingsServiceTests : IDisposable
 		using var document = JsonDocument.Parse(await File.ReadAllTextAsync(GetSettingsFilePath()));
 		Assert.Equal("Light", document.RootElement.GetProperty(nameof(AppSettings.AppTheme)).GetString());
 		Assert.Equal("E:\\Exports", document.RootElement.GetProperty(nameof(AppSettings.DownloadFolder)).GetString());
+		Assert.Equal(325, document.RootElement.GetProperty(nameof(AppSettings.InitialObjectLoadCount)).GetInt32());
+		Assert.Equal(90, document.RootElement.GetProperty(nameof(AppSettings.LoadMoreObjectCount)).GetInt32());
 		Assert.Equal("dev", document.RootElement.GetProperty(nameof(AppSettings.LastProfileName)).GetString());
 	}
 
 	[Fact]
-	internal async Task UpdateAsync_PersistsUpdatedSettings_AndRefreshesFacadeValues()
+	internal async Task UpdateAsync_PersistsUpdatedSettingsAndRefreshesFacadeValues()
 	{
 		// Arrange
 		var service = CreateService();
@@ -105,6 +117,8 @@ public sealed class SettingsServiceTests : IDisposable
 			settings.AppTheme = AppThemeMode.Dark;
 			settings.DownloadFolder = "F:\\Exports";
 			settings.AlwaysPromptDownloadLocation = true;
+			settings.InitialObjectLoadCount = 220;
+			settings.LoadMoreObjectCount = 0;
 			settings.StatusOverlayDurationSeconds = 6;
 			settings.DefaultRegion = "us-west-1";
 			settings.UseCredentialChainByDefault = false;
@@ -117,6 +131,8 @@ public sealed class SettingsServiceTests : IDisposable
 		Assert.Equal(AppThemeMode.Dark, service.AppTheme);
 		Assert.Equal("F:\\Exports", service.DownloadFolder);
 		Assert.True(service.AlwaysPromptDownloadLocation);
+		Assert.Equal(220, service.InitialObjectLoadCount);
+		Assert.Equal(0, service.LoadMoreObjectCount);
 		Assert.Equal(6, service.StatusOverlayDurationSeconds);
 		Assert.Equal("us-west-1", service.DefaultRegion);
 		Assert.False(service.UseCredentialChainByDefault);
@@ -125,6 +141,8 @@ public sealed class SettingsServiceTests : IDisposable
 		Assert.Equal(AppThemeMode.Dark, reloadedService.AppTheme);
 		Assert.Equal("F:\\Exports", reloadedService.DownloadFolder);
 		Assert.True(reloadedService.AlwaysPromptDownloadLocation);
+		Assert.Equal(220, reloadedService.InitialObjectLoadCount);
+		Assert.Equal(0, reloadedService.LoadMoreObjectCount);
 		Assert.Equal(6, reloadedService.StatusOverlayDurationSeconds);
 		Assert.Equal("us-west-1", reloadedService.DefaultRegion);
 		Assert.False(reloadedService.UseCredentialChainByDefault);

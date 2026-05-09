@@ -167,6 +167,90 @@
 
                 <TextBlock
                     Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
+                    Text="Object browser" />
+
+                <Border Style="{StaticResource SettingsCardBorderStyle}">
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <FontIcon
+                            Margin="0,4,0,0"
+                            VerticalAlignment="Top"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Glyph="&#xE81C;" />
+
+                        <StackPanel
+                            Grid.Column="1"
+                            Spacing="2">
+                            <TextBlock
+                                Style="{StaticResource BodyStrongTextBlockStyle}"
+                                Text="Initial object load" />
+                            <TextBlock
+                                Style="{StaticResource SettingsCardDescriptionTextBlockStyle}"
+                                Text="Choose how many rows Pail loads the first time a bucket folder opens or refreshes." />
+                            <TextBlock
+                                Style="{StaticResource SettingsCardDescriptionTextBlockStyle}"
+                                Text="Values above 1000 are fetched through multiple S3 requests." />
+                        </StackPanel>
+
+                        <NumberBox
+                            Grid.Column="2"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Top"
+                            Minimum="1"
+                            MinWidth="160"
+                            SmallChange="25"
+                            SpinButtonPlacementMode="Compact"
+                            Value="{x:Bind ViewModel.InitialObjectLoadCount, Mode=TwoWay}" />
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource SettingsCardBorderStyle}">
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <FontIcon
+                            Margin="0,4,0,0"
+                            VerticalAlignment="Top"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Glyph="&#xF8A5;" />
+
+                        <StackPanel
+                            Grid.Column="1"
+                            Spacing="2">
+                            <TextBlock
+                                Style="{StaticResource BodyStrongTextBlockStyle}"
+                                Text="Load more batch size" />
+                            <TextBlock
+                                Style="{StaticResource SettingsCardDescriptionTextBlockStyle}"
+                                Text="Set to 0 to reuse the initial load count, or choose a different batch size for each Load more click." />
+                            <TextBlock
+                                Style="{StaticResource SettingsCardDescriptionTextBlockStyle}"
+                                Text="Values above 1000 are fetched through multiple S3 requests." />
+                        </StackPanel>
+
+                        <NumberBox
+                            Grid.Column="2"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Top"
+                            Minimum="0"
+                            MinWidth="160"
+                            SmallChange="25"
+                            SpinButtonPlacementMode="Compact"
+                            Value="{x:Bind ViewModel.LoadMoreObjectCount, Mode=TwoWay}" />
+                    </Grid>
+                </Border>
+
+                <TextBlock
+                    Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                     Text="Downloads" />
 
                 <Border Style="{StaticResource SettingsCardBorderStyle}">

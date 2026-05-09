@@ -18,6 +18,8 @@ public sealed class SettingsViewModelTests
 		AppTheme = AppThemeMode.Dark,
 		DownloadFolder = "D:\\Downloads",
 		AlwaysPromptDownloadLocation = true,
+		InitialObjectLoadCount = 250,
+		LoadMoreObjectCount = 100,
 		StatusOverlayDurationSeconds = 5,
 		DefaultRegion = "us-east-1",
 		UseCredentialChainByDefault = false,
@@ -29,6 +31,8 @@ public sealed class SettingsViewModelTests
 		_settingsService.AppTheme.Returns(_ => _settings.AppTheme);
 		_settingsService.DownloadFolder.Returns(_ => _settings.DownloadFolder);
 		_settingsService.AlwaysPromptDownloadLocation.Returns(_ => _settings.AlwaysPromptDownloadLocation);
+		_settingsService.InitialObjectLoadCount.Returns(_ => _settings.InitialObjectLoadCount);
+		_settingsService.LoadMoreObjectCount.Returns(_ => _settings.LoadMoreObjectCount);
 		_settingsService.StatusOverlayDurationSeconds.Returns(_ => _settings.StatusOverlayDurationSeconds);
 		_settingsService.DefaultRegion.Returns(_ => _settings.DefaultRegion);
 		_settingsService.UseCredentialChainByDefault.Returns(_ => _settings.UseCredentialChainByDefault);
@@ -51,6 +55,8 @@ public sealed class SettingsViewModelTests
 		Assert.Equal(AppThemeMode.Dark, viewModel.AppTheme);
 		Assert.Equal("D:\\Downloads", viewModel.DownloadFolder);
 		Assert.True(viewModel.AlwaysPromptDownloadLocation);
+		Assert.Equal(250, viewModel.InitialObjectLoadCount);
+		Assert.Equal(100, viewModel.LoadMoreObjectCount);
 		Assert.Equal(5, viewModel.StatusOverlayDurationSeconds);
 		Assert.Equal("us-east-1", viewModel.DefaultRegion);
 		Assert.False(viewModel.UseCredentialChainByDefault);
@@ -69,6 +75,8 @@ public sealed class SettingsViewModelTests
 		viewModel.AppTheme = AppThemeMode.System;
 		viewModel.DownloadFolder = "E:\\Exports";
 		viewModel.AlwaysPromptDownloadLocation = false;
+		viewModel.InitialObjectLoadCount = 400;
+		viewModel.LoadMoreObjectCount = 150;
 		viewModel.StatusOverlayDurationSeconds = 8;
 		viewModel.DefaultRegion = "ap-south-1";
 		viewModel.UseCredentialChainByDefault = true;
@@ -81,6 +89,8 @@ public sealed class SettingsViewModelTests
 		Assert.Equal(AppThemeMode.System, _settings.AppTheme);
 		Assert.Equal("E:\\Exports", _settings.DownloadFolder);
 		Assert.False(_settings.AlwaysPromptDownloadLocation);
+		Assert.Equal(400, _settings.InitialObjectLoadCount);
+		Assert.Equal(150, _settings.LoadMoreObjectCount);
 		Assert.Equal(8, _settings.StatusOverlayDurationSeconds);
 		Assert.Equal("ap-south-1", _settings.DefaultRegion);
 		Assert.True(_settings.UseCredentialChainByDefault);
@@ -102,6 +112,22 @@ public sealed class SettingsViewModelTests
 
 		// Assert
 		Assert.Null(_settings.LastProfileName);
+	}
+
+	[Fact]
+	internal async Task SaveCommand_ObjectLoadCounts_AllowLargeValuesAndClampOnlyMinimums()
+	{
+		// Arrange
+		var viewModel = CreateViewModel();
+		viewModel.InitialObjectLoadCount = 0;
+		viewModel.LoadMoreObjectCount = 5005;
+
+		// Act
+		await viewModel.SaveCommand.ExecuteAsync(null);
+
+		// Assert
+		Assert.Equal(1, _settings.InitialObjectLoadCount);
+		Assert.Equal(5005, _settings.LoadMoreObjectCount);
 	}
 
 	[Fact]

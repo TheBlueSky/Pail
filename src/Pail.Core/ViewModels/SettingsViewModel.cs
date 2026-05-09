@@ -29,6 +29,8 @@ public partial class SettingsViewModel : ObservableObject
 		AppTheme = _settingsService.AppTheme;
 		DownloadFolder = _settingsService.DownloadFolder;
 		AlwaysPromptDownloadLocation = _settingsService.AlwaysPromptDownloadLocation;
+		InitialObjectLoadCount = _settingsService.InitialObjectLoadCount;
+		LoadMoreObjectCount = _settingsService.LoadMoreObjectCount;
 		StatusOverlayDurationSeconds = _settingsService.StatusOverlayDurationSeconds;
 		DefaultRegion = _settingsService.DefaultRegion;
 		UseCredentialChainByDefault = _settingsService.UseCredentialChainByDefault;
@@ -47,6 +49,12 @@ public partial class SettingsViewModel : ObservableObject
 
 	[ObservableProperty]
 	public partial bool AlwaysPromptDownloadLocation { get; set; }
+
+	[ObservableProperty]
+	public partial int InitialObjectLoadCount { get; set; }
+
+	[ObservableProperty]
+	public partial int LoadMoreObjectCount { get; set; }
 
 	[ObservableProperty]
 	public partial int StatusOverlayDurationSeconds { get; set; }
@@ -103,6 +111,8 @@ public partial class SettingsViewModel : ObservableObject
 					settings.AppTheme = AppTheme;
 					settings.DownloadFolder = string.IsNullOrWhiteSpace(DownloadFolder) ? settings.DownloadFolder : DownloadFolder.Trim();
 					settings.AlwaysPromptDownloadLocation = AlwaysPromptDownloadLocation;
+					settings.InitialObjectLoadCount = Math.Max(1, InitialObjectLoadCount);
+					settings.LoadMoreObjectCount = Math.Max(0, LoadMoreObjectCount);
 					settings.StatusOverlayDurationSeconds = Math.Max(1, StatusOverlayDurationSeconds);
 					settings.DefaultRegion = string.IsNullOrWhiteSpace(DefaultRegion) ? settings.DefaultRegion : DefaultRegion;
 					settings.UseCredentialChainByDefault = UseCredentialChainByDefault;
@@ -140,6 +150,8 @@ public partial class SettingsViewModel : ObservableObject
 		AppTheme = _settingsService.AppTheme;
 		DownloadFolder = _settingsService.DownloadFolder;
 		AlwaysPromptDownloadLocation = _settingsService.AlwaysPromptDownloadLocation;
+		InitialObjectLoadCount = _settingsService.InitialObjectLoadCount;
+		LoadMoreObjectCount = _settingsService.LoadMoreObjectCount;
 		StatusOverlayDurationSeconds = _settingsService.StatusOverlayDurationSeconds;
 		DefaultRegion = _settingsService.DefaultRegion;
 		UseCredentialChainByDefault = _settingsService.UseCredentialChainByDefault;
