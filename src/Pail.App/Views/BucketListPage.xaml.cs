@@ -41,4 +41,12 @@ public sealed partial class BucketListPage : Page
 		ViewModel.SelectedBucket = bucket;
 		await ViewModel.CopyBucketNameCommand.ExecuteAsync(null);
 	}
+
+	private void OnSearchTextChanged(object sender, TextChangedEventArgs e)
+	{
+		if (sender is TextBox searchTextBox)
+		{
+			ViewModel.SearchText = searchTextBox.Text ?? string.Empty;
+		}
+	}
 }

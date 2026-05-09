@@ -66,4 +66,111 @@ public sealed class BucketListViewModelTests
 		// Assert
 		await _copyActionService.DidNotReceive().CopyWithFeedbackAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>());
 	}
+
+	[Fact]
+	internal async Task SearchText_FiltersBucketsCaseInsensitively()
+	{
+		// Arrange
+		var viewModel = new BucketListViewModel(_s3Service, _navigationService, _copyActionService, _statusMessageService);
+
+		_s3Service
+			.GetBucketsAsync()
+			.Returns(
+			[
+				new S3BucketItem("alpha-logs", null),
+				new S3BucketItem("Beta-Archive", null),
+				new S3BucketItem("prod-data", null),
+			]);
+
+		await viewModel.LoadBucketsCommand.ExecuteAsync(null);
+
+		// Act
+		viewModel.SearchText = "arch";
+
+		// Assert
+		Assert.Single(viewModel.Buckets);
+		Assert.Equal("Beta-Archive", viewModel.Buckets[0].Name);
+	}
+
+	[Fact]
+	internal async Task SearchText_EmptyString_RestoresAllBuckets()
+	{
+		// Arrange
+		var viewModel = new BucketListViewModel(_s3Service, _navigationService, _copyActionService, _statusMessageService);
+
+		_s3Service
+			.GetBucketsAsync()
+			.Returns(
+			[
+				new S3BucketItem("alpha", null),
+				new S3BucketItem("beta", null),
+				new S3BucketItem("gamma", null),
+			]);
+
+		await viewModel.LoadBucketsCommand.ExecuteAsync(null);
+		viewModel.SearchText = "be";
+
+		// Act
+		viewModel.SearchText = string.Empty;
+
+		// Assert
+		Assert.Equal(3, viewModel.Buckets.Count);
+		Assert.Equal("alpha", viewModel.Buckets[0].Name);
+		Assert.Equal("beta", viewModel.Buckets[1].Name);
+		Assert.Equal("gamma", viewModel.Buckets[2].Name);
+	}
+
+	[Fact]
+	internal async Task LoadBuckets_PreservesActiveSearchFilter()
+	{
+		// Arrange
+		var viewModel = new BucketListViewModel(_s3Service, _navigationService, _copyActionService, _statusMessageService);
+
+		_s3Service
+			.GetBucketsAsync()
+			.Returns(
+			[
+				new S3BucketItem("prod-east", null),
+				new S3BucketItem("dev-west", null),
+			],
+			[
+				new S3BucketItem("prod-central", null),
+				new S3BucketItem("stage-east", null),
+			]);
+
+		await viewModel.LoadBucketsCommand.ExecuteAsync(null);
+		viewModel.SearchText = "prod";
+
+		// Act
+		await viewModel.LoadBucketsCommand.ExecuteAsync(null);
+
+		// Assert
+		Assert.Single(viewModel.Buckets);
+		Assert.Equal("prod-central", viewModel.Buckets[0].Name);
+	}
+
+	[Fact]
+	internal async Task SearchText_ClearsSelectionWhenSelectedBucketIsFilteredOut()
+	{
+		// Arrange
+		var viewModel = new BucketListViewModel(_s3Service, _navigationService, _copyActionService, _statusMessageService);
+
+		_s3Service
+			.GetBucketsAsync()
+			.Returns(
+			[
+				new S3BucketItem("alpha", null),
+				new S3BucketItem("beta", null),
+			]);
+
+		await viewModel.LoadBucketsCommand.ExecuteAsync(null);
+		viewModel.SelectedBucket = viewModel.Buckets[1];
+
+		// Act
+		viewModel.SearchText = "alpha";
+
+		// Assert
+		Assert.Null(viewModel.SelectedBucket);
+		Assert.False(viewModel.CopyBucketNameCommand.CanExecute(null));
+	}
 }

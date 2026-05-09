@@ -16,11 +16,29 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,0,0,12">
-            <TextBlock Text="S3 Buckets" Style="{StaticResource TitleTextBlockStyle}" VerticalAlignment="Center"/>
-            <Button Content="Refresh" Command="{x:Bind ViewModel.LoadBucketsCommand}" VerticalAlignment="Center"/>
-            <Button Content="Copy Bucket Name" Command="{x:Bind ViewModel.CopyBucketNameCommand}" VerticalAlignment="Center"/>
-        </StackPanel>
+        <Grid Margin="0,0,0,12" ColumnSpacing="12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Grid.Column="0" Text="S3 Buckets" Style="{StaticResource TitleTextBlockStyle}" VerticalAlignment="Center"/>
+            <TextBox
+                x:Name="SearchTextBox"
+                Grid.Column="1"
+                MinWidth="240"
+                MaxWidth="400"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Center"
+                PlaceholderText="Search buckets"
+                AutomationProperties.Name="Search buckets"
+                TextChanged="OnSearchTextChanged"/>
+            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="12">
+                <Button Content="Refresh" Command="{x:Bind ViewModel.LoadBucketsCommand}" VerticalAlignment="Center"/>
+                <Button Content="Copy Bucket Name" Command="{x:Bind ViewModel.CopyBucketNameCommand}" VerticalAlignment="Center"/>
+            </StackPanel>
+        </Grid>
 
         <ListView
             Grid.Row="1"
