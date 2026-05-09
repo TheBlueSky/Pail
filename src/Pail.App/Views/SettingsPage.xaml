@@ -69,7 +69,7 @@
                 VerticalAlignment="Center"
                 Command="{x:Bind ViewModel.SaveCommand}"
                 Content="Save"
-                Style="{StaticResource PrimaryAction}" />
+                Style="{StaticResource AccentButtonStyle}" />
         </Grid>
 
         <ScrollViewer
@@ -228,7 +228,7 @@
                             Margin="0,4,0,0"
                             VerticalAlignment="Top"
                             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            Glyph="&#xE895;" />
+                            Glyph="&#xF89A;" />
 
                         <StackPanel
                             Grid.Column="1"
@@ -370,7 +370,7 @@
                             Margin="0,4,0,0"
                             VerticalAlignment="Top"
                             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            Glyph="&#xE8D6;" />
+                            Glyph="&#xF3B1;" />
 
                         <StackPanel
                             Grid.Column="1"
@@ -407,8 +407,8 @@
                             </Grid.ColumnDefinitions>
 
                             <Image
-                                Width="24"
-                                Height="24"
+                                Width="44"
+                                Height="44"
                                 VerticalAlignment="Top"
                                 Source="ms-appx:///Assets/StoreLogo.png" />
 

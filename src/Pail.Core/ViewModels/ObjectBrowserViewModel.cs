@@ -15,8 +15,8 @@ public partial class ObjectBrowserViewModel : ObservableObject
 	private readonly ISettingsService _settingsService;
 	private readonly IStatusMessageService _statusMessageService;
 	private readonly Stack<string> _pathStack = new();
-	private bool _canNavigateBackWithinBucket;
 
+	private bool _canNavigateBackWithinBucket;
 	private string _bucketName = string.Empty;
 
 	public ObjectBrowserViewModel(
@@ -180,15 +180,10 @@ public partial class ObjectBrowserViewModel : ObservableObject
 		}
 	}
 
-	private static string ResolveDownloadFolder(string? downloadFolder)
-	{
-		if (string.IsNullOrWhiteSpace(downloadFolder))
-		{
-			return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads", "Pail");
-		}
-
-		return downloadFolder;
-	}
+	private static string ResolveDownloadFolder(string? downloadFolder) =>
+		string.IsNullOrWhiteSpace(downloadFolder)
+			? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads", "Pail")
+			: downloadFolder;
 
 	[RelayCommand(CanExecute = nameof(CanCopySelectedObject))]
 	private async Task CopyObjectNameAsync()
