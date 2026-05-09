@@ -22,6 +22,6 @@ public sealed partial class LoginPage : Page
 	{
 		base.OnNavigatedTo(e);
 
-		await ViewModel.LoadCredentialProfilesAsync();
+		await ViewModel.LoadCredentialProfilesCommand.ExecuteAsync(null);
 	}
 }

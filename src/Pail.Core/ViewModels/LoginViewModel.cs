@@ -65,6 +65,7 @@ public partial class LoginViewModel : ObservableObject
 
 	public IReadOnlyList<string> AvailableRegions { get; } = AwsRegions.All;
 
+	[RelayCommand]
 	public async Task LoadCredentialProfilesAsync()
 	{
 		try
