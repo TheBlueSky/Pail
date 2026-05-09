@@ -35,6 +35,7 @@ public partial class PailApp : Application
 		// Services
 		services.AddSingleton<IAwsProfileService, AwsProfileService>();
 		services.AddSingleton<IAppThemeService, AppThemeService>();
+		services.AddSingleton<IAwsConsoleCredentialsParser, AwsConsoleCredentialsParser>();
 		services.AddSingleton<IClipboardService, ClipboardService>();
 		services.AddSingleton<ICopyActionService, CopyActionService>();
 		services.AddSingleton<IFolderPickerService, FolderPickerService>();

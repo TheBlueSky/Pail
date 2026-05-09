@@ -12,6 +12,8 @@ public sealed class LoginViewModelTests
 	private readonly IS3Service _s3Service = Substitute.For<IS3Service>();
 	private readonly INavigationService _navigationService = Substitute.For<INavigationService>();
 	private readonly ISettingsService _settingsService = Substitute.For<ISettingsService>();
+	private readonly IClipboardService _clipboardService = Substitute.For<IClipboardService>();
+	private readonly IAwsConsoleCredentialsParser _awsConsoleCredentialsParser = Substitute.For<IAwsConsoleCredentialsParser>();
 	private readonly IStatusMessageService _statusMessageService = Substitute.For<IStatusMessageService>();
 	private readonly AppSettings _appSettings = new();
 
@@ -31,7 +33,7 @@ public sealed class LoginViewModelTests
 		_appSettings.LastProfileName = "dev-profile";
 
 		// Act
-		var viewModel = new LoginViewModel(_awsProfileService, _s3Service, _navigationService, _settingsService, _statusMessageService);
+		var viewModel = CreateViewModel();
 
 		// Assert
 		Assert.Equal("us-west-2", viewModel.Region);
@@ -48,7 +50,7 @@ public sealed class LoginViewModelTests
 		_awsProfileService.GetProfileNamesAsync().Returns(["dev", "prod"]);
 		_appSettings.LastProfileName = "prod";
 
-		var viewModel = new LoginViewModel(_awsProfileService, _s3Service, _navigationService, _settingsService, _statusMessageService);
+		var viewModel = CreateViewModel();
 
 		// Act
 		await viewModel.LoadCredentialProfilesAsync();
@@ -65,7 +67,7 @@ public sealed class LoginViewModelTests
 		_awsProfileService.GetProfileNamesAsync().Returns(["dev", "prod"]);
 		_appSettings.LastProfileName = "unknown-profile";
 
-		var viewModel = new LoginViewModel(_awsProfileService, _s3Service, _navigationService, _settingsService, _statusMessageService);
+		var viewModel = CreateViewModel();
 
 		// Act
 		await viewModel.LoadCredentialProfilesAsync();
@@ -83,12 +85,10 @@ public sealed class LoginViewModelTests
 		_appSettings.UseCredentialChainByDefault = false;
 		_appSettings.LastProfileName = "saved-default";
 
-		var viewModel = new LoginViewModel(_awsProfileService, _s3Service, _navigationService, _settingsService, _statusMessageService)
-		{
-			Region = "ap-southeast-2",
-			UseDefaultChain = true,
-			SelectedProfileName = "dev-profile",
-		};
+		var viewModel = CreateViewModel();
+		viewModel.Region = "ap-southeast-2";
+		viewModel.UseDefaultChain = true;
+		viewModel.SelectedProfileName = "dev-profile";
 
 		// Act
 		await viewModel.LoginCommand.ExecuteAsync(null);
@@ -108,7 +108,7 @@ public sealed class LoginViewModelTests
 		// Arrange
 		_s3Service.GetBucketsAsync().Throws(new Exception("Invalid credentials"));
 
-		var viewModel = new LoginViewModel(_awsProfileService, _s3Service, _navigationService, _settingsService, _statusMessageService);
+		var viewModel = CreateViewModel();
 
 		// Act
 		await viewModel.LoginCommand.ExecuteAsync(null);
@@ -125,11 +125,9 @@ public sealed class LoginViewModelTests
 		// Arrange
 		_s3Service.GetBucketsAsync().Returns([]);
 
-		var viewModel = new LoginViewModel(_awsProfileService, _s3Service, _navigationService, _settingsService, _statusMessageService)
-		{
-			UseDefaultChain = true,
-			SelectedProfileName = "dev-profile",
-		};
+		var viewModel = CreateViewModel();
+		viewModel.UseDefaultChain = true;
+		viewModel.SelectedProfileName = "dev-profile";
 
 		// Act
 		await viewModel.LoginCommand.ExecuteAsync(null);
@@ -151,11 +149,9 @@ public sealed class LoginViewModelTests
 		_s3Service.GetBucketsAsync().Returns([]);
 		_appSettings.LastProfileName = "stale-profile";
 
-		var viewModel = new LoginViewModel(_awsProfileService, _s3Service, _navigationService, _settingsService, _statusMessageService)
-		{
-			UseDefaultChain = false,
-			SelectedProfileName = "dev-profile",
-		};
+		var viewModel = CreateViewModel();
+		viewModel.UseDefaultChain = false;
+		viewModel.SelectedProfileName = "dev-profile";
 
 		// Act
 		await viewModel.LoginCommand.ExecuteAsync(null);
@@ -164,4 +160,72 @@ public sealed class LoginViewModelTests
 		Assert.Equal("stale-profile", _appSettings.LastProfileName);
 		await _settingsService.DidNotReceive().UpdateAsync(Arg.Any<Action<AppSettings>>(), Arg.Any<CancellationToken>());
 	}
+
+	[Fact]
+	internal async Task PasteCredentialsCommand_ValidClipboard_PopulatesFieldsAndDisablesDefaultChain()
+	{
+		// Arrange
+		const string clipboardText = "[ProfileName]\naws_access_key_id=key_id\naws_secret_access_key=secret\naws_session_token=token==";
+		var parsedCredentials = new AwsConsoleCredentials("key_id", "secret", "token==");
+		_clipboardService.ReadTextAsync().Returns(clipboardText);
+		_awsConsoleCredentialsParser.Parse(clipboardText).Returns(parsedCredentials);
+
+		var viewModel = CreateViewModel();
+		viewModel.UseDefaultChain = true;
+
+		// Act
+		await viewModel.PasteCredentialsCommand.ExecuteAsync(null);
+
+		// Assert
+		Assert.Equal(parsedCredentials.AccessKey, viewModel.AccessKey);
+		Assert.Equal(parsedCredentials.SecretKey, viewModel.SecretKey);
+		Assert.Equal(parsedCredentials.SessionToken, viewModel.SessionToken);
+		Assert.False(viewModel.UseDefaultChain);
+		_statusMessageService.DidNotReceive().ShowError(Arg.Any<string>());
+	}
+
+	[Fact]
+	internal async Task PasteCredentialsCommand_EmptyClipboard_ShowsErrorWithoutParsing()
+	{
+		// Arrange
+		_clipboardService.ReadTextAsync().Returns((string?)null);
+
+		var viewModel = CreateViewModel();
+
+		// Act
+		await viewModel.PasteCredentialsCommand.ExecuteAsync(null);
+
+		// Assert
+		await _clipboardService.Received(1).ReadTextAsync();
+		_awsConsoleCredentialsParser.DidNotReceive().Parse(Arg.Any<string>());
+		_statusMessageService.Received(1).ShowError(Arg.Is<string>(message => message.Contains("Clipboard does not contain AWS Console credentials", StringComparison.Ordinal)));
+	}
+
+	[Fact]
+	internal async Task PasteCredentialsCommand_InvalidClipboard_ShowsErrorAndPreservesFields()
+	{
+		// Arrange
+		const string clipboardText = "not-aws-credentials";
+		_clipboardService.ReadTextAsync().Returns(clipboardText);
+		_awsConsoleCredentialsParser.Parse(clipboardText).Returns((AwsConsoleCredentials?)null);
+
+		var viewModel = CreateViewModel();
+		viewModel.AccessKey = "existing-access";
+		viewModel.SecretKey = "existing-secret";
+		viewModel.SessionToken = "existing-token";
+		viewModel.UseDefaultChain = true;
+
+		// Act
+		await viewModel.PasteCredentialsCommand.ExecuteAsync(null);
+
+		// Assert
+		Assert.Equal("existing-access", viewModel.AccessKey);
+		Assert.Equal("existing-secret", viewModel.SecretKey);
+		Assert.Equal("existing-token", viewModel.SessionToken);
+		Assert.True(viewModel.UseDefaultChain);
+		_statusMessageService.Received(1).ShowError(Arg.Is<string>(message => message.Contains("Clipboard text is not in the expected AWS Console credential format", StringComparison.Ordinal)));
+	}
+
+	private LoginViewModel CreateViewModel() =>
+		new(_awsProfileService, _s3Service, _navigationService, _settingsService, _clipboardService, _awsConsoleCredentialsParser, _statusMessageService);
 }

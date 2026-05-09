@@ -14,6 +14,8 @@ public partial class LoginViewModel : ObservableObject
 	private readonly IS3Service _s3Service;
 	private readonly INavigationService _navigationService;
 	private readonly ISettingsService _settingsService;
+	private readonly IClipboardService _clipboardService;
+	private readonly IAwsConsoleCredentialsParser _awsConsoleCredentialsParser;
 	private readonly IStatusMessageService _statusMessageService;
 
 	public LoginViewModel(
@@ -21,12 +23,16 @@ public partial class LoginViewModel : ObservableObject
 		IS3Service s3Service,
 		INavigationService navigationService,
 		ISettingsService settingsService,
+		IClipboardService clipboardService,
+		IAwsConsoleCredentialsParser awsConsoleCredentialsParser,
 		IStatusMessageService statusMessageService)
 	{
 		_awsProfileService = awsProfileService;
 		_s3Service = s3Service;
 		_navigationService = navigationService;
 		_settingsService = settingsService;
+		_clipboardService = clipboardService;
+		_awsConsoleCredentialsParser = awsConsoleCredentialsParser;
 		_statusMessageService = statusMessageService;
 
 		Region = string.IsNullOrWhiteSpace(_settingsService.DefaultRegion) ? Region : _settingsService.DefaultRegion;
@@ -82,6 +88,31 @@ public partial class LoginViewModel : ObservableObject
 		{
 			_statusMessageService.ShowError($"Failed to load AWS profiles: {ex.Message}");
 		}
+	}
+
+	[RelayCommand]
+	private async Task PasteCredentialsAsync()
+	{
+		var clipboardText = await _clipboardService.ReadTextAsync();
+
+		if (string.IsNullOrWhiteSpace(clipboardText))
+		{
+			_statusMessageService.ShowError("Clipboard does not contain AWS Console credentials.");
+			return;
+		}
+
+		var parsedCredentials = _awsConsoleCredentialsParser.Parse(clipboardText);
+
+		if (parsedCredentials is null)
+		{
+			_statusMessageService.ShowError("Clipboard text is not in the expected AWS Console credential format.");
+			return;
+		}
+
+		AccessKey = parsedCredentials.AccessKey;
+		SecretKey = parsedCredentials.SecretKey;
+		SessionToken = parsedCredentials.SessionToken;
+		UseDefaultChain = false;
 	}
 
 	[RelayCommand]
