@@ -21,6 +21,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,0,0,12">
@@ -74,8 +75,32 @@
             </tableView:TableView.Columns>
         </tableView:TableView>
 
-        <ProgressRing Grid.Row="2" IsActive="{x:Bind ViewModel.IsBusy, Mode=OneWay}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+        <ProgressRing Grid.Row="2" IsActive="{x:Bind ViewModel.IsInitialLoadInProgress, Mode=OneWay}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
 
-        <appControls:StatusOverlayHost Grid.Row="0" Grid.RowSpan="3" Canvas.ZIndex="10"/>
+        <Grid Grid.Row="3" Margin="0,12,0,0" ColumnSpacing="12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock
+                VerticalAlignment="Center"
+                Text="{x:Bind ViewModel.LoadedItemsStatus, Mode=OneWay}" />
+
+            <ProgressRing
+                Grid.Column="1"
+                Width="18"
+                Height="18"
+                IsActive="{x:Bind ViewModel.IsLoadingMore, Mode=OneWay}"
+                VerticalAlignment="Center" />
+
+            <Button
+                Grid.Column="2"
+                Command="{x:Bind ViewModel.LoadMoreCommand}"
+                Content="Load more" />
+        </Grid>
+
+        <appControls:StatusOverlayHost Grid.Row="0" Grid.RowSpan="4" Canvas.ZIndex="10"/>
     </Grid>
 </Page>

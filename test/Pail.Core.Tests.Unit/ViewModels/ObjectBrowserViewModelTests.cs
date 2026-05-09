@@ -19,14 +19,22 @@ public sealed class ObjectBrowserViewModelTests
 	{
 		DownloadFolder = string.Empty,
 		AlwaysPromptDownloadLocation = false,
+		InitialObjectLoadCount = 2,
+		LoadMoreObjectCount = 0,
 	};
 
 	public ObjectBrowserViewModelTests()
 	{
 		_appSettings.DownloadFolder = _defaultDownloadFolder;
+		_s3Service
+			.GetObjectsAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<int>(), Arg.Any<string?>())
+			.Returns(Task.FromResult(CreatePage()));
 		_settingsService.DownloadFolder.Returns(_ => _appSettings.DownloadFolder);
 		_settingsService.AlwaysPromptDownloadLocation.Returns(_ => _appSettings.AlwaysPromptDownloadLocation);
-		_settingsService.UpdateAsync(Arg.Any<Action<AppSettings>>(), Arg.Any<CancellationToken>())
+		_settingsService.InitialObjectLoadCount.Returns(_ => _appSettings.InitialObjectLoadCount);
+		_settingsService.LoadMoreObjectCount.Returns(_ => _appSettings.LoadMoreObjectCount);
+		_settingsService
+			.UpdateAsync(Arg.Any<Action<AppSettings>>(), Arg.Any<CancellationToken>())
 			.Returns(callInfo =>
 			{
 				callInfo.Arg<Action<AppSettings>>().Invoke(_appSettings);
@@ -166,13 +174,160 @@ public sealed class ObjectBrowserViewModelTests
 	}
 
 	[Fact]
+	internal async Task InitializeAsync_LoadsConfiguredInitialBatchAndUpdatesStatus()
+	{
+		// Arrange
+		_s3Service.GetObjectsAsync("bucket-a", "", 2, null).Returns(
+			Task.FromResult(
+				CreatePage(
+					[
+						CreateObject("report-1.csv", "reports/report-1.csv"),
+						CreateObject("report-2.csv", "reports/report-2.csv"),
+					],
+					hasMoreItems: true,
+					nextContinuationToken: "page-2")));
+
+		var viewModel = CreateViewModel();
+
+		// Act
+		await viewModel.InitializeAsync("bucket-a");
+
+		// Assert
+		Assert.Equal(2, viewModel.Items.Count);
+		Assert.Equal("Loaded 2 items, more available", viewModel.LoadedItemsStatus);
+		Assert.True(viewModel.HasMoreItems);
+		await _s3Service.Received(1).GetObjectsAsync("bucket-a", "", 2, null);
+	}
+
+	[Fact]
+	internal async Task LoadMoreCommand_AppendsNextPageWithoutReplacingItems()
+	{
+		// Arrange
+		_s3Service.GetObjectsAsync("bucket-a", "", 2, null).Returns(
+			Task.FromResult(
+				CreatePage(
+					[
+						CreateObject("report-1.csv", "reports/report-1.csv"),
+						CreateObject("report-2.csv", "reports/report-2.csv"),
+					],
+					hasMoreItems: true,
+					nextContinuationToken: "page-2")));
+		_s3Service.GetObjectsAsync("bucket-a", "", 2, "page-2").Returns(
+			Task.FromResult(
+				CreatePage(
+					[
+						CreateObject("report-3.csv", "reports/report-3.csv"),
+					],
+					hasMoreItems: false,
+					nextContinuationToken: null)));
+
+		var viewModel = CreateViewModel();
+		await viewModel.InitializeAsync("bucket-a");
+
+		// Act
+		await viewModel.LoadMoreCommand.ExecuteAsync(null);
+
+		// Assert
+		Assert.Equal(3, viewModel.Items.Count);
+		Assert.Collection(
+			viewModel.Items,
+			item => Assert.Equal("report-1.csv", item.Name),
+			item => Assert.Equal("report-2.csv", item.Name),
+			item => Assert.Equal("report-3.csv", item.Name));
+		Assert.Equal("Loaded 3 items", viewModel.LoadedItemsStatus);
+		Assert.False(viewModel.HasMoreItems);
+		await _s3Service.Received(1).GetObjectsAsync("bucket-a", "", 2, "page-2");
+	}
+
+	[Fact]
+	internal async Task LoadMoreCommand_LoadMoreCountZero_ReusesInitialLoadCount()
+	{
+		// Arrange
+		_s3Service
+			.GetObjectsAsync("bucket-a", "", 2, null)
+			.Returns(Task.FromResult(CreatePage([CreateObject("report-1.csv", "reports/report-1.csv")], hasMoreItems: true, nextContinuationToken: "page-2")));
+
+		var viewModel = CreateViewModel();
+		await viewModel.InitializeAsync("bucket-a");
+
+		// Act
+		await viewModel.LoadMoreCommand.ExecuteAsync(null);
+
+		// Assert
+		await _s3Service.Received(1).GetObjectsAsync("bucket-a", "", 2, "page-2");
+	}
+
+	[Fact]
+	internal async Task LoadMoreCommand_UsesConfiguredLoadMoreCountWhenSpecified()
+	{
+		// Arrange
+		_appSettings.LoadMoreObjectCount = 1500;
+		_s3Service
+			.GetObjectsAsync("bucket-a", "", 2, null)
+			.Returns(Task.FromResult(CreatePage([CreateObject("report-1.csv", "reports/report-1.csv")], hasMoreItems: true, nextContinuationToken: "page-2")));
+
+		var viewModel = CreateViewModel();
+		await viewModel.InitializeAsync("bucket-a");
+
+		// Act
+		await viewModel.LoadMoreCommand.ExecuteAsync(null);
+
+		// Assert
+		await _s3Service.Received(1).GetObjectsAsync("bucket-a", "", 1500, "page-2");
+	}
+
+	[Fact]
+	internal async Task InitializeAsync_AllowsLargeInitialLoadCounts()
+	{
+		// Arrange
+		_appSettings.InitialObjectLoadCount = 2500;
+		_s3Service.GetObjectsAsync("bucket-a", "", 2500, null).Returns(Task.FromResult(CreatePage()));
+
+		var viewModel = CreateViewModel();
+
+		// Act
+		await viewModel.InitializeAsync("bucket-a");
+
+		// Assert
+		await _s3Service.Received(1).GetObjectsAsync("bucket-a", "", 2500, null);
+	}
+
+	[Fact]
+	internal async Task LoadMoreCommand_WhenLoadFails_KeepsExistingItems()
+	{
+		// Arrange
+		_s3Service.GetObjectsAsync("bucket-a", "", 2, null).Returns(
+			Task.FromResult(
+				CreatePage(
+					[
+						CreateObject("report-1.csv", "reports/report-1.csv"),
+						CreateObject("report-2.csv", "reports/report-2.csv"),
+					],
+					hasMoreItems: true,
+					nextContinuationToken: "page-2")));
+		_s3Service.GetObjectsAsync("bucket-a", "", 2, "page-2").Returns<Task<S3ObjectPage>>(_ => throw new InvalidOperationException("network glitch"));
+
+		var viewModel = CreateViewModel();
+		await viewModel.InitializeAsync("bucket-a");
+
+		// Act
+		await viewModel.LoadMoreCommand.ExecuteAsync(null);
+
+		// Assert
+		Assert.Equal(2, viewModel.Items.Count);
+		Assert.Equal("Loaded 2 items, more available", viewModel.LoadedItemsStatus);
+		Assert.True(viewModel.HasMoreItems);
+		_statusMessageService.Received(1).ShowError(Arg.Is<string>(message => message.Contains("Failed to load more objects: network glitch")));
+	}
+
+	[Fact]
 	internal async Task OpenItemCommand_FolderSelected_UpdatesPathAndEnablesBucketBack()
 	{
 		// Arrange
-		_s3Service.GetObjectsAsync("bucket-a", "").Returns([]);
-		_s3Service.GetObjectsAsync("bucket-a", "reports/").Returns([]);
+		_s3Service.GetObjectsAsync("bucket-a", "", 2, null).Returns(Task.FromResult(CreatePage()));
+		_s3Service.GetObjectsAsync("bucket-a", "reports/", 2, null).Returns(Task.FromResult(CreatePage()));
 
-		var viewModel = new ObjectBrowserViewModel(_s3Service, _navigationService, _copyActionService, _folderPickerService, _settingsService, _statusMessageService);
+		var viewModel = CreateViewModel();
 		var folder = new S3ObjectItem
 		{
 			Name = "reports",
@@ -188,18 +343,18 @@ public sealed class ObjectBrowserViewModelTests
 		// Assert
 		Assert.Equal("reports/", viewModel.CurrentPath);
 		Assert.True(viewModel.CanNavigateBackWithinBucket);
-		await _s3Service.Received(1).GetObjectsAsync("bucket-a", "reports/");
+		await _s3Service.Received(1).GetObjectsAsync("bucket-a", "reports/", 2, null);
 	}
 
 	[Fact]
 	internal async Task GoBackCommand_WhenInsideBucket_GoesToParentWithoutLeavingPage()
 	{
 		// Arrange
-		_s3Service.GetObjectsAsync("bucket-a", "").Returns([]);
-		_s3Service.GetObjectsAsync("bucket-a", "reports/").Returns([]);
-		_s3Service.GetObjectsAsync("bucket-a", "reports/2026/").Returns([]);
+		_s3Service.GetObjectsAsync("bucket-a", "", 2, null).Returns(Task.FromResult(CreatePage()));
+		_s3Service.GetObjectsAsync("bucket-a", "reports/", 2, null).Returns(Task.FromResult(CreatePage()));
+		_s3Service.GetObjectsAsync("bucket-a", "reports/2026/", 2, null).Returns(Task.FromResult(CreatePage()));
 
-		var viewModel = new ObjectBrowserViewModel(_s3Service, _navigationService, _copyActionService, _folderPickerService, _settingsService, _statusMessageService);
+		var viewModel = CreateViewModel();
 		var parentFolder = new S3ObjectItem
 		{
 			Name = "reports",
@@ -224,16 +379,16 @@ public sealed class ObjectBrowserViewModelTests
 		Assert.Equal("reports/", viewModel.CurrentPath);
 		Assert.True(viewModel.CanNavigateBackWithinBucket);
 		_navigationService.DidNotReceive().GoBack();
-		await _s3Service.Received(2).GetObjectsAsync("bucket-a", "reports/");
+		await _s3Service.Received(2).GetObjectsAsync("bucket-a", "reports/", 2, null);
 	}
 
 	[Fact]
 	internal async Task GoBackCommand_AtBucketRoot_DelegatesToNavigationService()
 	{
 		// Arrange
-		_s3Service.GetObjectsAsync("bucket-a", "").Returns([]);
+		_s3Service.GetObjectsAsync("bucket-a", "", 2, null).Returns(Task.FromResult(CreatePage()));
 
-		var viewModel = new ObjectBrowserViewModel(_s3Service, _navigationService, _copyActionService, _folderPickerService, _settingsService, _statusMessageService);
+		var viewModel = CreateViewModel();
 
 		await viewModel.InitializeAsync("bucket-a");
 
@@ -244,4 +399,21 @@ public sealed class ObjectBrowserViewModelTests
 		Assert.False(viewModel.CanNavigateBackWithinBucket);
 		_navigationService.Received(1).GoBack();
 	}
+
+	private ObjectBrowserViewModel CreateViewModel() =>
+		new(_s3Service, _navigationService, _copyActionService, _folderPickerService, _settingsService, _statusMessageService);
+
+	private static S3ObjectItem CreateObject(string name, string key) =>
+		new()
+		{
+			Name = name,
+			Key = key,
+			IsFolder = false,
+		};
+
+	private static S3ObjectPage CreatePage(
+		IEnumerable<S3ObjectItem>? items = null,
+		bool hasMoreItems = false,
+		string? nextContinuationToken = null) =>
+		new([.. items ?? []], hasMoreItems, nextContinuationToken);
 }

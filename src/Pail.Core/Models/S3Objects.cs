@@ -2,6 +2,8 @@ namespace Pail.Models;
 
 public sealed record S3BucketItem(string Name, DateTime? CreationDate);
 
+public sealed record S3ObjectPage(IReadOnlyList<S3ObjectItem> Items, bool HasMoreItems, string? NextContinuationToken);
+
 public sealed class S3ObjectItem
 {
 	private const string NoSizeDisplay = "-";

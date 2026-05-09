@@ -9,6 +9,9 @@ namespace Pail.Services;
 
 public sealed class S3Service : IS3Service
 {
+	private const int MinimumRequestedItemCount = 1;
+	private const int MaximumRequestPageSize = 1000;
+
 	public Task InitializeAsync(IAwsCredentials credentials)
 	{
 		var region = RegionEndpoint.GetBySystemName(credentials.Region);
@@ -45,23 +48,37 @@ public sealed class S3Service : IS3Service
 		return [.. response.Buckets.Select(b => new S3BucketItem(b.BucketName, b.CreationDate))];
 	}
 
-	public async Task<List<S3ObjectItem>> GetObjectsAsync(string bucketName, string prefix = "")
+	public async Task<S3ObjectPage> GetObjectsAsync(string bucketName, string prefix = "", int pageSize = MaximumRequestPageSize, string? continuationToken = null)
 	{
-		var request = new ListObjectsV2Request
-		{
-			BucketName = bucketName,
-			Prefix = prefix,
-			Delimiter = "/",
-		};
-
+		var requestedItemCount = Math.Max(MinimumRequestedItemCount, pageSize);
 		var items = new List<S3ObjectItem>();
+		var nextContinuationToken = string.IsNullOrWhiteSpace(continuationToken) ? null : continuationToken;
+		var hasMoreItems = false;
 
-		await foreach (var response in S3Client.Paginators.ListObjectsV2(request).Responses)
+		while (items.Count < requestedItemCount)
 		{
+			var request = new ListObjectsV2Request
+			{
+				BucketName = bucketName,
+				Prefix = prefix,
+				Delimiter = "/",
+				MaxKeys = Math.Min(requestedItemCount - items.Count, MaximumRequestPageSize),
+				ContinuationToken = nextContinuationToken,
+			};
+
+			var response = await S3Client.ListObjectsV2Async(request);
 			AddObjectItems(items, response, prefix);
+
+			nextContinuationToken = string.IsNullOrWhiteSpace(response.NextContinuationToken) ? null : response.NextContinuationToken;
+			hasMoreItems = (response.IsTruncated ?? false) && nextContinuationToken is not null;
+
+			if (hasMoreItems is false)
+			{
+				break;
+			}
 		}
 
-		return items;
+		return new S3ObjectPage(items, hasMoreItems, nextContinuationToken);
 	}
 
 	public async Task DownloadObjectAsync(string bucketName, string key, string destinationPath)

@@ -8,7 +8,7 @@ public interface IS3Service
 
 	public Task<List<S3BucketItem>> GetBucketsAsync();
 
-	public Task<List<S3ObjectItem>> GetObjectsAsync(string bucketName, string prefix = "");
+	public Task<S3ObjectPage> GetObjectsAsync(string bucketName, string prefix = "", int pageSize = 1000, string? continuationToken = null);
 
 	public Task DownloadObjectAsync(string bucketName, string key, string destinationPath);
 
