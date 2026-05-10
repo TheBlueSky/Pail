@@ -3,7 +3,7 @@ name: Publish single-file app
 on:
   push:
     tags:
-      - 'releases/v*'
+      - "releases/v*"
 
 permissions:
   contents: read
@@ -98,7 +98,8 @@ jobs:
       - name: Create GitHub release
         shell: pwsh
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: "${{ github.token }}"
+          GH_REPO: "${{ github.repository }}"
         run: |
           $tag = '${{ github.ref_name }}'
           $assets = @(Get-ChildItem -Path .\release-assets -File | Sort-Object Name | ForEach-Object { $_.FullName })
