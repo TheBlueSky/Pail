@@ -65,6 +65,7 @@
             SelectedItem="{x:Bind ViewModel.SelectedBucket, Mode=TwoWay}"
             SelectionMode="Single"
             IsItemClickEnabled="True"
+            PreviewKeyDown="OnBucketListPreviewKeyDown"
             DoubleTapped="OnBucketDoubleTapped">
 
             <ListView.ItemTemplate>

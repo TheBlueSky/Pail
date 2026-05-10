@@ -3,6 +3,7 @@ using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Navigation;
 using Pail.Models;
 using Pail.ViewModels;
+using Windows.System;
 
 namespace Pail.App.Views;
 
@@ -29,6 +30,15 @@ public sealed partial class BucketListPage : Page
 		if (e.OriginalSource is FrameworkElement element && element.DataContext is S3BucketItem bucket)
 		{
 			ViewModel.SelectBucketCommand.Execute(bucket);
+		}
+	}
+
+	private void OnBucketListPreviewKeyDown(object sender, KeyRoutedEventArgs e)
+	{
+		if (e.Key == VirtualKey.Enter && ViewModel.SelectedBucket is S3BucketItem bucket)
+		{
+			ViewModel.SelectBucketCommand.Execute(bucket);
+			e.Handled = true;
 		}
 	}
 
