@@ -14,6 +14,12 @@
             IsClosable="True"
             HorizontalAlignment="Right"
             VerticalAlignment="Top"
-            MaxWidth="420"/>
+            MinWidth="384"
+            MaxWidth="512">
+
+            <InfoBar.Background>
+                <AcrylicBrush TintColor="#CC000000" TintOpacity="0.75" FallbackColor="#DD000000" />
+            </InfoBar.Background>
+        </InfoBar>
     </Grid>
 </UserControl>
