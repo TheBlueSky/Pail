@@ -44,6 +44,15 @@ public sealed partial class ObjectBrowserPage : Page
 		}
 	}
 
+	private void OnGridRowContextFlyoutOpening(object sender, TableViewRowContextFlyoutEventArgs e)
+	{
+		if (e.Item is S3ObjectItem item && ObjectGrid.SelectedItems.Contains(item) is false)
+		{
+			ObjectGrid.SelectedItems.Clear();
+			ObjectGrid.SelectedItems.Add(item);
+		}
+	}
+
 	private void OnCopyNameClick(object sender, RoutedEventArgs e) =>
 		CopyNames();
 

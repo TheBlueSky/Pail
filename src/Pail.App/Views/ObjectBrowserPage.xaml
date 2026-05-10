@@ -54,6 +54,7 @@
             SelectionMode="Extended"
             SelectionUnit="Row"
             PreviewKeyDown="OnGridPreviewKeyDown"
+            RowContextFlyoutOpening="OnGridRowContextFlyoutOpening"
             CellDoubleTapped="OnGridCellDoubleTapped">
 
             <tableView:TableView.RowContextFlyout>
