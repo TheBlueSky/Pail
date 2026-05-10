@@ -4,22 +4,27 @@
   <img src="src/Pail.App/Assets/Square150x150Logo.scale-200.png" width="250"/>
 </p>
 
-**Pail is a Windows WinUI 3 app for browsing and downloading objects from Amazon S3 buckets.**
+**Pail is a Windows WinUI 3 app for browsing Amazon S3 buckets, and downloading objects and folders.**
 
-## What it does
+## Main features
 
-- Connect with access key / secret key
-- Sign in with the AWS default credential chain
-- Browse buckets and objects
-- Download files and folders to your Downloads folder
+- Sign in with access key and secret key, an optional session token, pasted AWS Console credentials, or the AWS default credential chain
+- Load local AWS profiles, choose a specific profile, or stay on the automatic (default) profile
+- Browse S3 buckets, search bucket names, and copy selected bucket names to the clipboard
+- Navigate bucket folders, inspect object names, sizes, and last-modified timestamps
+- Control the number of items loaded, and load more results for large listings
+- Copy object names or full S3 keys from the object browser
+- Download one or more files or folders, using a configurable default download folder or a prompt for each download
+- Save app preferences for theme, default region, preferred profile, object browser load sizes, and status message timing
 
 ## How to use it
 
 1. Start the app.
-2. Choose your sign-in method.
-3. Enter the region and credentials, or pick an AWS profile.
-4. Connect to list your buckets.
-5. Open a bucket to browse and download objects.
+2. Choose a region and your sign-in method.
+3. Enter credentials, paste AWS Console credentials, or use the default credential chain with an AWS profile.
+4. Sign in to list your buckets.
+5. Search or open a bucket, browse folders, then copy or download the items you need.
+6. Open Settings to adjust theme, login defaults, object loading behaviour, and download preferences.
 
 ## Download
 
