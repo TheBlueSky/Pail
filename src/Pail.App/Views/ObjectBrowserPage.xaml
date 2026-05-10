@@ -36,8 +36,8 @@
                     <KeyboardAccelerator Key="F5" Modifiers="None"/>
                 </AppBarButton.KeyboardAccelerators>
             </AppBarButton>
-            <AppBarButton Icon="Copy" Label="Copy Name" Command="{x:Bind ViewModel.CopyObjectNameCommand}" ToolTipService.ToolTip="Copy Name (Ctrl+C)"/>
-            <AppBarButton Icon="Copy" Label="Copy Full Key" Command="{x:Bind ViewModel.CopyObjectFullKeyCommand}" ToolTipService.ToolTip="Copy Full Key (Ctrl+Shift+C)"/>
+            <AppBarButton Icon="Copy" Label="Copy Name" Click="OnCopyNameClick" ToolTipService.ToolTip="Copy Name (Ctrl+C)"/>
+            <AppBarButton Icon="Copy" Label="Copy Full Key" Click="OnCopyFullKeyClick" ToolTipService.ToolTip="Copy Full Key (Ctrl+Shift+C)"/>
             <AppBarButton Icon="Download" Label="Download Selected" Click="OnDownloadClick">
                 <AppBarButton.KeyboardAccelerators>
                     <KeyboardAccelerator Key="D" Modifiers="Control"/>
@@ -49,15 +49,13 @@
             x:Name="ObjectGrid"
             Grid.Row="2"
             ItemsSource="{x:Bind ViewModel.Items}"
-            SelectedItem="{x:Bind ViewModel.SelectedItem, Mode=TwoWay}"
             AutoGenerateColumns="False"
             HeadersVisibility="Columns"
             IsReadOnly="True"
             SelectionMode="Extended"
             SelectionUnit="Row"
             PreviewKeyDown="OnGridPreviewKeyDown"
-            CellDoubleTapped="OnGridCellDoubleTapped"
-            RowContextFlyoutOpening="OnGridRowContextFlyoutOpening">
+            CellDoubleTapped="OnGridCellDoubleTapped">
 
             <tableView:TableView.RowContextFlyout>
                 <MenuFlyout>

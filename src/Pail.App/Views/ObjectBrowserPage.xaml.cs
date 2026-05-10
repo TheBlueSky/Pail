@@ -44,34 +44,37 @@ public sealed partial class ObjectBrowserPage : Page
 		}
 	}
 
+	private void OnCopyNameClick(object sender, RoutedEventArgs e) =>
+		CopyNames();
+
+	private void OnCopyFullKeyClick(object sender, RoutedEventArgs e) =>
+		CopyFullKeys();
+
 	private void OnDownloadClick(object sender, RoutedEventArgs e)
 	{
 		var selected = ObjectGrid.SelectedItems.Cast<S3ObjectItem>().ToList();
 		ViewModel.DownloadSelectedCommand.Execute(selected);
 	}
 
-	private void OnGridRowContextFlyoutOpening(object sender, TableViewRowContextFlyoutEventArgs e) =>
-		ViewModel.SelectedItem = e.Item as S3ObjectItem;
+	private void OnCopyObjectNameContextClick(object sender, RoutedEventArgs e) =>
+		CopyNames();
 
-	private async void OnCopyObjectNameContextClick(object sender, RoutedEventArgs e) =>
-		await ViewModel.CopyObjectNameCommand.ExecuteAsync(null);
-
-	private async void OnCopyObjectFullKeyContextClick(object sender, RoutedEventArgs e) =>
-		await ViewModel.CopyObjectFullKeyCommand.ExecuteAsync(null);
+	private void OnCopyObjectFullKeyContextClick(object sender, RoutedEventArgs e) =>
+		CopyFullKeys();
 
 	private async void OnGridPreviewKeyDown(object sender, KeyRoutedEventArgs e)
 	{
 		// Because TableView has built-in keyboard accelerators, we need to intercept the Ctrl+C combination before it gets handled by the grid.
 		// This allows us to provide our own copy logic that overrides the default behavior.
-		if (ViewModel.SelectedItem is not null && e.Key == VirtualKey.C && IsModifierKeyDown(VirtualKey.Control))
+		if (e.Key == VirtualKey.C && IsModifierKeyDown(VirtualKey.Control))
 		{
 			if (IsModifierKeyDown(VirtualKey.Shift))
 			{
-				await ViewModel.CopyObjectFullKeyCommand.ExecuteAsync(null);
+				CopyFullKeys();
 			}
 			else
 			{
-				await ViewModel.CopyObjectNameCommand.ExecuteAsync(null);
+				CopyNames();
 			}
 
 			e.Handled = true;
@@ -100,6 +103,22 @@ public sealed partial class ObjectBrowserPage : Page
 			: Math.Min(ViewModel.Items.Count - 1, currentIndex + 1);
 
 		e.Handled = await SelectRowAsync(nextIndex);
+
+		async Task<bool> SelectRowAsync(int targetIndex)
+		{
+			if (targetIndex < 0 || targetIndex >= ViewModel.Items.Count)
+			{
+				return false;
+			}
+
+			ObjectGrid.SelectedIndex = targetIndex;
+			_keyboardNavigationRowIndex = targetIndex;
+
+			var row = await ObjectGrid.ScrollRowIntoView(targetIndex);
+			row?.Focus(FocusState.Programmatic);
+
+			return true;
+		}
 	}
 
 	private void OnGridPointerPressed(object sender, PointerRoutedEventArgs e) =>
@@ -113,20 +132,16 @@ public sealed partial class ObjectBrowserPage : Page
 		}
 	}
 
-	private async Task<bool> SelectRowAsync(int targetIndex)
+	private void CopyNames()
 	{
-		if (targetIndex < 0 || targetIndex >= ViewModel.Items.Count)
-		{
-			return false;
-		}
+		var selected = ObjectGrid.SelectedItems.Cast<S3ObjectItem>().ToList();
+		ViewModel.CopyObjectNameCommand.Execute(selected);
+	}
 
-		ObjectGrid.SelectedIndex = targetIndex;
-		_keyboardNavigationRowIndex = targetIndex;
-
-		var row = await ObjectGrid.ScrollRowIntoView(targetIndex);
-		row?.Focus(FocusState.Programmatic);
-
-		return true;
+	private void CopyFullKeys()
+	{
+		var selected = ObjectGrid.SelectedItems.Cast<S3ObjectItem>().ToList();
+		ViewModel.CopyObjectFullKeyCommand.Execute(selected);
 	}
 
 	private static bool IsModifierKeyDown(VirtualKey key)

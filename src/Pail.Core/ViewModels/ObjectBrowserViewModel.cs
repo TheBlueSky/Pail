@@ -53,11 +53,6 @@ public partial class ObjectBrowserViewModel : ObservableObject
 	public partial bool IsLoadingMore { get; set; }
 
 	[ObservableProperty]
-	[NotifyCanExecuteChangedFor(nameof(CopyObjectNameCommand))]
-	[NotifyCanExecuteChangedFor(nameof(CopyObjectFullKeyCommand))]
-	public partial S3ObjectItem? SelectedItem { get; set; }
-
-	[ObservableProperty]
 	[NotifyCanExecuteChangedFor(nameof(LoadMoreCommand))]
 	public partial bool HasMoreItems { get; set; }
 
@@ -163,11 +158,6 @@ public partial class ObjectBrowserViewModel : ObservableObject
 		}
 	}
 
-	private bool CanLoadMoreItems() =>
-		IsBusy is false &&
-		HasMoreItems &&
-		string.IsNullOrWhiteSpace(_nextContinuationToken) is false;
-
 	[RelayCommand]
 	private async Task OpenItemAsync(S3ObjectItem item)
 	{
@@ -272,34 +262,43 @@ public partial class ObjectBrowserViewModel : ObservableObject
 	}
 
 	[RelayCommand(CanExecute = nameof(CanCopySelectedObject))]
-	private async Task CopyObjectNameAsync()
+	private async Task CopyObjectNameAsync(IList<S3ObjectItem> selectedItems)
 	{
-		if (SelectedItem is null)
+		if (selectedItems is null || !selectedItems.Any())
 		{
 			return;
 		}
 
+		var names = selectedItems.Select(item => item.Name);
+
 		await _copyActionService.CopyWithFeedbackAsync(
-			SelectedItem.Name,
-			$"Copied object name: {SelectedItem.Name}",
-			"Failed to copy object name.");
+			string.Join(Environment.NewLine, names),
+			$"Copied object names.",
+			"Failed to copy object names.");
 	}
 
 	[RelayCommand(CanExecute = nameof(CanCopySelectedObject))]
-	private async Task CopyObjectFullKeyAsync()
+	private async Task CopyObjectFullKeyAsync(IList<S3ObjectItem> selectedItems)
 	{
-		if (SelectedItem is null)
+		if (selectedItems is null || !selectedItems.Any())
 		{
 			return;
 		}
 
+		var keys = selectedItems.Select(item => item.Key);
+
 		await _copyActionService.CopyWithFeedbackAsync(
-			SelectedItem.Key,
-			$"Copied full key: {SelectedItem.Key}",
-			"Failed to copy full key.");
+			string.Join(Environment.NewLine, keys),
+			$"Copied full keys.",
+			"Failed to copy full keys.");
 	}
 
-	private bool CanCopySelectedObject() => IsBusy is false && SelectedItem is not null;
+	private bool CanCopySelectedObject() => IsBusy is false;
+
+	private bool CanLoadMoreItems() =>
+		IsBusy is false &&
+		HasMoreItems &&
+		string.IsNullOrWhiteSpace(_nextContinuationToken) is false;
 
 	private void UpdateCanNavigateBackWithinBucket() => CanNavigateBackWithinBucket = _pathStack.Count > 0;
 
@@ -316,7 +315,6 @@ public partial class ObjectBrowserViewModel : ObservableObject
 	private void ResetListingState()
 	{
 		Items.Clear();
-		SelectedItem = null;
 		ClearPagingState();
 		UpdateLoadedItemsStatus();
 	}

@@ -46,48 +46,40 @@ public sealed class ObjectBrowserViewModelTests
 	internal async Task CopyObjectNameCommand_SelectedItem_CopiesAndShowsSuccessMessage()
 	{
 		// Arrange
-		var viewModel = new ObjectBrowserViewModel(_s3Service, _navigationService, _copyActionService, _folderPickerService, _settingsService, _statusMessageService)
+		var viewModel = new ObjectBrowserViewModel(_s3Service, _navigationService, _copyActionService, _folderPickerService, _settingsService, _statusMessageService);
+		var selectedItems = new List<S3ObjectItem>
 		{
-			SelectedItem = new S3ObjectItem
-			{
-				Name = "report.csv",
-				Key = "reports/2026/report.csv",
-				IsFolder = false,
-			},
+			new() { Name = "report.csv", Key = "reports/report.csv", IsFolder = false },
 		};
 
 		// Act
-		await viewModel.CopyObjectNameCommand.ExecuteAsync(null);
+		await viewModel.CopyObjectNameCommand.ExecuteAsync(selectedItems);
 
 		// Assert
 		await _copyActionService.Received(1).CopyWithFeedbackAsync(
 			"report.csv",
-			"Copied object name: report.csv",
-			"Failed to copy object name.");
+			"Copied object names.",
+			"Failed to copy object names.");
 	}
 
 	[Fact]
 	internal async Task CopyObjectFullKeyCommand_SelectedItem_CopiesAndShowsSuccessMessage()
 	{
 		// Arrange
-		var viewModel = new ObjectBrowserViewModel(_s3Service, _navigationService, _copyActionService, _folderPickerService, _settingsService, _statusMessageService)
+		var viewModel = new ObjectBrowserViewModel(_s3Service, _navigationService, _copyActionService, _folderPickerService, _settingsService, _statusMessageService);
+		var selectedItems = new List<S3ObjectItem>
 		{
-			SelectedItem = new S3ObjectItem
-			{
-				Name = "report.csv",
-				Key = "reports/2026/report.csv",
-				IsFolder = false,
-			},
+			new() { Name = "report.csv", Key = "reports/report.csv", IsFolder = false },
 		};
 
 		// Act
-		await viewModel.CopyObjectFullKeyCommand.ExecuteAsync(null);
+		await viewModel.CopyObjectFullKeyCommand.ExecuteAsync(selectedItems);
 
 		// Assert
 		await _copyActionService.Received(1).CopyWithFeedbackAsync(
-			"reports/2026/report.csv",
-			"Copied full key: reports/2026/report.csv",
-			"Failed to copy full key.");
+			"reports/report.csv",
+			"Copied full keys.",
+			"Failed to copy full keys.");
 	}
 
 	[Fact]
