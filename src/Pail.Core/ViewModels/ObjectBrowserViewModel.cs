@@ -253,6 +253,13 @@ public partial class ObjectBrowserViewModel : ObservableObject
 			}
 
 			_statusMessageService.ShowInfo($"Download complete! Files saved to: {downloadsFolder}");
+
+			static string ResolveDownloadFolder(string? downloadFolder)
+			{
+				return string.IsNullOrWhiteSpace(downloadFolder)
+					? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads", "Pail")
+					: downloadFolder;
+			}
 		}
 		catch (Exception ex)
 		{
@@ -263,11 +270,6 @@ public partial class ObjectBrowserViewModel : ObservableObject
 			IsBusy = false;
 		}
 	}
-
-	private static string ResolveDownloadFolder(string? downloadFolder) =>
-		string.IsNullOrWhiteSpace(downloadFolder)
-			? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads", "Pail")
-			: downloadFolder;
 
 	[RelayCommand(CanExecute = nameof(CanCopySelectedObject))]
 	private async Task CopyObjectNameAsync()

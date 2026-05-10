@@ -51,9 +51,11 @@ public sealed partial class MainPage : Page
 		}
 	}
 
-	private async void OnBackRequested(NavigationView sender, NavigationViewBackRequestedEventArgs args) => await TryGoBackAsync();
+	private async void OnBackRequested(NavigationView sender, NavigationViewBackRequestedEventArgs args) =>
+		await TryGoBackAsync();
 
-	private async void OnBackKeyboardAcceleratorInvoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args) => args.Handled = await TryGoBackAsync();
+	private async void OnPageBackKeyboardAcceleratorInvoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args) =>
+		args.Handled = await TryGoBackAsync();
 
 	private async void OnPointerPressed(object sender, PointerRoutedEventArgs e)
 	{

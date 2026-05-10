@@ -69,7 +69,13 @@
                 VerticalAlignment="Center"
                 Command="{x:Bind ViewModel.SaveCommand}"
                 Content="Save"
-                Style="{StaticResource AccentButtonStyle}" />
+                Style="{StaticResource AccentButtonStyle}"
+                ToolTipService.ToolTip="Save settings (Ctrl+S)">
+
+                <Button.KeyboardAccelerators>
+                    <KeyboardAccelerator Key="S" Modifiers="Control" />
+                </Button.KeyboardAccelerators>
+            </Button>
         </Grid>
 
         <ScrollViewer

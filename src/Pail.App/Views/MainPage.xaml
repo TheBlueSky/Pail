@@ -11,7 +11,7 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Page.KeyboardAccelerators>
-        <KeyboardAccelerator Key="Left" Modifiers="Menu" Invoked="OnBackKeyboardAcceleratorInvoked"/>
+        <KeyboardAccelerator Key="Left" Modifiers="Menu" Invoked="OnPageBackKeyboardAcceleratorInvoked"/>
     </Page.KeyboardAccelerators>
 
     <NavigationView

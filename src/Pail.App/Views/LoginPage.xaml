@@ -29,11 +29,14 @@
                     Text="{x:Bind ViewModel.Region, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                 <Border Height="1" Background="{ThemeResource ControlStrokeColorDefaultBrush}"/>
 
-                <Button Command="{x:Bind ViewModel.PasteCredentialsCommand}" HorizontalAlignment="Stretch">
+                <Button Command="{x:Bind ViewModel.PasteCredentialsCommand}" HorizontalAlignment="Stretch" ToolTipService.ToolTip="Paste AWS Console Credentials (Shift+Ctrl+P)">
                     <StackPanel Orientation="Horizontal" Spacing="8">
                         <FontIcon Glyph="&#xE77F;" />
                         <TextBlock Text="Paste AWS Console Credentials" />
                     </StackPanel>
+                    <Button.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="P" Modifiers="Control,Shift"/>
+                    </Button.KeyboardAccelerators>
                 </Button>
 
                 <TextBox Header="Access Key" Text="{x:Bind ViewModel.AccessKey, Mode=TwoWay}" IsEnabled="{x:Bind ViewModel.UseDefaultChain, Converter={StaticResource InverseBooleanConverter}, Mode=OneWay}"/>
@@ -41,7 +44,11 @@
                 <TextBox Header="Session Token (Optional)" Text="{x:Bind ViewModel.SessionToken, Mode=TwoWay}" IsEnabled="{x:Bind ViewModel.UseDefaultChain, Converter={StaticResource InverseBooleanConverter}, Mode=OneWay}"/>
 
                 <Border Height="1" Background="{ThemeResource ControlStrokeColorDefaultBrush}"/>
-                <CheckBox Content="Use Default Credential Chain" IsChecked="{x:Bind ViewModel.UseDefaultChain, Mode=TwoWay}"/>
+                <CheckBox Content="Use Default Credential Chain" IsChecked="{x:Bind ViewModel.UseDefaultChain, Mode=TwoWay}" ToolTipService.ToolTip="Use the default AWS credential chain (Ctrl+Shift+D)">
+                    <CheckBox.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="D" Modifiers="Control,Shift"/>
+                    </CheckBox.KeyboardAccelerators>
+                </CheckBox>
                 <StackPanel Spacing="4">
                     <TextBlock Text="AWS Profile" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
                     <Grid HorizontalAlignment="Stretch" ColumnSpacing="8">
@@ -66,15 +73,28 @@
                             Padding="0"
                             Command="{x:Bind ViewModel.LoadCredentialProfilesCommand}"
                             IsEnabled="{x:Bind ViewModel.CanRefreshProfiles, Mode=OneWay}"
-                            ToolTipService.ToolTip="Refresh AWS profiles"
-                            AutomationProperties.Name="Refresh AWS profiles">
+                            AutomationProperties.Name="Refresh AWS profiles"
+                            ToolTipService.ToolTip="Refresh AWS profiles (Ctrl+R)">
 
                             <FontIcon Glyph="&#xE72C;" />
+                            <Button.KeyboardAccelerators>
+                                <KeyboardAccelerator Key="R" Modifiers="Control"/>
+                            </Button.KeyboardAccelerators>
                         </Button>
                     </Grid>
                 </StackPanel>
 
-                <Button Content="Connect" Command="{x:Bind ViewModel.LoginCommand}" HorizontalAlignment="Stretch" Style="{StaticResource AccentButtonStyle}" Margin="0,10,0,0"/>
+                <Button
+                    Content="Sign In"
+                    Command="{x:Bind ViewModel.LoginCommand}"
+                    HorizontalAlignment="Stretch"
+                    Style="{StaticResource AccentButtonStyle}" Margin="0,10,0,0"
+                    ToolTipService.ToolTip="Sign in (Ctrl+Shift+S)">
+
+                    <Button.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="S" Modifiers="Control,Shift"/>
+                    </Button.KeyboardAccelerators>
+                </Button>
 
                 <ProgressRing IsActive="{x:Bind ViewModel.IsBusy, Mode=OneWay}" HorizontalAlignment="Center" Margin="0,10,0,0"/>
             </StackPanel>

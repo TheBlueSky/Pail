@@ -1,6 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Input;
-using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Navigation;
 using Pail.Models;
@@ -20,6 +19,7 @@ public sealed partial class ObjectBrowserPage : Page
 		InitializeComponent();
 
 		ViewModel = PailApp.Services.GetRequiredService<ObjectBrowserViewModel>();
+
 		ObjectGrid.PointerPressed += OnGridPointerPressed;
 		ObjectGrid.SelectionChanged += OnGridSelectionChanged;
 	}
@@ -61,6 +61,23 @@ public sealed partial class ObjectBrowserPage : Page
 
 	private async void OnGridPreviewKeyDown(object sender, KeyRoutedEventArgs e)
 	{
+		// Because TableView has built-in keyboard accelerators, we need to intercept the Ctrl+C combination before it gets handled by the grid.
+		// This allows us to provide our own copy logic that overrides the default behavior.
+		if (ViewModel.SelectedItem is not null && e.Key == VirtualKey.C && IsModifierKeyDown(VirtualKey.Control))
+		{
+			if (IsModifierKeyDown(VirtualKey.Shift))
+			{
+				await ViewModel.CopyObjectFullKeyCommand.ExecuteAsync(null);
+			}
+			else
+			{
+				await ViewModel.CopyObjectNameCommand.ExecuteAsync(null);
+			}
+
+			e.Handled = true;
+			return;
+		}
+
 		if (ViewModel.Items.Count == 0 || IsModifierKeyDown(VirtualKey.Control) || IsModifierKeyDown(VirtualKey.Shift))
 		{
 			return;

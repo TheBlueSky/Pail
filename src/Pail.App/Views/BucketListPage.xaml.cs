@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Navigation;
 using Pail.Models;
 using Pail.ViewModels;
@@ -47,6 +48,15 @@ public sealed partial class BucketListPage : Page
 		if (sender is TextBox searchTextBox)
 		{
 			ViewModel.SearchText = searchTextBox.Text ?? string.Empty;
+		}
+	}
+
+	private void OnPageKeyboardAcceleratorInvoked(KeyboardAccelerator accelerator, KeyboardAcceleratorInvokedEventArgs args)
+	{
+		if (accelerator == SearchKeyboardAcceleratorF || accelerator == SearchKeyboardAcceleratorF3)
+		{
+			SearchTextBox.Focus(FocusState.Programmatic);
+			args.Handled = true;
 		}
 	}
 }

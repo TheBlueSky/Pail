@@ -10,6 +10,11 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
+    <Page.KeyboardAccelerators>
+        <KeyboardAccelerator x:Name="SearchKeyboardAcceleratorF" Key="F" Modifiers="Control" Invoked="OnPageKeyboardAcceleratorInvoked" />
+        <KeyboardAccelerator x:Name="SearchKeyboardAcceleratorF3" Key="F3" Modifiers="None" Invoked="OnPageKeyboardAcceleratorInvoked"/>
+    </Page.KeyboardAccelerators>
+
     <Grid Margin="24">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -33,16 +38,24 @@
                 VerticalAlignment="Center"
                 PlaceholderText="Search buckets"
                 AutomationProperties.Name="Search buckets"
-                TextChanged="OnSearchTextChanged"/>
+                TextChanged="OnSearchTextChanged"
+                ToolTipService.ToolTip="Search buckets (Ctrl+F or F3)"/>
             <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="12">
-                <Button Command="{x:Bind ViewModel.LoadBucketsCommand}" VerticalAlignment="Center">
+                <Button Command="{x:Bind ViewModel.LoadBucketsCommand}" VerticalAlignment="Center" ToolTipService.ToolTip="Reload buckets (Ctrl+R or F5)">
                     <FontIcon Glyph="&#xE72C;" />
+                    <Button.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="R" Modifiers="Control"/>
+                        <KeyboardAccelerator Key="F5" Modifiers="None"/>
+                    </Button.KeyboardAccelerators>
                 </Button>
-                <Button Command="{x:Bind ViewModel.CopyBucketNameCommand}" VerticalAlignment="Center">
+                <Button Command="{x:Bind ViewModel.CopyBucketNameCommand}" VerticalAlignment="Center" ToolTipService.ToolTip="Copy bucket name (Ctrl+C)">
                     <StackPanel Orientation="Horizontal" Spacing="8">
                         <FontIcon Glyph="&#xE77F;" />
                         <TextBlock Text="Copy Bucket Name" />
                     </StackPanel>
+                    <Button.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="C" Modifiers="Control"/>
+                    </Button.KeyboardAccelerators>
                 </Button>
             </StackPanel>
         </Grid>
