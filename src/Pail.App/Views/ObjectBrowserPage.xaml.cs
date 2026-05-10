@@ -86,6 +86,17 @@ public sealed partial class ObjectBrowserPage : Page
 			return;
 		}
 
+		if (e.Key == VirtualKey.Enter)
+		{
+			if (GetSingleSelectedItem() is S3ObjectItem item)
+			{
+				ViewModel.OpenItemCommand.Execute(item);
+			}
+
+			e.Handled = true;
+			return;
+		}
+
 		if (e.Key is VirtualKey.Home or VirtualKey.End)
 		{
 			var targetIndex = e.Key == VirtualKey.Home ? 0 : ViewModel.Items.Count - 1;
@@ -103,6 +114,13 @@ public sealed partial class ObjectBrowserPage : Page
 			: Math.Min(ViewModel.Items.Count - 1, currentIndex + 1);
 
 		e.Handled = await SelectRowAsync(nextIndex);
+
+		S3ObjectItem? GetSingleSelectedItem()
+		{
+			return ObjectGrid.SelectedItems.Count == 1
+				? ObjectGrid.SelectedItems[0] as S3ObjectItem
+				: null;
+		}
 
 		async Task<bool> SelectRowAsync(int targetIndex)
 		{
