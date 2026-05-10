@@ -58,7 +58,6 @@ jobs:
         shell: pwsh
         run: |
           $publishDir = Join-Path $env:GITHUB_WORKSPACE "artifacts\${{ matrix.rid }}"
-          $assetPath = Join-Path $publishDir "Pail-${{ matrix.rid }}.exe"
 
           dotnet publish .\src\Pail.App\Pail.App.csproj `
             --configuration Release `
@@ -72,13 +71,11 @@ jobs:
             -p:CopyOutputSymbolsToPublishDirectory=false `
             -p:PublishDir="$publishDir\"
 
-          Copy-Item (Join-Path $publishDir 'Pail.exe') $assetPath
-
       - name: Upload ${{ matrix.rid }} artifact
         uses: actions/upload-artifact@v7
         with:
           name: Pail-${{ matrix.rid }}
-          path: artifacts/${{ matrix.rid }}/Pail-${{ matrix.rid }}.exe
+          path: artifacts/${{ matrix.rid }}/
           if-no-files-found: error
 
   create-release:
@@ -93,7 +90,34 @@ jobs:
         with:
           pattern: Pail-*
           path: release-assets
-          merge-multiple: true
+
+      - name: Package release assets
+        shell: pwsh
+        run: |
+          $packageDir = Join-Path $env:GITHUB_WORKSPACE 'release-packages'
+          New-Item -ItemType Directory -Path $packageDir -Force | Out-Null
+
+          Push-Location .\release-assets
+          try {
+            $artifactDirs = @(Get-ChildItem -Directory | Sort-Object Name)
+
+            if ($artifactDirs.Count -eq 0) {
+              throw 'No release artifact directories were downloaded.'
+            }
+
+            foreach ($artifactDir in $artifactDirs) {
+              $archivePath = Join-Path $packageDir ($artifactDir.Name + '.zip')
+
+              if (Test-Path $archivePath) {
+                Remove-Item $archivePath -Force
+              }
+
+              Compress-Archive -Path $artifactDir.Name -DestinationPath $archivePath -CompressionLevel Optimal
+            }
+          }
+          finally {
+            Pop-Location
+          }
 
       - name: Create GitHub release
         shell: pwsh
@@ -102,7 +126,7 @@ jobs:
           GH_REPO: "${{ github.repository }}"
         run: |
           $tag = '${{ github.ref_name }}'
-          $assets = @(Get-ChildItem -Path .\release-assets -File | Sort-Object Name | ForEach-Object { $_.FullName })
+          $assets = @(Get-ChildItem -Path .\release-packages -Filter '*.zip' -File | Sort-Object Name | ForEach-Object { $_.FullName })
 
           if ($assets.Count -eq 0) {
             throw 'No release assets were downloaded.'
