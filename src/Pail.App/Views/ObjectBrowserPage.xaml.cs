@@ -62,10 +62,18 @@ public sealed partial class ObjectBrowserPage : Page
 	private void OnCopyObjectFullKeyContextClick(object sender, RoutedEventArgs e) =>
 		CopyFullKeys();
 
+	// Because TableView has built-in keyboard accelerators, we need to intercept the keyboard combinations, that we are interested in, before it gets handled by the grid.
+	// This allows us to provide our own logic that overrides the default behavior.
 	private async void OnGridPreviewKeyDown(object sender, KeyRoutedEventArgs e)
 	{
-		// Because TableView has built-in keyboard accelerators, we need to intercept the Ctrl+C combination before it gets handled by the grid.
-		// This allows us to provide our own copy logic that overrides the default behavior.
+		if (e.Key == VirtualKey.Left && IsModifierKeyDown(VirtualKey.Menu))
+		{
+			await ViewModel.GoBackCommand.ExecuteAsync(null);
+
+			e.Handled = true;
+			return;
+		}
+
 		if (e.Key == VirtualKey.C && IsModifierKeyDown(VirtualKey.Control))
 		{
 			if (IsModifierKeyDown(VirtualKey.Shift))
