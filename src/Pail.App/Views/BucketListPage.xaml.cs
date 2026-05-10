@@ -23,9 +23,9 @@ public sealed partial class BucketListPage : Page
 		await ViewModel.LoadBucketsAsync();
 	}
 
-	private void OnBucketClick(object sender, ItemClickEventArgs e)
+	private void OnBucketDoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
 	{
-		if (e.ClickedItem is S3BucketItem bucket)
+		if (e.OriginalSource is FrameworkElement element && element.DataContext is S3BucketItem bucket)
 		{
 			ViewModel.SelectBucketCommand.Execute(bucket);
 		}

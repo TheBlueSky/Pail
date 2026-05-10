@@ -53,7 +53,7 @@
             SelectedItem="{x:Bind ViewModel.SelectedBucket, Mode=TwoWay}"
             SelectionMode="Single"
             IsItemClickEnabled="True"
-            ItemClick="OnBucketClick">
+            DoubleTapped="OnBucketDoubleTapped">
 
             <ListView.ItemTemplate>
                 <DataTemplate x:DataType="models:S3BucketItem">
