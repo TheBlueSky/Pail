@@ -126,6 +126,7 @@ jobs:
           GH_REPO: "${{ github.repository }}"
         run: |
           $tag = '${{ github.ref_name }}'
+          $displayTag = $tag -replace '^releases/', ''
           $assets = @(Get-ChildItem -Path .\release-packages -Filter '*.zip' -File | Sort-Object Name | ForEach-Object { $_.FullName })
 
           if ($assets.Count -eq 0) {
@@ -133,7 +134,7 @@ jobs:
           }
 
           gh release create $tag $assets `
-            --title "Pail $tag" `
+            --title "Pail $displayTag" `
             --verify-tag `
-            --notes "Automated release for \`$tag\` tag." `
+            --notes "Automated release for ``$tag`` tag." `
             --generate-notes
