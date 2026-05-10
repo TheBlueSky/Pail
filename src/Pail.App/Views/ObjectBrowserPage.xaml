@@ -53,6 +53,9 @@
             IsReadOnly="True"
             SelectionMode="Extended"
             SelectionUnit="Row"
+            CanSortColumns="True"
+            CanFilterColumns="True"
+            CornerButtonMode="None"
             PreviewKeyDown="OnGridPreviewKeyDown"
             RowContextFlyoutOpening="OnGridRowContextFlyoutOpening"
             CellDoubleTapped="OnGridCellDoubleTapped">
