@@ -13,7 +13,10 @@ namespace Pail.App;
 
 public partial class PailApp : Application
 {
+	private const double StatusOverlayInset = 24;
+
 	private Window? _window;
+	private Frame? _rootFrame;
 
 	public PailApp()
 	{
@@ -58,14 +61,8 @@ public partial class PailApp : Application
 	{
 		_window = new Window { Title = "Pail – AWS S3 Browser" };
 		MainWindow = _window;
-
-		if (_window.Content is not Frame rootFrame)
-		{
-			rootFrame = new Frame();
-			rootFrame.NavigationFailed += OnNavigationFailed;
-
-			_window.Content = rootFrame;
-		}
+		_rootFrame = CreateRootFrame();
+		_window.Content = CreateShellRoot(_rootFrame);
 
 		Services.GetRequiredService<IAppThemeService>().ApplyTheme(Services.GetRequiredService<ISettingsService>().AppTheme);
 
@@ -75,7 +72,7 @@ public partial class PailApp : Application
 
 		// Register the frame with the navigation service
 		var navService = Services.GetRequiredService<INavigationHostService>();
-		navService.Initialize(rootFrame);
+		navService.Initialize(_rootFrame);
 
 		navService.NavigateTo("LoginPage");
 		_window.Activate();
@@ -86,15 +83,40 @@ public partial class PailApp : Application
 
 	private void OnWindowClosing(AppWindow sender, AppWindowClosingEventArgs args)
 	{
-		if (_window?.Content is not Frame rootFrame)
+		if (_rootFrame is null)
 		{
 			return;
 		}
 
-		var wasTabStop = rootFrame.IsTabStop;
-		rootFrame.IsTabStop = true;
-		rootFrame.Focus(FocusState.Programmatic);
-		rootFrame.IsTabStop = wasTabStop;
+		var wasTabStop = _rootFrame.IsTabStop;
+		_rootFrame.IsTabStop = true;
+		_rootFrame.Focus(FocusState.Programmatic);
+		_rootFrame.IsTabStop = wasTabStop;
+	}
+
+	private Frame CreateRootFrame()
+	{
+		var rootFrame = new Frame();
+		rootFrame.NavigationFailed += OnNavigationFailed;
+		return rootFrame;
+	}
+
+	private static Grid CreateShellRoot(Frame rootFrame)
+	{
+		var shellRoot = new Grid();
+		var statusOverlayHost = new StatusOverlayHost
+		{
+			Margin = new Thickness(StatusOverlayInset),
+			HorizontalAlignment = HorizontalAlignment.Stretch,
+			VerticalAlignment = VerticalAlignment.Stretch,
+		};
+
+		Canvas.SetZIndex(statusOverlayHost, 10);
+
+		shellRoot.Children.Add(rootFrame);
+		shellRoot.Children.Add(statusOverlayHost);
+
+		return shellRoot;
 	}
 
 	private static void SetWindowIcon(Window window)

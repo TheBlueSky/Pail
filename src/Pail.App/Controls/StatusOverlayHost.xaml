@@ -8,13 +8,12 @@
     mc:Ignorable="d">
 
     <Grid HorizontalAlignment="Right" VerticalAlignment="Top">
-        <InfoBar x:Name="StatusInfoBar"
-            Canvas.ZIndex="10"
+        <InfoBar
+            x:Name="StatusInfoBar"
             IsOpen="False"
             IsClosable="True"
             HorizontalAlignment="Right"
             VerticalAlignment="Top"
-            MaxWidth="420"
-            Margin="0,0,0,12"/>
+            MaxWidth="420"/>
     </Grid>
 </UserControl>

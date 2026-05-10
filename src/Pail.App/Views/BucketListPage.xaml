@@ -6,7 +6,6 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="using:Pail.Models"
-    xmlns:appControls="using:Pail.App.Controls"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
@@ -87,7 +86,5 @@
         </ListView>
 
         <ProgressRing Grid.Row="1" IsActive="{x:Bind ViewModel.IsBusy, Mode=OneWay}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-
-        <appControls:StatusOverlayHost Grid.Row="0" Grid.RowSpan="2" Canvas.ZIndex="10"/>
     </Grid>
 </Page>

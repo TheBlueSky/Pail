@@ -6,7 +6,6 @@
     xmlns:converters="using:Pail.App.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:appControls="using:Pail.App.Controls"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
@@ -533,7 +532,5 @@
                 </Border>
             </StackPanel>
         </ScrollViewer>
-
-        <appControls:StatusOverlayHost Canvas.ZIndex="10" />
     </Grid>
 </Page>
