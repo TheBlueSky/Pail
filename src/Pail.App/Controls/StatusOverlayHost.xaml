@@ -12,14 +12,10 @@
             x:Name="StatusInfoBar"
             IsOpen="False"
             IsClosable="True"
+            Background="{ThemeResource StatusOverlayBackgroundBrush}"
             HorizontalAlignment="Right"
             VerticalAlignment="Top"
             MinWidth="384"
-            MaxWidth="512">
-
-            <InfoBar.Background>
-                <AcrylicBrush TintColor="#CC000000" TintOpacity="0.75" FallbackColor="#DD000000" />
-            </InfoBar.Background>
-        </InfoBar>
+            MaxWidth="512" />
     </Grid>
 </UserControl>

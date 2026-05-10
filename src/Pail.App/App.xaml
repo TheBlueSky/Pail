@@ -15,6 +15,32 @@
                 <!-- Other merged dictionaries here -->
             </ResourceDictionary.MergedDictionaries>
 
+            <ResourceDictionary.ThemeDictionaries>
+                <ResourceDictionary x:Key="Default">
+                    <AcrylicBrush
+                        x:Key="StatusOverlayBackgroundBrush"
+                        TintColor="#CCFFFFFF"
+                        TintOpacity="0.75"
+                        FallbackColor="#F2FFFFFF" />
+                </ResourceDictionary>
+
+                <ResourceDictionary x:Key="Light">
+                    <AcrylicBrush
+                        x:Key="StatusOverlayBackgroundBrush"
+                        TintColor="#CCFFFFFF"
+                        TintOpacity="0.75"
+                        FallbackColor="#F2FFFFFF" />
+                </ResourceDictionary>
+
+                <ResourceDictionary x:Key="Dark">
+                    <AcrylicBrush
+                        x:Key="StatusOverlayBackgroundBrush"
+                        TintColor="#CC000000"
+                        TintOpacity="0.75"
+                        FallbackColor="#DD000000" />
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
+
             <!-- Other app resources here -->
             <Color x:Key="Primary">#512BD4</Color>
 
