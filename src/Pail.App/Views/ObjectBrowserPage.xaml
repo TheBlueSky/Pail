@@ -57,6 +57,7 @@
             CanFilterColumns="True"
             CornerButtonMode="None"
             PreviewKeyDown="OnGridPreviewKeyDown"
+            CopyToClipboard="OnGridCopyToClipboard"
             RowContextFlyoutOpening="OnGridRowContextFlyoutOpening"
             CellDoubleTapped="OnGridCellDoubleTapped">
 

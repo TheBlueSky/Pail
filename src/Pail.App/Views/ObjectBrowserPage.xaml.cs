@@ -53,6 +53,22 @@ public sealed partial class ObjectBrowserPage : Page
 		}
 	}
 
+	// TableView's built-in Copy command is triggered by Ctrl+C and Ctrl+Shift+C.
+	// We handle it to provide custom copy behavior for object names and full keys.
+	private void OnGridCopyToClipboard(object sender, TableViewCopyToClipboardEventArgs e)
+	{
+		if (e.IncludeHeaders) // Ctrl+Shift+C
+		{
+			CopyFullKeys();
+		}
+		else // Ctrl+C
+		{
+			CopyNames();
+		}
+
+		e.Handled = true;
+	}
+
 	private void OnCopyNameClick(object sender, RoutedEventArgs e) =>
 		CopyNames();
 
@@ -71,28 +87,12 @@ public sealed partial class ObjectBrowserPage : Page
 	private void OnCopyObjectFullKeyContextClick(object sender, RoutedEventArgs e) =>
 		CopyFullKeys();
 
-	// Because TableView has built-in keyboard accelerators, we need to intercept the keyboard combinations, that we are interested in, before it gets handled by the grid.
-	// This allows us to provide our own logic that overrides the default behavior.
+	// Intercept app-specific shortcuts before TableView handles its built-in keyboard commands.
 	private async void OnGridPreviewKeyDown(object sender, KeyRoutedEventArgs e)
 	{
 		if (e.Key == VirtualKey.Left && IsModifierKeyDown(VirtualKey.Menu))
 		{
 			await ViewModel.GoBackCommand.ExecuteAsync(null);
-
-			e.Handled = true;
-			return;
-		}
-
-		if (e.Key == VirtualKey.C && IsModifierKeyDown(VirtualKey.Control))
-		{
-			if (IsModifierKeyDown(VirtualKey.Shift))
-			{
-				CopyFullKeys();
-			}
-			else
-			{
-				CopyNames();
-			}
 
 			e.Handled = true;
 			return;
