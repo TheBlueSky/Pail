@@ -14,21 +14,37 @@
         <KeyboardAccelerator x:Name="SearchKeyboardAcceleratorF3" Key="F3" Modifiers="None" Invoked="OnPageKeyboardAcceleratorInvoked"/>
     </Page.KeyboardAccelerators>
 
-    <Grid Margin="24">
+    <Grid
+        x:Uid="BucketListMainRegion"
+        Margin="24"
+        AutomationProperties.LandmarkType="Main"
+        AutomationProperties.LocalizedLandmarkType="Bucket list">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <Grid Margin="0,0,0,12" ColumnSpacing="12">
+        <Grid
+            x:Uid="BucketSearchRegion"
+            Margin="0,0,0,12"
+            ColumnSpacing="12"
+            AutomationProperties.LandmarkType="Search"
+            AutomationProperties.LocalizedLandmarkType="Search buckets">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <TextBlock Grid.Column="0" Text="S3 Buckets" Style="{StaticResource TitleTextBlockStyle}" VerticalAlignment="Center"/>
+            <TextBlock
+                x:Uid="BucketListTitle"
+                Grid.Column="0"
+                Text="S3 Buckets"
+                Style="{StaticResource TitleTextBlockStyle}"
+                VerticalAlignment="Center"
+                AutomationProperties.HeadingLevel="Level1"/>
             <TextBox
+                x:Uid="SearchTextBox"
                 x:Name="SearchTextBox"
                 Grid.Column="1"
                 MinWidth="240"
@@ -37,20 +53,32 @@
                 VerticalAlignment="Center"
                 PlaceholderText="Search buckets"
                 AutomationProperties.Name="Search buckets"
+                AutomationProperties.AcceleratorKey="Ctrl+F, F3"
                 TextChanged="OnSearchTextChanged"
                 ToolTipService.ToolTip="Search buckets (Ctrl+F or F3)"/>
             <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="12">
-                <Button Command="{x:Bind ViewModel.LoadBucketsCommand}" VerticalAlignment="Center" ToolTipService.ToolTip="Reload buckets (Ctrl+R or F5)">
-                    <FontIcon Glyph="&#xE72C;" />
+                <Button
+                    x:Uid="ReloadBucketsButton"
+                    Command="{x:Bind ViewModel.LoadBucketsCommand}"
+                    VerticalAlignment="Center"
+                    AutomationProperties.Name="Reload buckets"
+                    AutomationProperties.AcceleratorKey="Ctrl+R, F5"
+                    ToolTipService.ToolTip="Reload buckets (Ctrl+R or F5)">
+                    <FontIcon Glyph="&#xE72C;" AutomationProperties.AccessibilityView="Raw"/>
                     <Button.KeyboardAccelerators>
                         <KeyboardAccelerator Key="R" Modifiers="Control"/>
                         <KeyboardAccelerator Key="F5" Modifiers="None"/>
                     </Button.KeyboardAccelerators>
                 </Button>
-                <Button Command="{x:Bind ViewModel.CopyBucketNameCommand}" VerticalAlignment="Center" ToolTipService.ToolTip="Copy bucket name (Ctrl+C)">
+                <Button
+                    x:Uid="CopyBucketNameButton"
+                    Command="{x:Bind ViewModel.CopyBucketNameCommand}"
+                    VerticalAlignment="Center"
+                    AutomationProperties.AcceleratorKey="Ctrl+C"
+                    ToolTipService.ToolTip="Copy bucket name (Ctrl+C)">
                     <StackPanel Orientation="Horizontal" Spacing="8">
-                        <FontIcon Glyph="&#xE77F;" />
-                        <TextBlock Text="Copy Bucket Name" />
+                        <FontIcon Glyph="&#xE77F;" AutomationProperties.AccessibilityView="Raw"/>
+                        <TextBlock x:Uid="CopyBucketNameText" Text="Copy Bucket Name" />
                     </StackPanel>
                     <Button.KeyboardAccelerators>
                         <KeyboardAccelerator Key="C" Modifiers="Control"/>
@@ -60,20 +88,22 @@
         </Grid>
 
         <ListView
+            x:Uid="BucketListView"
             Grid.Row="1"
             ItemsSource="{x:Bind ViewModel.Buckets}"
             SelectedItem="{x:Bind ViewModel.SelectedBucket, Mode=TwoWay}"
             SelectionMode="Single"
             IsItemClickEnabled="True"
             PreviewKeyDown="OnBucketListPreviewKeyDown"
-            DoubleTapped="OnBucketDoubleTapped">
+            DoubleTapped="OnBucketDoubleTapped"
+            AutomationProperties.Name="List of S3 buckets">
 
             <ListView.ItemTemplate>
                 <DataTemplate x:DataType="models:S3BucketItem">
                     <Grid Padding="12">
                         <Grid.ContextFlyout>
                             <MenuFlyout>
-                                <MenuFlyoutItem Text="Copy Bucket Name" Icon="Copy" Click="OnBucketCopyNameContextClick"/>
+                                <MenuFlyoutItem x:Uid="BucketCopyNameContext" Text="Copy Bucket Name" Icon="Copy" Click="OnBucketCopyNameContextClick"/>
                             </MenuFlyout>
                         </Grid.ContextFlyout>
 
@@ -86,6 +116,6 @@
             </ListView.ItemTemplate>
         </ListView>
 
-        <ProgressRing Grid.Row="1" IsActive="{x:Bind ViewModel.IsBusy, Mode=OneWay}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+        <ProgressRing Grid.Row="1" IsActive="{x:Bind ViewModel.IsBusy, Mode=OneWay}" VerticalAlignment="Center" HorizontalAlignment="Center" AutomationProperties.AccessibilityView="Raw"/>
     </Grid>
 </Page>

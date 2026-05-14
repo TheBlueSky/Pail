@@ -15,7 +15,11 @@
         <converters:FolderIconConverter x:Key="FolderIconConverter"/>
     </Page.Resources>
 
-    <Grid Margin="24">
+    <Grid
+        x:Uid="ObjectBrowserMainRegion"
+        Margin="24"
+        AutomationProperties.LandmarkType="Main"
+        AutomationProperties.LocalizedLandmarkType="Object browser">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -24,20 +28,53 @@
         </Grid.RowDefinitions>
 
         <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,0,0,12">
-            <TextBlock Text="Browser" Style="{StaticResource TitleTextBlockStyle}" VerticalAlignment="Center"/>
+            <TextBlock x:Uid="ObjectBrowserTitle" Text="Browser" Style="{StaticResource TitleTextBlockStyle}" VerticalAlignment="Center" AutomationProperties.HeadingLevel="Level1"/>
             <TextBlock Text="{x:Bind ViewModel.CurrentPath, Mode=OneWay}" VerticalAlignment="Center" Foreground="Gray"/>
         </StackPanel>
 
-        <CommandBar Grid.Row="1" HorizontalAlignment="Left" Background="Transparent" DefaultLabelPosition="Right">
-            <AppBarButton Icon="Refresh" Label="Refresh" Command="{x:Bind ViewModel.LoadItemsCommand}" ToolTipService.ToolTip="Refresh (Ctrl+R, F5)">
+        <CommandBar
+            x:Uid="ObjectBrowserCommandBar"
+            Grid.Row="1"
+            HorizontalAlignment="Left"
+            Background="Transparent"
+            DefaultLabelPosition="Right"
+            AutomationProperties.LandmarkType="Navigation"
+            AutomationProperties.LocalizedLandmarkType="Object commands">
+
+            <AppBarButton
+                x:Uid="RefreshButton"
+                Icon="Refresh"
+                Label="Refresh"
+                Command="{x:Bind ViewModel.LoadItemsCommand}"
+                AutomationProperties.AcceleratorKey="Ctrl+R, F5"
+                ToolTipService.ToolTip="Refresh (Ctrl+R, F5)">
+
                 <AppBarButton.KeyboardAccelerators>
                     <KeyboardAccelerator Key="R" Modifiers="Control"/>
                     <KeyboardAccelerator Key="F5" Modifiers="None"/>
                 </AppBarButton.KeyboardAccelerators>
             </AppBarButton>
-            <AppBarButton Icon="Copy" Label="Copy Name" Click="OnCopyNameClick" ToolTipService.ToolTip="Copy Name (Ctrl+C)"/>
-            <AppBarButton Icon="Copy" Label="Copy Full Key" Click="OnCopyFullKeyClick" ToolTipService.ToolTip="Copy Full Key (Ctrl+Shift+C)"/>
-            <AppBarButton Icon="Download" Label="Download Selected" Click="OnDownloadClick">
+            <AppBarButton
+                x:Uid="CopyNameButton"
+                Icon="Copy"
+                Label="Copy Name"
+                Click="OnCopyNameClick"
+                AutomationProperties.AcceleratorKey="Ctrl+C"
+                ToolTipService.ToolTip="Copy Name (Ctrl+C)"/>
+            <AppBarButton
+                x:Uid="CopyFullKeyButton"
+                Icon="Copy"
+                Label="Copy Full Key"
+                Click="OnCopyFullKeyClick"
+                AutomationProperties.AcceleratorKey="Ctrl+Shift+C"
+                ToolTipService.ToolTip="Copy Full Key (Ctrl+Shift+C)"/>
+            <AppBarButton
+                x:Uid="DownloadSelectedButton"
+                Icon="Download"
+                Label="Download Selected"
+                Click="OnDownloadClick"
+                AutomationProperties.AcceleratorKey="Ctrl+D"
+                ToolTipService.ToolTip="Download Selected (Ctrl+D)">
                 <AppBarButton.KeyboardAccelerators>
                     <KeyboardAccelerator Key="D" Modifiers="Control"/>
                 </AppBarButton.KeyboardAccelerators>
@@ -45,6 +82,7 @@
         </CommandBar>
 
         <tableView:TableView
+            x:Uid="ObjectTableView"
             x:Name="ObjectGrid"
             Grid.Row="2"
             ItemsSource="{x:Bind ViewModel.Items}"
@@ -59,12 +97,13 @@
             PreviewKeyDown="OnGridPreviewKeyDown"
             CopyToClipboard="OnGridCopyToClipboard"
             RowContextFlyoutOpening="OnGridRowContextFlyoutOpening"
-            CellDoubleTapped="OnGridCellDoubleTapped">
+            CellDoubleTapped="OnGridCellDoubleTapped"
+            AutomationProperties.Name="S3 objects table">
 
             <tableView:TableView.RowContextFlyout>
                 <MenuFlyout>
-                    <MenuFlyoutItem Text="Copy Name" Icon="Copy" Click="OnCopyObjectNameContextClick"/>
-                    <MenuFlyoutItem Text="Copy Full Key" Icon="Copy" Click="OnCopyObjectFullKeyContextClick"/>
+                    <MenuFlyoutItem x:Uid="ObjectCopyNameContext" Text="Copy Name" Icon="Copy" Click="OnCopyObjectNameContextClick"/>
+                    <MenuFlyoutItem x:Uid="ObjectCopyFullKeyContext" Text="Copy Full Key" Icon="Copy" Click="OnCopyObjectFullKeyContextClick"/>
                 </MenuFlyout>
             </tableView:TableView.RowContextFlyout>
 
@@ -76,18 +115,19 @@
                                 <SymbolIcon
                                     Symbol="{x:Bind IsFolder, Converter={StaticResource FolderIconConverter}}"
                                     HorizontalAlignment="Center"
-                                    VerticalAlignment="Center"/>
+                                    VerticalAlignment="Center"
+                                    AutomationProperties.AccessibilityView="Raw"/>
                             </Grid>
                         </DataTemplate>
                     </tableView:TableViewTemplateColumn.CellTemplate>
                 </tableView:TableViewTemplateColumn>
-                <tableView:TableViewTextColumn Header="Name" Binding="{Binding Name}" Width="*"/>
-                <tableView:TableViewTextColumn Header="Size" Binding="{Binding SizeDisplay}" Width="100"/>
-                <tableView:TableViewTextColumn Header="Last Modified" Binding="{Binding LastModified}" Width="180"/>
+                <tableView:TableViewTextColumn x:Uid="ObjectNameColumn" Header="Name" Binding="{Binding Name}" Width="*"/>
+                <tableView:TableViewTextColumn x:Uid="ObjectSizeColumn" Header="Size" Binding="{Binding SizeDisplay}" Width="100"/>
+                <tableView:TableViewTextColumn x:Uid="ObjectLastModifiedColumn" Header="Last Modified" Binding="{Binding LastModified}" Width="180"/>
             </tableView:TableView.Columns>
         </tableView:TableView>
 
-        <ProgressRing Grid.Row="2" IsActive="{x:Bind ViewModel.IsInitialLoadInProgress, Mode=OneWay}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+        <ProgressRing Grid.Row="2" IsActive="{x:Bind ViewModel.IsInitialLoadInProgress, Mode=OneWay}" VerticalAlignment="Center" HorizontalAlignment="Center" AutomationProperties.AccessibilityView="Raw"/>
 
         <Grid Grid.Row="3" Margin="0,12,0,0" ColumnSpacing="12">
             <Grid.ColumnDefinitions>
@@ -98,19 +138,26 @@
 
             <TextBlock
                 VerticalAlignment="Center"
-                Text="{x:Bind ViewModel.LoadedItemsStatus, Mode=OneWay}" />
+                Text="{x:Bind ViewModel.LoadedItemsStatus, Mode=OneWay}"
+                AutomationProperties.LiveSetting="Polite" />
 
             <ProgressRing
                 Grid.Column="1"
                 Width="18"
                 Height="18"
                 IsActive="{x:Bind ViewModel.IsLoadingMore, Mode=OneWay}"
-                VerticalAlignment="Center" />
+                VerticalAlignment="Center"
+                AutomationProperties.AccessibilityView="Raw" />
 
-            <Button Grid.Column="2" Command="{x:Bind ViewModel.LoadMoreCommand}">
+            <Button
+                x:Uid="LoadMoreButton"
+                Grid.Column="2"
+                Command="{x:Bind ViewModel.LoadMoreCommand}"
+                AutomationProperties.AcceleratorKey="Ctrl+M">
+
                 <StackPanel Orientation="Horizontal" Spacing="8">
-                    <FontIcon Glyph="&#xE895;" />
-                    <TextBlock Text="Load more" />
+                    <FontIcon Glyph="&#xE895;" AutomationProperties.AccessibilityView="Raw"/>
+                    <TextBlock x:Uid="LoadMoreText" Text="Load more" />
                 </StackPanel>
                 <Button.KeyboardAccelerators>
                     <KeyboardAccelerator Key="M" Modifiers="Control"/>

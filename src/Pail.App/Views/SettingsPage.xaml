@@ -37,7 +37,10 @@
         </Style>
     </Page.Resources>
 
-    <Grid>
+    <Grid
+        x:Uid="SettingsMainRegion"
+        AutomationProperties.LandmarkType="Main"
+        AutomationProperties.LocalizedLandmarkType="Settings">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
@@ -54,21 +57,25 @@
 
             <StackPanel Spacing="4">
                 <TextBlock
+                    x:Uid="SettingsTitle"
                     AutomationProperties.HeadingLevel="Level1"
                     Style="{StaticResource TitleTextBlockStyle}"
                     Text="Settings" />
                 <TextBlock
+                    x:Uid="SettingsDescription"
                     Style="{StaticResource SettingsCardDescriptionTextBlockStyle}"
                     Text="Configure how Pail looks and which defaults it uses when you sign in, browse, and download." />
             </StackPanel>
 
             <Button
+                x:Uid="SaveSettingsButton"
                 Grid.Column="1"
                 MinWidth="120"
                 VerticalAlignment="Center"
                 Command="{x:Bind ViewModel.SaveCommand}"
                 Content="Save"
                 Style="{StaticResource AccentButtonStyle}"
+                AutomationProperties.AcceleratorKey="Ctrl+S"
                 ToolTipService.ToolTip="Save settings (Ctrl+S)">
 
                 <Button.KeyboardAccelerators>
@@ -91,8 +98,10 @@
                 </StackPanel.ChildrenTransitions>
 
                 <TextBlock
+                    x:Uid="AppearanceSectionHeader"
                     Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                    Text="Appearance &amp; behavior" />
+                    Text="Appearance &amp; behavior"
+                    AutomationProperties.HeadingLevel="Level2" />
 
                 <Border Style="{StaticResource SettingsCardBorderStyle}">
                     <Grid ColumnSpacing="16">
@@ -106,15 +115,19 @@
                             Margin="0,4,0,0"
                             VerticalAlignment="Top"
                             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            Glyph="&#xE790;" />
+                            Glyph="&#xE790;"
+                            AutomationProperties.AccessibilityView="Raw" />
 
                         <StackPanel
                             Grid.Column="1"
                             Spacing="2">
                             <TextBlock
+                                x:Name="AppThemeTitleText"
+                                x:Uid="AppThemeTitle"
                                 Style="{StaticResource BodyStrongTextBlockStyle}"
                                 Text="App theme" />
                             <TextBlock
+                                x:Uid="AppThemeDescription"
                                 Style="{StaticResource SettingsCardDescriptionTextBlockStyle}"
                                 Text="Choose whether the app follows the system theme or always uses a specific mode." />
                         </StackPanel>
@@ -124,7 +137,8 @@
                             HorizontalAlignment="Right"
                             MinWidth="220"
                             ItemsSource="{x:Bind ViewModel.AvailableThemes}"
-                            SelectedItem="{x:Bind ViewModel.AppTheme, Mode=TwoWay}">
+                            SelectedItem="{x:Bind ViewModel.AppTheme, Mode=TwoWay}"
+                            AutomationProperties.LabeledBy="{Binding ElementName=AppThemeTitleText}">
                             <ComboBox.ItemTemplate>
                                 <DataTemplate>
                                     <TextBlock Text="{Binding Converter={StaticResource AppThemeModeDisplayConverter}}" />
@@ -146,15 +160,19 @@
                             Margin="0,4,0,0"
                             VerticalAlignment="Top"
                             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            Glyph="&#xE7F4;" />
+                            Glyph="&#xE7F4;"
+                            AutomationProperties.AccessibilityView="Raw" />
 
                         <StackPanel
                             Grid.Column="1"
                             Spacing="2">
                             <TextBlock
+                                x:Name="StatusMessagesTitleText"
+                                x:Uid="StatusMessagesTitle"
                                 Style="{StaticResource BodyStrongTextBlockStyle}"
                                 Text="Status messages" />
                             <TextBlock
+                                x:Uid="StatusMessagesDescription"
                                 Style="{StaticResource SettingsCardDescriptionTextBlockStyle}"
                                 Text="Control how long transient status overlays stay visible before they dismiss." />
                         </StackPanel>
@@ -166,13 +184,16 @@
                             Minimum="1"
                             SmallChange="1"
                             SpinButtonPlacementMode="Compact"
-                            Value="{x:Bind ViewModel.StatusOverlayDurationSeconds, Mode=TwoWay}" />
+                            Value="{x:Bind ViewModel.StatusOverlayDurationSeconds, Mode=TwoWay}"
+                            AutomationProperties.LabeledBy="{Binding ElementName=StatusMessagesTitleText}" />
                     </Grid>
                 </Border>
 
                 <TextBlock
+                    x:Uid="ObjectBrowserSectionHeader"
                     Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                    Text="Object browser" />
+                    Text="Object browser"
+                    AutomationProperties.HeadingLevel="Level2" />
 
                 <Border Style="{StaticResource SettingsCardBorderStyle}">
                     <Grid ColumnSpacing="16">
@@ -186,18 +207,23 @@
                             Margin="0,4,0,0"
                             VerticalAlignment="Top"
                             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            Glyph="&#xE81C;" />
+                            Glyph="&#xE81C;"
+                            AutomationProperties.AccessibilityView="Raw" />
 
                         <StackPanel
                             Grid.Column="1"
                             Spacing="2">
                             <TextBlock
+                                x:Name="InitialObjectLoadTitleText"
+                                x:Uid="InitialObjectLoadTitle"
                                 Style="{StaticResource BodyStrongTextBlockStyle}"
                                 Text="Initial object load" />
                             <TextBlock
+                                x:Uid="InitialObjectLoadDescription"
                                 Style="{StaticResource SettingsCardDescriptionTextBlockStyle}"
                                 Text="Choose how many rows Pail loads the first time a bucket folder opens or refreshes." />
                             <TextBlock
+                                x:Uid="InitialObjectLoadHint"
                                 Style="{StaticResource SettingsCardDescriptionTextBlockStyle}"
                                 Text="Values above 1000 are fetched through multiple S3 requests." />
                         </StackPanel>
@@ -210,7 +236,8 @@
                             MinWidth="160"
                             SmallChange="25"
                             SpinButtonPlacementMode="Compact"
-                            Value="{x:Bind ViewModel.InitialObjectLoadCount, Mode=TwoWay}" />
+                            Value="{x:Bind ViewModel.InitialObjectLoadCount, Mode=TwoWay}"
+                            AutomationProperties.LabeledBy="{Binding ElementName=InitialObjectLoadTitleText}" />
                     </Grid>
                 </Border>
 
@@ -226,18 +253,23 @@
                             Margin="0,4,0,0"
                             VerticalAlignment="Top"
                             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            Glyph="&#xF8A5;" />
+                            Glyph="&#xF8A5;"
+                            AutomationProperties.AccessibilityView="Raw" />
 
                         <StackPanel
                             Grid.Column="1"
                             Spacing="2">
                             <TextBlock
+                                x:Name="LoadMoreBatchTitleText"
+                                x:Uid="LoadMoreBatchTitle"
                                 Style="{StaticResource BodyStrongTextBlockStyle}"
                                 Text="Load more batch size" />
                             <TextBlock
+                                x:Uid="LoadMoreBatchDescription"
                                 Style="{StaticResource SettingsCardDescriptionTextBlockStyle}"
                                 Text="Set to 0 to reuse the initial load count, or choose a different batch size for each Load more click." />
                             <TextBlock
+                                x:Uid="LoadMoreBatchHint"
                                 Style="{StaticResource SettingsCardDescriptionTextBlockStyle}"
                                 Text="Values above 1000 are fetched through multiple S3 requests." />
                         </StackPanel>
@@ -250,13 +282,16 @@
                             MinWidth="160"
                             SmallChange="25"
                             SpinButtonPlacementMode="Compact"
-                            Value="{x:Bind ViewModel.LoadMoreObjectCount, Mode=TwoWay}" />
+                            Value="{x:Bind ViewModel.LoadMoreObjectCount, Mode=TwoWay}"
+                            AutomationProperties.LabeledBy="{Binding ElementName=LoadMoreBatchTitleText}" />
                     </Grid>
                 </Border>
 
                 <TextBlock
+                    x:Uid="DownloadsSectionHeader"
                     Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                    Text="Downloads" />
+                    Text="Downloads"
+                    AutomationProperties.HeadingLevel="Level2" />
 
                 <Border Style="{StaticResource SettingsCardBorderStyle}">
                     <Grid ColumnSpacing="16">
@@ -270,15 +305,19 @@
                             Margin="0,4,0,0"
                             VerticalAlignment="Top"
                             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            Glyph="&#xE8B7;" />
+                            Glyph="&#xE8B7;"
+                            AutomationProperties.AccessibilityView="Raw" />
 
                         <StackPanel
                             Grid.Column="1"
                             Spacing="2">
                             <TextBlock
+                                x:Name="DefaultDownloadFolderTitleText"
+                                x:Uid="DefaultDownloadFolderTitle"
                                 Style="{StaticResource BodyStrongTextBlockStyle}"
                                 Text="Default download folder" />
                             <TextBlock
+                                x:Uid="DefaultDownloadFolderDescription"
                                 Style="{StaticResource SettingsCardDescriptionTextBlockStyle}"
                                 Text="Choose where downloaded objects go unless you pick a different location." />
                         </StackPanel>
@@ -294,10 +333,13 @@
                             </Grid.ColumnDefinitions>
 
                             <TextBox
+                                x:Uid="DownloadFolderInput"
                                 Grid.Column="0"
                                 PlaceholderText="e.g. C:\Downloads\Pail"
-                                Text="{x:Bind ViewModel.DownloadFolder, Mode=TwoWay}" />
+                                Text="{x:Bind ViewModel.DownloadFolder, Mode=TwoWay}"
+                                AutomationProperties.LabeledBy="{Binding ElementName=DefaultDownloadFolderTitleText}" />
                             <Button
+                                x:Uid="BrowseDownloadFolderButton"
                                 Grid.Column="1"
                                 Command="{x:Bind ViewModel.BrowseDownloadFolderCommand}"
                                 Content="Browse" />
@@ -317,15 +359,19 @@
                             Margin="0,4,0,0"
                             VerticalAlignment="Top"
                             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            Glyph="&#xF89A;" />
+                            Glyph="&#xF89A;"
+                            AutomationProperties.AccessibilityView="Raw" />
 
                         <StackPanel
                             Grid.Column="1"
                             Spacing="2">
                             <TextBlock
+                                x:Name="DownloadPromptsTitleText"
+                                x:Uid="DownloadPromptsTitle"
                                 Style="{StaticResource BodyStrongTextBlockStyle}"
                                 Text="Download prompts" />
                             <TextBlock
+                                x:Uid="DownloadPromptsDescription"
                                 Style="{StaticResource SettingsCardDescriptionTextBlockStyle}"
                                 Text="Ask for a location every time before downloading an object." />
                         </StackPanel>
@@ -334,13 +380,16 @@
                             Grid.Column="2"
                             HorizontalAlignment="Right"
                             MinWidth="0"
-                            IsOn="{x:Bind ViewModel.AlwaysPromptDownloadLocation, Mode=TwoWay}" />
+                            IsOn="{x:Bind ViewModel.AlwaysPromptDownloadLocation, Mode=TwoWay}"
+                            AutomationProperties.LabeledBy="{Binding ElementName=DownloadPromptsTitleText}" />
                     </Grid>
                 </Border>
 
                 <TextBlock
+                    x:Uid="AwsLoginSectionHeader"
                     Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                    Text="AWS login defaults" />
+                    Text="AWS login defaults"
+                    AutomationProperties.HeadingLevel="Level2" />
 
                 <Border Style="{StaticResource SettingsCardBorderStyle}">
                     <Grid ColumnSpacing="16">
@@ -354,15 +403,19 @@
                             Margin="0,4,0,0"
                             VerticalAlignment="Top"
                             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            Glyph="&#xE774;" />
+                            Glyph="&#xE774;"
+                            AutomationProperties.AccessibilityView="Raw" />
 
                         <StackPanel
                             Grid.Column="1"
                             Spacing="2">
                             <TextBlock
+                                x:Name="DefaultRegionTitleText"
+                                x:Uid="DefaultRegionTitle"
                                 Style="{StaticResource BodyStrongTextBlockStyle}"
                                 Text="Default region" />
                             <TextBlock
+                                x:Uid="DefaultRegionDescription"
                                 Style="{StaticResource SettingsCardDescriptionTextBlockStyle}"
                                 Text="Preselect the region users see first on the sign-in page." />
                         </StackPanel>
@@ -372,7 +425,8 @@
                             HorizontalAlignment="Right"
                             MinWidth="220"
                             ItemsSource="{x:Bind ViewModel.AvailableRegions}"
-                            SelectedItem="{x:Bind ViewModel.DefaultRegion, Mode=TwoWay}" />
+                            SelectedItem="{x:Bind ViewModel.DefaultRegion, Mode=TwoWay}"
+                            AutomationProperties.LabeledBy="{Binding ElementName=DefaultRegionTitleText}" />
                     </Grid>
                 </Border>
 
@@ -388,15 +442,19 @@
                             Margin="0,4,0,0"
                             VerticalAlignment="Top"
                             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            Glyph="&#xE72E;" />
+                            Glyph="&#xE72E;"
+                            AutomationProperties.AccessibilityView="Raw" />
 
                         <StackPanel
                             Grid.Column="1"
                             Spacing="2">
                             <TextBlock
+                                x:Name="CredentialChainTitleText"
+                                x:Uid="CredentialChainTitle"
                                 Style="{StaticResource BodyStrongTextBlockStyle}"
                                 Text="Use credential chain by default" />
                             <TextBlock
+                                x:Uid="CredentialChainDescription"
                                 Style="{StaticResource SettingsCardDescriptionTextBlockStyle}"
                                 Text="Start with the default AWS credential chain enabled when users open the sign-in page." />
                         </StackPanel>
@@ -405,7 +463,8 @@
                             Grid.Column="2"
                             HorizontalAlignment="Right"
                             MinWidth="0"
-                            IsOn="{x:Bind ViewModel.UseCredentialChainByDefault, Mode=TwoWay}" />
+                            IsOn="{x:Bind ViewModel.UseCredentialChainByDefault, Mode=TwoWay}"
+                            AutomationProperties.LabeledBy="{Binding ElementName=CredentialChainTitleText}" />
                     </Grid>
                 </Border>
 
@@ -421,31 +480,39 @@
                             Margin="0,4,0,0"
                             VerticalAlignment="Top"
                             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            Glyph="&#xE77B;" />
+                            Glyph="&#xE77B;"
+                            AutomationProperties.AccessibilityView="Raw" />
 
                         <StackPanel
                             Grid.Column="1"
                             Spacing="2">
                             <TextBlock
+                                x:Name="PreferredProfileTitleText"
+                                x:Uid="PreferredProfileTitle"
                                 Style="{StaticResource BodyStrongTextBlockStyle}"
                                 Text="Preferred profile name" />
                             <TextBlock
+                                x:Uid="PreferredProfileDescription"
                                 Style="{StaticResource SettingsCardDescriptionTextBlockStyle}"
                                 Text="Leave blank to fall back to Automatic (recommended)." />
                         </StackPanel>
 
                         <TextBox
+                            x:Uid="PreferredProfileInput"
                             Grid.Column="2"
                             HorizontalAlignment="Right"
                             MinWidth="220"
                             PlaceholderText="Automatic (recommended)"
-                            Text="{x:Bind ViewModel.LastProfileName, Mode=TwoWay}" />
+                            Text="{x:Bind ViewModel.LastProfileName, Mode=TwoWay}"
+                            AutomationProperties.LabeledBy="{Binding ElementName=PreferredProfileTitleText}" />
                     </Grid>
                 </Border>
 
                 <TextBlock
+                    x:Uid="AccountSectionHeader"
                     Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                    Text="Account" />
+                    Text="Account"
+                    AutomationProperties.HeadingLevel="Level2" />
 
                 <Border Style="{StaticResource SettingsCardBorderStyle}">
                     <Grid ColumnSpacing="16">
@@ -459,20 +526,24 @@
                             Margin="0,4,0,0"
                             VerticalAlignment="Top"
                             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            Glyph="&#xF3B1;" />
+                            Glyph="&#xF3B1;"
+                            AutomationProperties.AccessibilityView="Raw" />
 
                         <StackPanel
                             Grid.Column="1"
                             Spacing="2">
                             <TextBlock
+                                x:Uid="SignOutTitle"
                                 Style="{StaticResource BodyStrongTextBlockStyle}"
                                 Text="Sign out" />
                             <TextBlock
+                                x:Uid="SignOutDescription"
                                 Style="{StaticResource SettingsCardDescriptionTextBlockStyle}"
                                 Text="Return to the sign-in page and switch to a different AWS account." />
                         </StackPanel>
 
                         <Button
+                            x:Uid="SignOutButton"
                             Grid.Column="2"
                             HorizontalAlignment="Right"
                             Command="{x:Bind ViewModel.LogoutCommand}"
@@ -481,8 +552,10 @@
                 </Border>
 
                 <TextBlock
+                    x:Uid="AboutSectionHeader"
                     Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                    Text="About" />
+                    Text="About"
+                    AutomationProperties.HeadingLevel="Level2" />
 
                 <Border
                     Margin="0,0,0,36"
@@ -496,18 +569,22 @@
                             </Grid.ColumnDefinitions>
 
                             <Image
+                                x:Uid="PailLogoImage"
                                 Width="44"
                                 Height="44"
                                 VerticalAlignment="Top"
-                                Source="ms-appx:///Assets/StoreLogo.png" />
+                                Source="ms-appx:///Assets/StoreLogo.png"
+                                AutomationProperties.Name="Pail logo" />
 
                             <StackPanel
                                 Grid.Column="1"
                                 Spacing="2">
                                 <TextBlock
+                                    x:Uid="AboutAppName"
                                     Style="{StaticResource BodyStrongTextBlockStyle}"
                                     Text="Pail" />
                                 <TextBlock
+                                    x:Uid="AboutAppDescription"
                                     Style="{StaticResource SettingsCardDescriptionTextBlockStyle}"
                                     Text="AWS S3 browser for Windows." />
                             </StackPanel>
@@ -522,9 +599,11 @@
 
                         <StackPanel Orientation="Horizontal" Spacing="12">
                             <HyperlinkButton
+                                x:Uid="GitHubLink"
                                 Content="GitHub repository"
                                 NavigateUri="https://github.com/TheBlueSky/Pail" />
                             <HyperlinkButton
+                                x:Uid="ReleasesLink"
                                 Content="Releases"
                                 NavigateUri="https://github.com/TheBlueSky/Pail/releases" />
                         </StackPanel>

@@ -7,8 +7,9 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <Grid HorizontalAlignment="Right" VerticalAlignment="Top">
+    <Grid HorizontalAlignment="Right" VerticalAlignment="Top" AutomationProperties.LiveSetting="Assertive">
         <InfoBar
+            x:Uid="StatusInfoBar"
             x:Name="StatusInfoBar"
             IsOpen="False"
             IsClosable="True"
@@ -16,6 +17,7 @@
             HorizontalAlignment="Right"
             VerticalAlignment="Top"
             MinWidth="384"
-            MaxWidth="512" />
+            MaxWidth="512"
+            AutomationProperties.Name="Status notifications" />
     </Grid>
 </UserControl>

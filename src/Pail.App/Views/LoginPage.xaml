@@ -14,42 +14,72 @@
         <converters:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
     </Page.Resources>
 
-    <Grid>
+    <Grid
+        x:Uid="LoginMainRegion"
+        AutomationProperties.LandmarkType="Main"
+        AutomationProperties.LocalizedLandmarkType="Sign in">
         <Grid VerticalAlignment="Center" HorizontalAlignment="Center" MaxWidth="400" Width="400">
             <StackPanel Spacing="12">
-                <TextBlock Text="Pail" FontSize="28" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,20"/>
+                <TextBlock x:Uid="LoginTitle" Text="Pail" FontSize="28" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,20" AutomationProperties.HeadingLevel="Level1"/>
 
                 <ComboBox
+                    x:Uid="RegionCombo"
                     Header="Region"
                     HorizontalAlignment="Stretch"
                     IsEditable="True"
                     IsTextSearchEnabled="True"
                     ItemsSource="{x:Bind ViewModel.AvailableRegions, Mode=OneWay}"
                     Text="{x:Bind ViewModel.Region, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
                 <Border Height="1" Background="{ThemeResource ControlStrokeColorDefaultBrush}"/>
 
-                <Button Command="{x:Bind ViewModel.PasteCredentialsCommand}" HorizontalAlignment="Stretch" ToolTipService.ToolTip="Paste AWS Console Credentials (Shift+Ctrl+P)">
+                <Button
+                    x:Uid="PasteCredentialsButton"
+                    Command="{x:Bind ViewModel.PasteCredentialsCommand}"
+                    HorizontalAlignment="Stretch"
+                    AutomationProperties.Name="Paste AWS Console Credentials"
+                    AutomationProperties.AcceleratorKey="Ctrl+Shift+P"
+                    ToolTipService.ToolTip="Paste AWS Console Credentials (Shift+Ctrl+P)">
+
                     <StackPanel Orientation="Horizontal" Spacing="8">
-                        <FontIcon Glyph="&#xE77F;" />
-                        <TextBlock Text="Paste AWS Console Credentials" />
+                        <FontIcon Glyph="&#xE77F;" AutomationProperties.AccessibilityView="Raw"/>
+                        <TextBlock x:Uid="PasteCredentialsText" Text="Paste AWS Console Credentials" />
                     </StackPanel>
                     <Button.KeyboardAccelerators>
                         <KeyboardAccelerator Key="P" Modifiers="Control,Shift"/>
                     </Button.KeyboardAccelerators>
                 </Button>
 
-                <TextBox Header="Access Key" Text="{x:Bind ViewModel.AccessKey, Mode=TwoWay}" IsEnabled="{x:Bind ViewModel.UseDefaultChain, Converter={StaticResource InverseBooleanConverter}, Mode=OneWay}"/>
-                <PasswordBox Header="Secret Key" Password="{x:Bind ViewModel.SecretKey, Mode=TwoWay}" IsEnabled="{x:Bind ViewModel.UseDefaultChain, Converter={StaticResource InverseBooleanConverter}, Mode=OneWay}"/>
-                <TextBox Header="Session Token (Optional)" Text="{x:Bind ViewModel.SessionToken, Mode=TwoWay}" IsEnabled="{x:Bind ViewModel.UseDefaultChain, Converter={StaticResource InverseBooleanConverter}, Mode=OneWay}"/>
+                <TextBox
+                    x:Uid="AccessKeyInput"
+                    Header="Access Key"
+                    Text="{x:Bind ViewModel.AccessKey, Mode=TwoWay}"
+                    IsEnabled="{x:Bind ViewModel.UseDefaultChain, Converter={StaticResource InverseBooleanConverter}, Mode=OneWay}"/>
+                <PasswordBox
+                    x:Uid="SecretKeyInput"
+                    Header="Secret Key"
+                    Password="{x:Bind ViewModel.SecretKey, Mode=TwoWay}"
+                    IsEnabled="{x:Bind ViewModel.UseDefaultChain, Converter={StaticResource InverseBooleanConverter}, Mode=OneWay}"/>
+                <TextBox
+                    x:Uid="SessionTokenInput"
+                    Header="Session Token (Optional)"
+                    Text="{x:Bind ViewModel.SessionToken, Mode=TwoWay}"
+                    IsEnabled="{x:Bind ViewModel.UseDefaultChain, Converter={StaticResource InverseBooleanConverter}, Mode=OneWay}"/>
 
                 <Border Height="1" Background="{ThemeResource ControlStrokeColorDefaultBrush}"/>
-                <CheckBox Content="Use Default Credential Chain" IsChecked="{x:Bind ViewModel.UseDefaultChain, Mode=TwoWay}" ToolTipService.ToolTip="Use the default AWS credential chain (Ctrl+Shift+D)">
+
+                <CheckBox
+                    x:Uid="DefaultChainCheckBox"
+                    Content="Use Default Credential Chain"
+                    IsChecked="{x:Bind ViewModel.UseDefaultChain, Mode=TwoWay}"
+                    AutomationProperties.AcceleratorKey="Ctrl+Shift+D"
+                    ToolTipService.ToolTip="Use the default AWS credential chain (Ctrl+Shift+D)">
                     <CheckBox.KeyboardAccelerators>
                         <KeyboardAccelerator Key="D" Modifiers="Control,Shift"/>
                     </CheckBox.KeyboardAccelerators>
                 </CheckBox>
                 <StackPanel Spacing="4">
-                    <TextBlock Text="AWS Profile" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                    <TextBlock x:Uid="AwsProfileLabel" x:Name="AwsProfileLabelText" Text="AWS Profile" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
                     <Grid HorizontalAlignment="Stretch" ColumnSpacing="8">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
@@ -63,9 +93,10 @@
                             ItemsSource="{x:Bind ViewModel.AvailableProfiles, Mode=OneWay}"
                             SelectedItem="{x:Bind ViewModel.SelectedProfileName, Mode=TwoWay}"
                             IsEnabled="{x:Bind ViewModel.UseDefaultChain, Mode=OneWay}"
-                            AutomationProperties.Name="AWS Profile"/>
+                            AutomationProperties.LabeledBy="{Binding ElementName=AwsProfileLabelText}"/>
 
                         <Button
+                            x:Uid="RefreshProfilesButton"
                             Grid.Column="1"
                             Width="{Binding ElementName=AwsProfileComboBox, Path=ActualHeight, Mode=OneWay}"
                             Height="{Binding ElementName=AwsProfileComboBox, Path=ActualHeight, Mode=OneWay}"
@@ -73,9 +104,10 @@
                             Command="{x:Bind ViewModel.LoadCredentialProfilesCommand}"
                             IsEnabled="{x:Bind ViewModel.CanRefreshProfiles, Mode=OneWay}"
                             AutomationProperties.Name="Refresh AWS profiles"
+                            AutomationProperties.AcceleratorKey="Ctrl+R"
                             ToolTipService.ToolTip="Refresh AWS profiles (Ctrl+R)">
 
-                            <FontIcon Glyph="&#xE72C;" />
+                            <FontIcon Glyph="&#xE72C;" AutomationProperties.AccessibilityView="Raw"/>
                             <Button.KeyboardAccelerators>
                                 <KeyboardAccelerator Key="R" Modifiers="Control"/>
                             </Button.KeyboardAccelerators>
@@ -84,10 +116,12 @@
                 </StackPanel>
 
                 <Button
+                    x:Uid="SignInButton"
                     Content="Sign In"
                     Command="{x:Bind ViewModel.LoginCommand}"
                     HorizontalAlignment="Stretch"
                     Style="{StaticResource AccentButtonStyle}" Margin="0,10,0,0"
+                    AutomationProperties.AcceleratorKey="Ctrl+Shift+S"
                     ToolTipService.ToolTip="Sign in (Ctrl+Shift+S)">
 
                     <Button.KeyboardAccelerators>
@@ -95,7 +129,7 @@
                     </Button.KeyboardAccelerators>
                 </Button>
 
-                <ProgressRing IsActive="{x:Bind ViewModel.IsBusy, Mode=OneWay}" HorizontalAlignment="Center" Margin="0,10,0,0"/>
+                <ProgressRing IsActive="{x:Bind ViewModel.IsBusy, Mode=OneWay}" HorizontalAlignment="Center" Margin="0,10,0,0" AutomationProperties.AccessibilityView="Raw"/>
             </StackPanel>
         </Grid>
     </Grid>

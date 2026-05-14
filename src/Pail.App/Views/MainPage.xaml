@@ -15,6 +15,7 @@
     </Page.KeyboardAccelerators>
 
     <NavigationView
+        x:Uid="MainNavigationView"
         x:Name="NavView"
         AlwaysShowHeader="False"
         BackRequested="OnBackRequested"
@@ -22,16 +23,23 @@
         IsPaneOpen="False"
         IsSettingsVisible="True"
         PaneDisplayMode="LeftCompact"
-        ItemInvoked="OnItemInvoked">
+        ItemInvoked="OnItemInvoked"
+        AutomationProperties.LandmarkType="Navigation"
+        AutomationProperties.LocalizedLandmarkType="Main navigation">
 
         <NavigationView.MenuItems>
-            <NavigationViewItem x:Name="BucketsNavItem" Content="Buckets" Tag="BucketListPage">
+            <NavigationViewItem x:Uid="BucketsNavItem" x:Name="BucketsNavItem" Content="Buckets" Tag="BucketListPage">
                 <NavigationViewItem.Icon>
                     <SymbolIcon Symbol="List" />
                 </NavigationViewItem.Icon>
             </NavigationViewItem>
         </NavigationView.MenuItems>
 
-        <Frame x:Name="ContentFrame" Navigated="OnContentFrameNavigated" />
+        <Frame
+            x:Uid="ContentFrame"
+            x:Name="ContentFrame"
+            Navigated="OnContentFrameNavigated"
+            AutomationProperties.LandmarkType="Main"
+            AutomationProperties.LocalizedLandmarkType="Page content" />
     </NavigationView>
 </Page>
