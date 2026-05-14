@@ -9,6 +9,34 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
+    <Page.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.ThemeDictionaries>
+                <ResourceDictionary x:Key="Default">
+                    <Style x:Key="BucketCreationDateTextBlockStyle" TargetType="TextBlock">
+                        <Setter Property="Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}" />
+                    </Style>
+                </ResourceDictionary>
+
+                <ResourceDictionary x:Key="Light">
+                    <Style x:Key="BucketCreationDateTextBlockStyle" TargetType="TextBlock">
+                        <Setter Property="Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}" />
+                    </Style>
+                </ResourceDictionary>
+
+                <ResourceDictionary x:Key="Dark">
+                    <Style x:Key="BucketCreationDateTextBlockStyle" TargetType="TextBlock">
+                        <Setter Property="Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}" />
+                    </Style>
+                </ResourceDictionary>
+
+                <ResourceDictionary x:Key="HighContrast">
+                    <Style x:Key="BucketCreationDateTextBlockStyle" TargetType="TextBlock" />
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
+        </ResourceDictionary>
+    </Page.Resources>
+
     <Page.KeyboardAccelerators>
         <KeyboardAccelerator x:Name="SearchKeyboardAcceleratorF" Key="F" Modifiers="Control" Invoked="OnPageKeyboardAcceleratorInvoked" />
         <KeyboardAccelerator x:Name="SearchKeyboardAcceleratorF3" Key="F3" Modifiers="None" Invoked="OnPageKeyboardAcceleratorInvoked"/>
@@ -109,7 +137,7 @@
 
                         <StackPanel>
                             <TextBlock Text="{x:Bind Name}" FontSize="16" FontWeight="SemiBold"/>
-                            <TextBlock Text="{x:Bind CreationDate}" FontSize="12" Foreground="Gray"/>
+                            <TextBlock Text="{x:Bind CreationDate}" FontSize="12" Style="{ThemeResource BucketCreationDateTextBlockStyle}"/>
                         </StackPanel>
                     </Grid>
                 </DataTemplate>

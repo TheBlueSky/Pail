@@ -29,7 +29,7 @@
 
         <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,0,0,12">
             <TextBlock x:Uid="ObjectBrowserTitle" Text="Browser" Style="{StaticResource TitleTextBlockStyle}" VerticalAlignment="Center" AutomationProperties.HeadingLevel="Level1"/>
-            <TextBlock Text="{x:Bind ViewModel.CurrentPath, Mode=OneWay}" VerticalAlignment="Center" Foreground="Gray"/>
+            <TextBlock Text="{x:Bind ViewModel.CurrentPath, Mode=OneWay}" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
         </StackPanel>
 
         <CommandBar
