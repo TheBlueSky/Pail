@@ -1,0 +1,672 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AppWindowTitle" xml:space="preserve">
+    <value>Pail - AWS S3 Browser</value>
+    <comment>Main window title</comment>
+  </data>
+  <data name="AppDisplayName" xml:space="preserve">
+    <value>Pail</value>
+    <comment>Application display name used by the Windows app manifest</comment>
+  </data>
+  <data name="AppPublisherDisplayName" xml:space="preserve">
+    <value>TheBlueSky</value>
+    <comment>Publisher display name used by the Windows app manifest</comment>
+  </data>
+  <data name="AppDescription" xml:space="preserve">
+    <value>S3 Browser for Windows</value>
+    <comment>Application description used by the Windows app manifest</comment>
+  </data>
+  <data name="ThemeModeLight" xml:space="preserve">
+    <value>Light</value>
+    <comment>App theme option: Light mode</comment>
+  </data>
+  <data name="ThemeModeDark" xml:space="preserve">
+    <value>Dark</value>
+    <comment>App theme option: Dark mode</comment>
+  </data>
+  <data name="ThemeModeSystem" xml:space="preserve">
+    <value>Use system setting</value>
+    <comment>App theme option: Follow system theme</comment>
+  </data>
+  <data name="AutomaticProfileOption" xml:space="preserve">
+    <value>Automatic (recommended)</value>
+    <comment>AWS profile selector option that lets the SDK choose credentials automatically</comment>
+  </data>
+  <data name="LoginTitle.Text" xml:space="preserve">
+    <value>Pail</value>
+    <comment>Sign-in page heading</comment>
+  </data>
+  <data name="LoginMainRegion.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.LocalizedLandmarkType" xml:space="preserve">
+    <value>Sign in</value>
+    <comment>Localized landmark type for the sign-in page main region</comment>
+  </data>
+  <data name="RegionCombo.Header" xml:space="preserve">
+    <value>Region</value>
+    <comment>AWS region selector label</comment>
+  </data>
+  <data name="PasteCredentialsButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Paste AWS Console Credentials</value>
+    <comment>Accessible name for paste credentials button</comment>
+  </data>
+  <data name="PasteCredentialsButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.AcceleratorKey" xml:space="preserve">
+    <value>Ctrl+Shift+P</value>
+    <comment>Keyboard shortcut announced for paste credentials button</comment>
+  </data>
+  <data name="PasteCredentialsButton.ToolTipService.ToolTip" xml:space="preserve">
+    <value>Paste AWS Console Credentials (Shift+Ctrl+P)</value>
+    <comment>Tooltip for paste credentials button</comment>
+  </data>
+  <data name="PasteCredentialsText.Text" xml:space="preserve">
+    <value>Paste AWS Console Credentials</value>
+    <comment>Paste credentials button label</comment>
+  </data>
+  <data name="AccessKeyInput.Header" xml:space="preserve">
+    <value>Access Key</value>
+    <comment>AWS access key field label</comment>
+  </data>
+  <data name="SecretKeyInput.Header" xml:space="preserve">
+    <value>Secret Key</value>
+    <comment>AWS secret key field label</comment>
+  </data>
+  <data name="SessionTokenInput.Header" xml:space="preserve">
+    <value>Session Token (Optional)</value>
+    <comment>AWS session token field label</comment>
+  </data>
+  <data name="DefaultChainCheckBox.Content" xml:space="preserve">
+    <value>Use Default Credential Chain</value>
+    <comment>Checkbox label for using default AWS credential chain</comment>
+  </data>
+  <data name="DefaultChainCheckBox.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.AcceleratorKey" xml:space="preserve">
+    <value>Ctrl+Shift+D</value>
+    <comment>Keyboard shortcut announced for default credential chain checkbox</comment>
+  </data>
+  <data name="DefaultChainCheckBox.ToolTipService.ToolTip" xml:space="preserve">
+    <value>Use the default AWS credential chain (Ctrl+Shift+D)</value>
+    <comment>Tooltip for default credential chain checkbox</comment>
+  </data>
+  <data name="AwsProfileLabel.Text" xml:space="preserve">
+    <value>AWS Profile</value>
+    <comment>Label above the AWS profile selector</comment>
+  </data>
+  <data name="RefreshProfilesButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Refresh AWS profiles</value>
+    <comment>Accessible name for refresh profiles button</comment>
+  </data>
+  <data name="RefreshProfilesButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.AcceleratorKey" xml:space="preserve">
+    <value>Ctrl+R</value>
+    <comment>Keyboard shortcut announced for refresh profiles button</comment>
+  </data>
+  <data name="RefreshProfilesButton.ToolTipService.ToolTip" xml:space="preserve">
+    <value>Refresh AWS profiles (Ctrl+R)</value>
+    <comment>Tooltip for refresh profiles button</comment>
+  </data>
+  <data name="SignInButton.Content" xml:space="preserve">
+    <value>Sign In</value>
+    <comment>Sign-in button label</comment>
+  </data>
+  <data name="SignInButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.AcceleratorKey" xml:space="preserve">
+    <value>Ctrl+Shift+S</value>
+    <comment>Keyboard shortcut announced for sign-in button</comment>
+  </data>
+  <data name="SignInButton.ToolTipService.ToolTip" xml:space="preserve">
+    <value>Sign in (Ctrl+Shift+S)</value>
+    <comment>Tooltip for sign-in button</comment>
+  </data>
+  <data name="BucketListMainRegion.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.LocalizedLandmarkType" xml:space="preserve">
+    <value>Bucket list</value>
+    <comment>Localized landmark type for the bucket list page main region</comment>
+  </data>
+  <data name="BucketSearchRegion.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.LocalizedLandmarkType" xml:space="preserve">
+    <value>Search buckets</value>
+    <comment>Localized landmark type for the bucket search region</comment>
+  </data>
+  <data name="BucketListTitle.Text" xml:space="preserve">
+    <value>S3 Buckets</value>
+    <comment>Bucket list page heading</comment>
+  </data>
+  <data name="SearchTextBox.PlaceholderText" xml:space="preserve">
+    <value>Search buckets</value>
+    <comment>Placeholder text for bucket search box</comment>
+  </data>
+  <data name="SearchTextBox.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Search buckets</value>
+    <comment>Accessible name for bucket search box</comment>
+  </data>
+  <data name="SearchTextBox.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.AcceleratorKey" xml:space="preserve">
+    <value>Ctrl+F, F3</value>
+    <comment>Keyboard shortcuts announced for bucket search box</comment>
+  </data>
+  <data name="SearchTextBox.ToolTipService.ToolTip" xml:space="preserve">
+    <value>Search buckets (Ctrl+F or F3)</value>
+    <comment>Tooltip for bucket search box</comment>
+  </data>
+  <data name="ReloadBucketsButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Reload buckets</value>
+    <comment>Accessible name for reload buckets button</comment>
+  </data>
+  <data name="ReloadBucketsButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.AcceleratorKey" xml:space="preserve">
+    <value>Ctrl+R, F5</value>
+    <comment>Keyboard shortcuts announced for reload buckets button</comment>
+  </data>
+  <data name="ReloadBucketsButton.ToolTipService.ToolTip" xml:space="preserve">
+    <value>Reload buckets (Ctrl+R or F5)</value>
+    <comment>Tooltip for reload buckets button</comment>
+  </data>
+  <data name="CopyBucketNameButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.AcceleratorKey" xml:space="preserve">
+    <value>Ctrl+C</value>
+    <comment>Keyboard shortcut announced for copy bucket name button</comment>
+  </data>
+  <data name="CopyBucketNameButton.ToolTipService.ToolTip" xml:space="preserve">
+    <value>Copy bucket name (Ctrl+C)</value>
+    <comment>Tooltip for copy bucket name button</comment>
+  </data>
+  <data name="CopyBucketNameText.Text" xml:space="preserve">
+    <value>Copy Bucket Name</value>
+    <comment>Copy bucket name button label</comment>
+  </data>
+  <data name="BucketListView.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>List of S3 buckets</value>
+    <comment>Accessible name for bucket list view</comment>
+  </data>
+  <data name="BucketCopyNameContext.Text" xml:space="preserve">
+    <value>Copy Bucket Name</value>
+    <comment>Context menu item for copying bucket name</comment>
+  </data>
+  <data name="ObjectBrowserMainRegion.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.LocalizedLandmarkType" xml:space="preserve">
+    <value>Object browser</value>
+    <comment>Localized landmark type for the object browser page main region</comment>
+  </data>
+  <data name="ObjectBrowserTitle.Text" xml:space="preserve">
+    <value>Browser</value>
+    <comment>Object browser page heading</comment>
+  </data>
+  <data name="ObjectBrowserCommandBar.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.LocalizedLandmarkType" xml:space="preserve">
+    <value>Object commands</value>
+    <comment>Localized landmark type for the object browser command bar</comment>
+  </data>
+  <data name="RefreshButton.Label" xml:space="preserve">
+    <value>Refresh</value>
+    <comment>Refresh button label in command bar</comment>
+  </data>
+  <data name="RefreshButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.AcceleratorKey" xml:space="preserve">
+    <value>Ctrl+R, F5</value>
+    <comment>Keyboard shortcuts announced for object browser refresh button</comment>
+  </data>
+  <data name="RefreshButton.ToolTipService.ToolTip" xml:space="preserve">
+    <value>Refresh (Ctrl+R, F5)</value>
+    <comment>Tooltip for refresh button</comment>
+  </data>
+  <data name="CopyNameButton.Label" xml:space="preserve">
+    <value>Copy Name</value>
+    <comment>Copy name button label in command bar</comment>
+  </data>
+  <data name="CopyNameButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.AcceleratorKey" xml:space="preserve">
+    <value>Ctrl+C</value>
+    <comment>Keyboard shortcut announced for copy name button</comment>
+  </data>
+  <data name="CopyNameButton.ToolTipService.ToolTip" xml:space="preserve">
+    <value>Copy Name (Ctrl+C)</value>
+    <comment>Tooltip for copy name button</comment>
+  </data>
+  <data name="CopyFullKeyButton.Label" xml:space="preserve">
+    <value>Copy Full Key</value>
+    <comment>Copy full key button label in command bar</comment>
+  </data>
+  <data name="CopyFullKeyButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.AcceleratorKey" xml:space="preserve">
+    <value>Ctrl+Shift+C</value>
+    <comment>Keyboard shortcut announced for copy full key button</comment>
+  </data>
+  <data name="CopyFullKeyButton.ToolTipService.ToolTip" xml:space="preserve">
+    <value>Copy Full Key (Ctrl+Shift+C)</value>
+    <comment>Tooltip for copy full key button</comment>
+  </data>
+  <data name="DownloadSelectedButton.Label" xml:space="preserve">
+    <value>Download Selected</value>
+    <comment>Download selected button label in command bar</comment>
+  </data>
+  <data name="DownloadSelectedButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.AcceleratorKey" xml:space="preserve">
+    <value>Ctrl+D</value>
+    <comment>Keyboard shortcut announced for download selected button</comment>
+  </data>
+  <data name="DownloadSelectedButton.ToolTipService.ToolTip" xml:space="preserve">
+    <value>Download Selected (Ctrl+D)</value>
+    <comment>Tooltip for download selected button</comment>
+  </data>
+  <data name="ObjectTableView.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>S3 objects table</value>
+    <comment>Accessible name for object table</comment>
+  </data>
+  <data name="ObjectCopyNameContext.Text" xml:space="preserve">
+    <value>Copy Name</value>
+    <comment>Context menu item for copying object name</comment>
+  </data>
+  <data name="ObjectCopyFullKeyContext.Text" xml:space="preserve">
+    <value>Copy Full Key</value>
+    <comment>Context menu item for copying object full key</comment>
+  </data>
+  <data name="ObjectNameColumn.Header" xml:space="preserve">
+    <value>Name</value>
+    <comment>Object table column header: Name</comment>
+  </data>
+  <data name="ObjectSizeColumn.Header" xml:space="preserve">
+    <value>Size</value>
+    <comment>Object table column header: Size</comment>
+  </data>
+  <data name="ObjectLastModifiedColumn.Header" xml:space="preserve">
+    <value>Last Modified</value>
+    <comment>Object table column header: Last Modified</comment>
+  </data>
+  <data name="LoadMoreButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.AcceleratorKey" xml:space="preserve">
+    <value>Ctrl+M</value>
+    <comment>Keyboard shortcut announced for load more button</comment>
+  </data>
+  <data name="LoadMoreText.Text" xml:space="preserve">
+    <value>Load more</value>
+    <comment>Load more objects button label</comment>
+  </data>
+  <data name="MainNavigationView.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.LocalizedLandmarkType" xml:space="preserve">
+    <value>Main navigation</value>
+    <comment>Localized landmark type for the main navigation view</comment>
+  </data>
+  <data name="ContentFrame.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.LocalizedLandmarkType" xml:space="preserve">
+    <value>Page content</value>
+    <comment>Localized landmark type for the page content frame</comment>
+  </data>
+  <data name="BucketsNavItem.Content" xml:space="preserve">
+    <value>Buckets</value>
+    <comment>Main navigation item: Buckets</comment>
+  </data>
+  <data name="SettingsMainRegion.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.LocalizedLandmarkType" xml:space="preserve">
+    <value>Settings</value>
+    <comment>Localized landmark type for the settings page main region</comment>
+  </data>
+  <data name="SettingsTitle.Text" xml:space="preserve">
+    <value>Settings</value>
+    <comment>Settings page heading</comment>
+  </data>
+  <data name="SettingsDescription.Text" xml:space="preserve">
+    <value>Configure how Pail looks and which defaults it uses when you sign in, browse, and download.</value>
+    <comment>Settings page description</comment>
+  </data>
+  <data name="SaveSettingsButton.Content" xml:space="preserve">
+    <value>Save</value>
+    <comment>Save settings button label</comment>
+  </data>
+  <data name="SaveSettingsButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.AcceleratorKey" xml:space="preserve">
+    <value>Ctrl+S</value>
+    <comment>Keyboard shortcut announced for save settings button</comment>
+  </data>
+  <data name="SaveSettingsButton.ToolTipService.ToolTip" xml:space="preserve">
+    <value>Save settings (Ctrl+S)</value>
+    <comment>Tooltip for save settings button</comment>
+  </data>
+  <data name="AppearanceSectionHeader.Text" xml:space="preserve">
+    <value>Appearance &amp; behaviour</value>
+    <comment>Settings section: Appearance and behaviour</comment>
+  </data>
+  <data name="AppThemeTitle.Text" xml:space="preserve">
+    <value>App theme</value>
+    <comment>Settings card: App theme title</comment>
+  </data>
+  <data name="AppThemeDescription.Text" xml:space="preserve">
+    <value>Choose whether the app follows the system theme or always uses a specific mode.</value>
+    <comment>Settings card: App theme description</comment>
+  </data>
+  <data name="StatusMessagesTitle.Text" xml:space="preserve">
+    <value>Status messages</value>
+    <comment>Settings card: Status messages title</comment>
+  </data>
+  <data name="StatusMessagesDescription.Text" xml:space="preserve">
+    <value>Control how long transient status overlays stay visible before they dismiss.</value>
+    <comment>Settings card: Status messages description</comment>
+  </data>
+  <data name="ObjectBrowserSectionHeader.Text" xml:space="preserve">
+    <value>Object browser</value>
+    <comment>Settings section: Object browser</comment>
+  </data>
+  <data name="InitialObjectLoadTitle.Text" xml:space="preserve">
+    <value>Initial object load</value>
+    <comment>Settings card: Initial object load title</comment>
+  </data>
+  <data name="InitialObjectLoadDescription.Text" xml:space="preserve">
+    <value>Choose how many rows Pail loads the first time a bucket folder opens or refreshes.</value>
+    <comment>Settings card: Initial object load description</comment>
+  </data>
+  <data name="InitialObjectLoadHint.Text" xml:space="preserve">
+    <value>Values above 1000 are fetched through multiple S3 requests.</value>
+    <comment>Settings card: Initial object load hint</comment>
+  </data>
+  <data name="LoadMoreBatchTitle.Text" xml:space="preserve">
+    <value>Load more batch size</value>
+    <comment>Settings card: Load more batch size title</comment>
+  </data>
+  <data name="LoadMoreBatchDescription.Text" xml:space="preserve">
+    <value>Set to 0 to reuse the initial load count, or choose a different batch size for each Load more click.</value>
+    <comment>Settings card: Load more batch size description</comment>
+  </data>
+  <data name="LoadMoreBatchHint.Text" xml:space="preserve">
+    <value>Values above 1000 are fetched through multiple S3 requests.</value>
+    <comment>Settings card: Load more batch size hint</comment>
+  </data>
+  <data name="DownloadsSectionHeader.Text" xml:space="preserve">
+    <value>Downloads</value>
+    <comment>Settings section: Downloads</comment>
+  </data>
+  <data name="DefaultDownloadFolderTitle.Text" xml:space="preserve">
+    <value>Default download folder</value>
+    <comment>Settings card: Default download folder title</comment>
+  </data>
+  <data name="DefaultDownloadFolderDescription.Text" xml:space="preserve">
+    <value>Choose where downloaded objects go unless you pick a different location.</value>
+    <comment>Settings card: Default download folder description</comment>
+  </data>
+  <data name="DownloadFolderInput.PlaceholderText" xml:space="preserve">
+    <value>e.g. C:\Downloads\Pail</value>
+    <comment>Download folder path placeholder</comment>
+  </data>
+  <data name="BrowseDownloadFolderButton.Content" xml:space="preserve">
+    <value>Browse</value>
+    <comment>Browse for download folder button</comment>
+  </data>
+  <data name="DownloadPromptsTitle.Text" xml:space="preserve">
+    <value>Download prompts</value>
+    <comment>Settings card: Download prompts title</comment>
+  </data>
+  <data name="DownloadPromptsDescription.Text" xml:space="preserve">
+    <value>Ask for a location every time before downloading an object.</value>
+    <comment>Settings card: Download prompts description</comment>
+  </data>
+  <data name="AwsLoginSectionHeader.Text" xml:space="preserve">
+    <value>AWS login defaults</value>
+    <comment>Settings section: AWS login defaults</comment>
+  </data>
+  <data name="DefaultRegionTitle.Text" xml:space="preserve">
+    <value>Default region</value>
+    <comment>Settings card: Default region title</comment>
+  </data>
+  <data name="DefaultRegionDescription.Text" xml:space="preserve">
+    <value>Preselect the region users see first on the sign-in page.</value>
+    <comment>Settings card: Default region description</comment>
+  </data>
+  <data name="CredentialChainTitle.Text" xml:space="preserve">
+    <value>Use credential chain by default</value>
+    <comment>Settings card: Credential chain title</comment>
+  </data>
+  <data name="CredentialChainDescription.Text" xml:space="preserve">
+    <value>Start with the default AWS credential chain enabled when users open the sign-in page.</value>
+    <comment>Settings card: Credential chain description</comment>
+  </data>
+  <data name="PreferredProfileTitle.Text" xml:space="preserve">
+    <value>Preferred profile name</value>
+    <comment>Settings card: Preferred profile title</comment>
+  </data>
+  <data name="PreferredProfileDescription.Text" xml:space="preserve">
+    <value>Leave blank to fall back to Automatic (recommended).</value>
+    <comment>Settings card: Preferred profile description</comment>
+  </data>
+  <data name="PreferredProfileInput.PlaceholderText" xml:space="preserve">
+    <value>Automatic (recommended)</value>
+    <comment>Preferred profile name placeholder</comment>
+  </data>
+  <data name="AccountSectionHeader.Text" xml:space="preserve">
+    <value>Account</value>
+    <comment>Settings section: Account</comment>
+  </data>
+  <data name="SignOutTitle.Text" xml:space="preserve">
+    <value>Sign out</value>
+    <comment>Settings card: Sign out title</comment>
+  </data>
+  <data name="SignOutDescription.Text" xml:space="preserve">
+    <value>Return to the sign-in page and switch to a different AWS account.</value>
+    <comment>Settings card: Sign out description</comment>
+  </data>
+  <data name="SignOutButton.Content" xml:space="preserve">
+    <value>Sign out</value>
+    <comment>Sign out button label</comment>
+  </data>
+  <data name="AboutSectionHeader.Text" xml:space="preserve">
+    <value>About</value>
+    <comment>Settings section: About</comment>
+  </data>
+  <data name="PailLogoImage.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Pail logo</value>
+    <comment>Accessible name for the Pail app logo</comment>
+  </data>
+  <data name="AboutAppName.Text" xml:space="preserve">
+    <value>Pail</value>
+    <comment>About card: app name</comment>
+  </data>
+  <data name="StatusInfoBar.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Status notifications</value>
+    <comment>Accessible name for transient status notifications</comment>
+  </data>
+  <data name="AboutAppDescription.Text" xml:space="preserve">
+    <value>AWS S3 browser for Windows.</value>
+    <comment>About card: app description</comment>
+  </data>
+  <data name="GitHubLink.Content" xml:space="preserve">
+    <value>GitHub repository</value>
+    <comment>Link to GitHub repository</comment>
+  </data>
+  <data name="ReleasesLink.Content" xml:space="preserve">
+    <value>Releases</value>
+    <comment>Link to GitHub releases</comment>
+  </data>
+  <data name="BucketListLoadFailed" xml:space="preserve">
+    <value>Failed to load buckets: {0}</value>
+    <comment>Status error shown when the S3 bucket list cannot be loaded. {0} is the error message.</comment>
+  </data>
+  <data name="BucketNameCopied" xml:space="preserve">
+    <value>Copied bucket name: {0}</value>
+    <comment>Status message shown after copying a bucket name. {0} is the bucket name.</comment>
+  </data>
+  <data name="BucketNameCopyFailed" xml:space="preserve">
+    <value>Failed to copy bucket name.</value>
+    <comment>Status error shown when copying a bucket name fails</comment>
+  </data>
+  <data name="AwsProfilesLoadFailed" xml:space="preserve">
+    <value>Failed to load AWS profiles: {0}</value>
+    <comment>Status error shown when AWS credential profiles cannot be loaded. {0} is the error message.</comment>
+  </data>
+  <data name="ClipboardMissingAwsCredentials" xml:space="preserve">
+    <value>Clipboard does not contain AWS Console credentials.</value>
+    <comment>Status error shown when the clipboard is empty or has no AWS console credentials</comment>
+  </data>
+  <data name="ClipboardInvalidAwsCredentials" xml:space="preserve">
+    <value>Clipboard text is not in the expected AWS Console credential format.</value>
+    <comment>Status error shown when pasted AWS console credentials cannot be parsed</comment>
+  </data>
+  <data name="LoginFailed" xml:space="preserve">
+    <value>Login failed: {0}</value>
+    <comment>Status error shown when S3 login fails. {0} is the error message.</comment>
+  </data>
+  <data name="BucketRegionMismatch" xml:space="preserve">
+    <value>This bucket is in a different region than the one you connected with. Please reconnect with the correct region.</value>
+    <comment>Status error shown when S3 reports that the bucket is in a different region</comment>
+  </data>
+  <data name="ObjectLoadFailed" xml:space="preserve">
+    <value>Failed to load objects: {0}</value>
+    <comment>Status error shown when S3 objects cannot be loaded. {0} is the error message.</comment>
+  </data>
+  <data name="ObjectLoadMoreFailed" xml:space="preserve">
+    <value>Failed to load more objects: {0}</value>
+    <comment>Status error shown when loading another page of S3 objects fails. {0} is the error message.</comment>
+  </data>
+  <data name="DownloadCancelled" xml:space="preserve">
+    <value>Download cancelled.</value>
+    <comment>Status message shown when the user cancels folder selection before download</comment>
+  </data>
+  <data name="DownloadComplete" xml:space="preserve">
+    <value>Download complete! Files saved to: {0}</value>
+    <comment>Status message shown after a successful download. {0} is the destination folder.</comment>
+  </data>
+  <data name="DownloadFailed" xml:space="preserve">
+    <value>Download failed: {0}</value>
+    <comment>Status error shown when download fails. {0} is the error message.</comment>
+  </data>
+  <data name="ObjectNamesCopied" xml:space="preserve">
+    <value>Copied object names.</value>
+    <comment>Status message shown after copying selected S3 object names</comment>
+  </data>
+  <data name="ObjectNamesCopyFailed" xml:space="preserve">
+    <value>Failed to copy object names.</value>
+    <comment>Status error shown when copying selected S3 object names fails</comment>
+  </data>
+  <data name="ObjectFullKeysCopied" xml:space="preserve">
+    <value>Copied full keys.</value>
+    <comment>Status message shown after copying selected S3 object full keys</comment>
+  </data>
+  <data name="ObjectFullKeysCopyFailed" xml:space="preserve">
+    <value>Failed to copy full keys.</value>
+    <comment>Status error shown when copying selected S3 object full keys fails</comment>
+  </data>
+  <data name="ObjectLoadedOneItemStatus" xml:space="preserve">
+    <value>Loaded 1 item</value>
+    <comment>Status text shown when exactly one S3 object row is loaded</comment>
+  </data>
+  <data name="ObjectLoadedOneItemMoreAvailableStatus" xml:space="preserve">
+    <value>Loaded 1 item, more available</value>
+    <comment>Status text shown when exactly one S3 object row is loaded and more rows are available</comment>
+  </data>
+  <data name="ObjectLoadedItemsStatus" xml:space="preserve">
+    <value>Loaded {0} items</value>
+    <comment>Status text shown with the number of loaded S3 object rows. {0} is the item count.</comment>
+  </data>
+  <data name="ObjectLoadedItemsMoreAvailableStatus" xml:space="preserve">
+    <value>Loaded {0} items, more available</value>
+    <comment>Status text shown with the number of loaded S3 object rows when more rows are available. {0} is the item count.</comment>
+  </data>
+  <data name="FolderSelectFailed" xml:space="preserve">
+    <value>Failed to select folder: {0}</value>
+    <comment>Status error shown when the folder picker fails. {0} is the error message.</comment>
+  </data>
+  <data name="SettingsSavedThemeApplyFailed" xml:space="preserve">
+    <value>Settings saved, but failed to apply theme: {0}</value>
+    <comment>Status error shown when settings are saved but applying the selected theme fails. {0} is the error message.</comment>
+  </data>
+  <data name="SettingsSaved" xml:space="preserve">
+    <value>Settings saved.</value>
+    <comment>Status message shown after settings are saved successfully</comment>
+  </data>
+  <data name="SettingsSaveFailed" xml:space="preserve">
+    <value>Failed to save settings: {0}</value>
+    <comment>Status error shown when settings cannot be saved. {0} is the error message.</comment>
+  </data>
+</root>

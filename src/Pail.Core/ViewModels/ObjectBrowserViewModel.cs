@@ -14,6 +14,7 @@ public partial class ObjectBrowserViewModel : ObservableObject
 	private readonly IFolderPickerService _folderPickerService;
 	private readonly ISettingsService _settingsService;
 	private readonly IStatusMessageService _statusMessageService;
+	private readonly ILocalizationService _localizationService;
 	private readonly Stack<string> _pathStack = new();
 	private string? _nextContinuationToken;
 
@@ -26,7 +27,8 @@ public partial class ObjectBrowserViewModel : ObservableObject
 		ICopyActionService copyActionService,
 		IFolderPickerService folderPickerService,
 		ISettingsService settingsService,
-		IStatusMessageService statusMessageService)
+		IStatusMessageService statusMessageService,
+		ILocalizationService localizationService)
 	{
 		_s3Service = s3Service;
 		_navigationService = navigationService;
@@ -34,6 +36,9 @@ public partial class ObjectBrowserViewModel : ObservableObject
 		_folderPickerService = folderPickerService;
 		_settingsService = settingsService;
 		_statusMessageService = statusMessageService;
+		_localizationService = localizationService;
+
+		UpdateLoadedItemsStatus();
 	}
 
 	[ObservableProperty]
@@ -57,7 +62,7 @@ public partial class ObjectBrowserViewModel : ObservableObject
 	public partial bool HasMoreItems { get; set; }
 
 	[ObservableProperty]
-	public partial string LoadedItemsStatus { get; set; } = "Loaded 0 items";
+	public partial string LoadedItemsStatus { get; set; } = string.Empty;
 
 	public ObservableCollection<S3ObjectItem> Items { get; } = [];
 
@@ -100,8 +105,8 @@ public partial class ObjectBrowserViewModel : ObservableObject
 			ClearPagingState();
 
 			var message = ex is Amazon.S3.AmazonS3Exception s3Ex && s3Ex.ErrorCode == "PermanentRedirect"
-				? "This bucket is in a different region than the one you connected with. Please reconnect with the correct region."
-				: $"Failed to load objects: {ex.Message}";
+				? _localizationService.GetString("BucketRegionMismatch", "This bucket is in a different region than the one you connected with. Please reconnect with the correct region.")
+				: _localizationService.FormatString("ObjectLoadFailed", "Failed to load objects: {0}", ex.Message);
 
 			_statusMessageService.ShowError(message);
 		}
@@ -144,8 +149,8 @@ public partial class ObjectBrowserViewModel : ObservableObject
 		catch (Exception ex)
 		{
 			var message = ex is Amazon.S3.AmazonS3Exception s3Ex && s3Ex.ErrorCode == "PermanentRedirect"
-				? "This bucket is in a different region than the one you connected with. Please reconnect with the correct region."
-				: $"Failed to load more objects: {ex.Message}";
+				? _localizationService.GetString("BucketRegionMismatch", "This bucket is in a different region than the one you connected with. Please reconnect with the correct region.")
+				: _localizationService.FormatString("ObjectLoadMoreFailed", "Failed to load more objects: {0}", ex.Message);
 
 			_statusMessageService.ShowError(message);
 		}
@@ -216,7 +221,7 @@ public partial class ObjectBrowserViewModel : ObservableObject
 
 				if (string.IsNullOrWhiteSpace(selectedFolder))
 				{
-					_statusMessageService.ShowInfo("Download cancelled.");
+					_statusMessageService.ShowInfo(_localizationService.GetString("DownloadCancelled", "Download cancelled."));
 					return;
 				}
 
@@ -242,7 +247,7 @@ public partial class ObjectBrowserViewModel : ObservableObject
 				}
 			}
 
-			_statusMessageService.ShowInfo($"Download complete! Files saved to: {downloadsFolder}");
+			_statusMessageService.ShowInfo(_localizationService.FormatString("DownloadComplete", "Download complete! Files saved to: {0}", downloadsFolder));
 
 			static string ResolveDownloadFolder(string? downloadFolder)
 			{
@@ -253,7 +258,7 @@ public partial class ObjectBrowserViewModel : ObservableObject
 		}
 		catch (Exception ex)
 		{
-			_statusMessageService.ShowError($"Download failed: {ex.Message}");
+			_statusMessageService.ShowError(_localizationService.FormatString("DownloadFailed", "Download failed: {0}", ex.Message));
 		}
 		finally
 		{
@@ -273,8 +278,8 @@ public partial class ObjectBrowserViewModel : ObservableObject
 
 		await _copyActionService.CopyWithFeedbackAsync(
 			string.Join(Environment.NewLine, names),
-			$"Copied object names.",
-			"Failed to copy object names.");
+			_localizationService.GetString("ObjectNamesCopied", "Copied object names."),
+			_localizationService.GetString("ObjectNamesCopyFailed", "Failed to copy object names."));
 	}
 
 	[RelayCommand(CanExecute = nameof(CanCopySelectedObject))]
@@ -289,8 +294,8 @@ public partial class ObjectBrowserViewModel : ObservableObject
 
 		await _copyActionService.CopyWithFeedbackAsync(
 			string.Join(Environment.NewLine, keys),
-			$"Copied full keys.",
-			"Failed to copy full keys.");
+			_localizationService.GetString("ObjectFullKeysCopied", "Copied full keys."),
+			_localizationService.GetString("ObjectFullKeysCopyFailed", "Failed to copy full keys."));
 	}
 
 	private bool CanCopySelectedObject() => IsBusy is false;
@@ -334,11 +339,12 @@ public partial class ObjectBrowserViewModel : ObservableObject
 		UpdateLoadedItemsStatus();
 	}
 
-	private void UpdateLoadedItemsStatus()
-	{
-		var label = Items.Count == 1 ? "item" : "items";
-		LoadedItemsStatus = HasMoreItems
-			? $"Loaded {Items.Count} {label}, more available"
-			: $"Loaded {Items.Count} {label}";
-	}
+	private void UpdateLoadedItemsStatus() =>
+		LoadedItemsStatus = Items.Count == 1
+			? HasMoreItems
+				? _localizationService.GetString("ObjectLoadedOneItemMoreAvailableStatus", "Loaded 1 item, more available")
+				: _localizationService.GetString("ObjectLoadedOneItemStatus", "Loaded 1 item")
+			: HasMoreItems
+				? _localizationService.FormatString("ObjectLoadedItemsMoreAvailableStatus", "Loaded {0} items, more available", Items.Count)
+				: _localizationService.FormatString("ObjectLoadedItemsStatus", "Loaded {0} items", Items.Count);
 }

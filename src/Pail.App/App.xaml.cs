@@ -42,6 +42,7 @@ public partial class PailApp : Application
 		services.AddSingleton<IClipboardService, ClipboardService>();
 		services.AddSingleton<ICopyActionService, CopyActionService>();
 		services.AddSingleton<IFolderPickerService, FolderPickerService>();
+		services.AddSingleton<ILocalizationService, ResourceLocalizationService>();
 		services.AddSingleton<INavigationHostService, NavigationService>();
 		services.AddSingleton<INavigationService>(serviceProvider => serviceProvider.GetRequiredService<INavigationHostService>());
 		services.AddSingleton<IS3Service, S3Service>();
@@ -59,7 +60,7 @@ public partial class PailApp : Application
 
 	protected override void OnLaunched(LaunchActivatedEventArgs e)
 	{
-		_window = new Window { Title = "Pail – AWS S3 Browser" };
+		_window = new Window { Title = Services.GetRequiredService<ILocalizationService>().GetString("AppWindowTitle", "Pail – AWS S3 Browser") };
 		MainWindow = _window;
 		_rootFrame = CreateRootFrame();
 		_window.Content = CreateShellRoot(_rootFrame);

@@ -1,5 +1,6 @@
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
+using Pail.Core.Tests.Unit.TestInfrastructure;
 using Pail.Models;
 using Pail.Services;
 using Pail.ViewModels;
@@ -8,6 +9,8 @@ namespace Pail.Core.Tests.Unit.ViewModels;
 
 public sealed class LoginViewModelTests
 {
+	private const string AutomaticProfileOption = "Automatic (recommended)";
+
 	private readonly IAwsProfileService _awsProfileService = Substitute.For<IAwsProfileService>();
 	private readonly IS3Service _s3Service = Substitute.For<IS3Service>();
 	private readonly INavigationService _navigationService = Substitute.For<INavigationService>();
@@ -15,6 +18,7 @@ public sealed class LoginViewModelTests
 	private readonly IClipboardService _clipboardService = Substitute.For<IClipboardService>();
 	private readonly IAwsConsoleCredentialsParser _awsConsoleCredentialsParser = Substitute.For<IAwsConsoleCredentialsParser>();
 	private readonly IStatusMessageService _statusMessageService = Substitute.For<IStatusMessageService>();
+	private readonly ILocalizationService _localizationService = Substitute.For<ILocalizationService>();
 	private readonly AppSettings _appSettings = new();
 
 	public LoginViewModelTests()
@@ -22,6 +26,8 @@ public sealed class LoginViewModelTests
 		_settingsService.DefaultRegion.Returns(_ => _appSettings.DefaultRegion);
 		_settingsService.UseCredentialChainByDefault.Returns(_ => _appSettings.UseCredentialChainByDefault);
 		_settingsService.LastProfileName.Returns(_ => _appSettings.LastProfileName);
+
+		_localizationService.ReturnsFallbackStrings();
 	}
 
 	[Fact]
@@ -56,7 +62,7 @@ public sealed class LoginViewModelTests
 		await viewModel.LoadCredentialProfilesAsync();
 
 		// Assert
-		Assert.Equal([LoginViewModel.AutomaticProfileOption, "dev", "prod"], viewModel.AvailableProfiles);
+		Assert.Equal([AutomaticProfileOption, "dev", "prod"], viewModel.AvailableProfiles);
 		Assert.Equal("prod", viewModel.SelectedProfileName);
 	}
 
@@ -73,7 +79,7 @@ public sealed class LoginViewModelTests
 		await viewModel.LoadCredentialProfilesAsync();
 
 		// Assert
-		Assert.Equal(LoginViewModel.AutomaticProfileOption, viewModel.SelectedProfileName);
+		Assert.Equal(AutomaticProfileOption, viewModel.SelectedProfileName);
 	}
 
 	[Fact]
@@ -91,7 +97,7 @@ public sealed class LoginViewModelTests
 		await viewModel.LoadCredentialProfilesCommand.ExecuteAsync(null);
 
 		// Assert
-		Assert.Equal([LoginViewModel.AutomaticProfileOption, "dev", "stage", "prod"], viewModel.AvailableProfiles);
+		Assert.Equal([AutomaticProfileOption, "dev", "stage", "prod"], viewModel.AvailableProfiles);
 		Assert.Equal("prod", viewModel.SelectedProfileName);
 	}
 
@@ -292,5 +298,5 @@ public sealed class LoginViewModelTests
 	}
 
 	private LoginViewModel CreateViewModel() =>
-		new(_awsProfileService, _s3Service, _navigationService, _settingsService, _clipboardService, _awsConsoleCredentialsParser, _statusMessageService);
+		new(_awsProfileService, _s3Service, _navigationService, _settingsService, _clipboardService, _awsConsoleCredentialsParser, _statusMessageService, _localizationService);
 }

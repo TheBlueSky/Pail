@@ -1,4 +1,5 @@
 using NSubstitute;
+using Pail.Core.Tests.Unit.TestInfrastructure;
 using Pail.Models;
 using Pail.Services;
 using Pail.ViewModels;
@@ -11,12 +12,18 @@ public sealed class BucketListViewModelTests
 	private readonly INavigationService _navigationService = Substitute.For<INavigationService>();
 	private readonly ICopyActionService _copyActionService = Substitute.For<ICopyActionService>();
 	private readonly IStatusMessageService _statusMessageService = Substitute.For<IStatusMessageService>();
+	private readonly ILocalizationService _localizationService = Substitute.For<ILocalizationService>();
+
+	public BucketListViewModelTests()
+	{
+		_localizationService.ReturnsFallbackStrings();
+	}
 
 	[Fact]
 	internal async Task LoadBuckets_PopulatesBucketsCollection()
 	{
 		// Arrange
-		var viewModel = new BucketListViewModel(_s3Service, _navigationService, _copyActionService, _statusMessageService);
+		var viewModel = new BucketListViewModel(_s3Service, _navigationService, _copyActionService, _statusMessageService, _localizationService);
 
 		var buckets = new List<S3BucketItem>
 		{
@@ -39,7 +46,7 @@ public sealed class BucketListViewModelTests
 	internal async Task CopyBucketNameCommand_SelectedBucket_CopiesAndShowsSuccessMessage()
 	{
 		// Arrange
-		var viewModel = new BucketListViewModel(_s3Service, _navigationService, _copyActionService, _statusMessageService)
+		var viewModel = new BucketListViewModel(_s3Service, _navigationService, _copyActionService, _statusMessageService, _localizationService)
 		{
 			SelectedBucket = new S3BucketItem("my-bucket", null),
 		};
@@ -58,7 +65,7 @@ public sealed class BucketListViewModelTests
 	internal async Task CopyBucketNameCommand_NoSelection_DoesNotCopy()
 	{
 		// Arrange
-		var viewModel = new BucketListViewModel(_s3Service, _navigationService, _copyActionService, _statusMessageService);
+		var viewModel = new BucketListViewModel(_s3Service, _navigationService, _copyActionService, _statusMessageService, _localizationService);
 
 		// Act
 		await viewModel.CopyBucketNameCommand.ExecuteAsync(null);
@@ -71,7 +78,7 @@ public sealed class BucketListViewModelTests
 	internal async Task SearchText_FiltersBucketsCaseInsensitively()
 	{
 		// Arrange
-		var viewModel = new BucketListViewModel(_s3Service, _navigationService, _copyActionService, _statusMessageService);
+		var viewModel = new BucketListViewModel(_s3Service, _navigationService, _copyActionService, _statusMessageService, _localizationService);
 
 		_s3Service
 			.GetBucketsAsync()
@@ -96,7 +103,7 @@ public sealed class BucketListViewModelTests
 	internal async Task SearchText_EmptyString_RestoresAllBuckets()
 	{
 		// Arrange
-		var viewModel = new BucketListViewModel(_s3Service, _navigationService, _copyActionService, _statusMessageService);
+		var viewModel = new BucketListViewModel(_s3Service, _navigationService, _copyActionService, _statusMessageService, _localizationService);
 
 		_s3Service
 			.GetBucketsAsync()
@@ -124,7 +131,7 @@ public sealed class BucketListViewModelTests
 	internal async Task LoadBuckets_PreservesActiveSearchFilter()
 	{
 		// Arrange
-		var viewModel = new BucketListViewModel(_s3Service, _navigationService, _copyActionService, _statusMessageService);
+		var viewModel = new BucketListViewModel(_s3Service, _navigationService, _copyActionService, _statusMessageService, _localizationService);
 
 		_s3Service
 			.GetBucketsAsync()
@@ -153,7 +160,7 @@ public sealed class BucketListViewModelTests
 	internal async Task SearchText_ClearsSelectionWhenSelectedBucketIsFilteredOut()
 	{
 		// Arrange
-		var viewModel = new BucketListViewModel(_s3Service, _navigationService, _copyActionService, _statusMessageService);
+		var viewModel = new BucketListViewModel(_s3Service, _navigationService, _copyActionService, _statusMessageService, _localizationService);
 
 		_s3Service
 			.GetBucketsAsync()

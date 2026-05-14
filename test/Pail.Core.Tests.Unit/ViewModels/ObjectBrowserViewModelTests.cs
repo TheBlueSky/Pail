@@ -1,4 +1,5 @@
 using NSubstitute;
+using Pail.Core.Tests.Unit.TestInfrastructure;
 using Pail.Models;
 using Pail.Services;
 using Pail.ViewModels;
@@ -13,6 +14,7 @@ public sealed class ObjectBrowserViewModelTests
 	private readonly IFolderPickerService _folderPickerService = Substitute.For<IFolderPickerService>();
 	private readonly ISettingsService _settingsService = Substitute.For<ISettingsService>();
 	private readonly IStatusMessageService _statusMessageService = Substitute.For<IStatusMessageService>();
+	private readonly ILocalizationService _localizationService = Substitute.For<ILocalizationService>();
 	private readonly string _defaultDownloadFolder = Path.Combine(Path.GetTempPath(), "Pail.Tests", "Downloads.Default");
 	private readonly string _pickedDownloadFolder = Path.Combine(Path.GetTempPath(), "Pail.Tests", "Downloads.Picked");
 	private readonly AppSettings _appSettings = new()
@@ -40,13 +42,15 @@ public sealed class ObjectBrowserViewModelTests
 				callInfo.Arg<Action<AppSettings>>().Invoke(_appSettings);
 				return Task.CompletedTask;
 			});
+
+		_localizationService.ReturnsFallbackStrings();
 	}
 
 	[Fact]
 	internal async Task CopyObjectNameCommand_SelectedItem_CopiesAndShowsSuccessMessage()
 	{
 		// Arrange
-		var viewModel = new ObjectBrowserViewModel(_s3Service, _navigationService, _copyActionService, _folderPickerService, _settingsService, _statusMessageService);
+		var viewModel = CreateViewModel();
 		var selectedItems = new List<S3ObjectItem>
 		{
 			new() { Name = "report.csv", Key = "reports/report.csv", IsFolder = false },
@@ -66,7 +70,7 @@ public sealed class ObjectBrowserViewModelTests
 	internal async Task CopyObjectFullKeyCommand_SelectedItem_CopiesAndShowsSuccessMessage()
 	{
 		// Arrange
-		var viewModel = new ObjectBrowserViewModel(_s3Service, _navigationService, _copyActionService, _folderPickerService, _settingsService, _statusMessageService);
+		var viewModel = CreateViewModel();
 		var selectedItems = new List<S3ObjectItem>
 		{
 			new() { Name = "report.csv", Key = "reports/report.csv", IsFolder = false },
@@ -86,7 +90,7 @@ public sealed class ObjectBrowserViewModelTests
 	internal async Task CopyCommands_NoSelection_DoNotCopy()
 	{
 		// Arrange
-		var viewModel = new ObjectBrowserViewModel(_s3Service, _navigationService, _copyActionService, _folderPickerService, _settingsService, _statusMessageService);
+		var viewModel = CreateViewModel();
 
 		// Act
 		await viewModel.CopyObjectNameCommand.ExecuteAsync(null);
@@ -100,7 +104,7 @@ public sealed class ObjectBrowserViewModelTests
 	internal async Task DownloadSelectedCommand_AlwaysPromptDisabled_UsesSavedDownloadFolder()
 	{
 		// Arrange
-		var viewModel = new ObjectBrowserViewModel(_s3Service, _navigationService, _copyActionService, _folderPickerService, _settingsService, _statusMessageService);
+		var viewModel = CreateViewModel();
 		await viewModel.InitializeAsync("bucket-a");
 
 		var selectedItems = new List<S3ObjectItem>
@@ -124,7 +128,7 @@ public sealed class ObjectBrowserViewModelTests
 		_appSettings.AlwaysPromptDownloadLocation = true;
 		_folderPickerService.PickFolderAsync().Returns(_pickedDownloadFolder);
 
-		var viewModel = new ObjectBrowserViewModel(_s3Service, _navigationService, _copyActionService, _folderPickerService, _settingsService, _statusMessageService);
+		var viewModel = CreateViewModel();
 		await viewModel.InitializeAsync("bucket-a");
 
 		var selectedItems = new List<S3ObjectItem>
@@ -148,7 +152,7 @@ public sealed class ObjectBrowserViewModelTests
 		_appSettings.AlwaysPromptDownloadLocation = true;
 		_folderPickerService.PickFolderAsync().Returns((string?)null);
 
-		var viewModel = new ObjectBrowserViewModel(_s3Service, _navigationService, _copyActionService, _folderPickerService, _settingsService, _statusMessageService);
+		var viewModel = CreateViewModel();
 		await viewModel.InitializeAsync("bucket-a");
 
 		var selectedItems = new List<S3ObjectItem>
@@ -393,7 +397,7 @@ public sealed class ObjectBrowserViewModelTests
 	}
 
 	private ObjectBrowserViewModel CreateViewModel() =>
-		new(_s3Service, _navigationService, _copyActionService, _folderPickerService, _settingsService, _statusMessageService);
+		new(_s3Service, _navigationService, _copyActionService, _folderPickerService, _settingsService, _statusMessageService, _localizationService);
 
 	private static S3ObjectItem CreateObject(string name, string key) =>
 		new()

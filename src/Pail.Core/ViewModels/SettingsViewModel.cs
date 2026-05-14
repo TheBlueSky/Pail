@@ -12,19 +12,22 @@ public partial class SettingsViewModel : ObservableObject
 	private readonly IFolderPickerService _folderPickerService;
 	private readonly IStatusMessageService _statusMessageService;
 	private readonly INavigationService _navigationService;
+	private readonly ILocalizationService _localizationService;
 
 	public SettingsViewModel(
 		IAppThemeService appThemeService,
 		ISettingsService settingsService,
 		IFolderPickerService folderPickerService,
 		IStatusMessageService statusMessageService,
-		INavigationService navigationService)
+		INavigationService navigationService,
+		ILocalizationService localizationService)
 	{
 		_appThemeService = appThemeService;
 		_settingsService = settingsService;
 		_folderPickerService = folderPickerService;
 		_statusMessageService = statusMessageService;
 		_navigationService = navigationService;
+		_localizationService = localizationService;
 
 		AppTheme = _settingsService.AppTheme;
 		DownloadFolder = _settingsService.DownloadFolder;
@@ -91,7 +94,7 @@ public partial class SettingsViewModel : ObservableObject
 		}
 		catch (Exception ex)
 		{
-			_statusMessageService.ShowError($"Failed to select folder: {ex.Message}");
+			_statusMessageService.ShowError(_localizationService.FormatString("FolderSelectFailed", "Failed to select folder: {0}", ex.Message));
 		}
 	}
 
@@ -127,15 +130,15 @@ public partial class SettingsViewModel : ObservableObject
 			}
 			catch (Exception ex)
 			{
-				_statusMessageService.ShowError($"Settings saved, but failed to apply theme: {ex.Message}");
+				_statusMessageService.ShowError(_localizationService.FormatString("SettingsSavedThemeApplyFailed", "Settings saved, but failed to apply theme: {0}", ex.Message));
 				return;
 			}
 
-			_statusMessageService.ShowInfo("Settings saved.");
+			_statusMessageService.ShowInfo(_localizationService.GetString("SettingsSaved", "Settings saved."));
 		}
 		catch (Exception ex)
 		{
-			_statusMessageService.ShowError($"Failed to save settings: {ex.Message}");
+			_statusMessageService.ShowError(_localizationService.FormatString("SettingsSaveFailed", "Failed to save settings: {0}", ex.Message));
 		}
 		finally
 		{

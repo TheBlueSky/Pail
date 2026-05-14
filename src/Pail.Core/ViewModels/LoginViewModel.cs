@@ -8,7 +8,7 @@ namespace Pail.ViewModels;
 
 public partial class LoginViewModel : ObservableObject
 {
-	public const string AutomaticProfileOption = "Automatic (recommended)";
+	private const string AutomaticProfileOption = "Automatic (recommended)";
 
 	private readonly IAwsProfileService _awsProfileService;
 	private readonly IS3Service _s3Service;
@@ -17,6 +17,8 @@ public partial class LoginViewModel : ObservableObject
 	private readonly IClipboardService _clipboardService;
 	private readonly IAwsConsoleCredentialsParser _awsConsoleCredentialsParser;
 	private readonly IStatusMessageService _statusMessageService;
+	private readonly ILocalizationService _localizationService;
+	private readonly string _automaticProfileOption;
 
 	public LoginViewModel(
 		IAwsProfileService awsProfileService,
@@ -25,7 +27,8 @@ public partial class LoginViewModel : ObservableObject
 		ISettingsService settingsService,
 		IClipboardService clipboardService,
 		IAwsConsoleCredentialsParser awsConsoleCredentialsParser,
-		IStatusMessageService statusMessageService)
+		IStatusMessageService statusMessageService,
+		ILocalizationService localizationService)
 	{
 		_awsProfileService = awsProfileService;
 		_s3Service = s3Service;
@@ -34,10 +37,13 @@ public partial class LoginViewModel : ObservableObject
 		_clipboardService = clipboardService;
 		_awsConsoleCredentialsParser = awsConsoleCredentialsParser;
 		_statusMessageService = statusMessageService;
+		_localizationService = localizationService;
+
+		_automaticProfileOption = GetAutomaticProfileOption();
 
 		Region = string.IsNullOrWhiteSpace(_settingsService.DefaultRegion) ? Region : _settingsService.DefaultRegion;
 		UseDefaultChain = _settingsService.UseCredentialChainByDefault;
-		SelectedProfileName = string.IsNullOrWhiteSpace(_settingsService.LastProfileName) ? AutomaticProfileOption : _settingsService.LastProfileName;
+		SelectedProfileName = string.IsNullOrWhiteSpace(_settingsService.LastProfileName) ? _automaticProfileOption : _settingsService.LastProfileName;
 	}
 
 	[ObservableProperty]
@@ -57,7 +63,7 @@ public partial class LoginViewModel : ObservableObject
 	public partial bool UseDefaultChain { get; set; }
 
 	[ObservableProperty]
-	public partial string SelectedProfileName { get; set; } = AutomaticProfileOption;
+	public partial string SelectedProfileName { get; set; } = string.Empty;
 
 	[ObservableProperty]
 	public partial bool IsBusy { get; set; }
@@ -66,7 +72,7 @@ public partial class LoginViewModel : ObservableObject
 	[NotifyPropertyChangedFor(nameof(CanRefreshProfiles))]
 	public partial bool IsLoadingCredentialProfiles { get; set; }
 
-	public ObservableCollection<string> AvailableProfiles { get; } = [AutomaticProfileOption];
+	public ObservableCollection<string> AvailableProfiles { get; } = [];
 
 	public IReadOnlyList<string> AvailableRegions { get; } = AwsRegions.All;
 
@@ -84,10 +90,10 @@ public partial class LoginViewModel : ObservableObject
 
 		try
 		{
-			var profileNames = await _awsProfileService.GetProfileNamesAsync();
-
 			AvailableProfiles.Clear();
-			AvailableProfiles.Add(AutomaticProfileOption);
+			AvailableProfiles.Add(_automaticProfileOption);
+
+			var profileNames = await _awsProfileService.GetProfileNamesAsync();
 
 			foreach (var profileName in profileNames)
 			{
@@ -96,12 +102,12 @@ public partial class LoginViewModel : ObservableObject
 
 			if (!AvailableProfiles.Any(profileName => IAwsProfileService.ProfileNameComparer.Equals(profileName, SelectedProfileName)))
 			{
-				SelectedProfileName = AutomaticProfileOption;
+				SelectedProfileName = _automaticProfileOption;
 			}
 		}
 		catch (Exception ex)
 		{
-			_statusMessageService.ShowError($"Failed to load AWS profiles: {ex.Message}");
+			_statusMessageService.ShowError(_localizationService.FormatString("AwsProfilesLoadFailed", "Failed to load AWS profiles: {0}", ex.Message));
 		}
 		finally
 		{
@@ -116,7 +122,7 @@ public partial class LoginViewModel : ObservableObject
 
 		if (string.IsNullOrWhiteSpace(clipboardText))
 		{
-			_statusMessageService.ShowError("Clipboard does not contain AWS Console credentials.");
+			_statusMessageService.ShowError(_localizationService.GetString("ClipboardMissingAwsCredentials", "Clipboard does not contain AWS Console credentials."));
 			return;
 		}
 
@@ -124,7 +130,7 @@ public partial class LoginViewModel : ObservableObject
 
 		if (parsedCredentials is null)
 		{
-			_statusMessageService.ShowError("Clipboard text is not in the expected AWS Console credential format.");
+			_statusMessageService.ShowError(_localizationService.GetString("ClipboardInvalidAwsCredentials", "Clipboard text is not in the expected AWS Console credential format."));
 			return;
 		}
 
@@ -154,14 +160,19 @@ public partial class LoginViewModel : ObservableObject
 		}
 		catch (Exception ex)
 		{
-			_statusMessageService.ShowError($"Login failed: {ex.Message}");
+			_statusMessageService.ShowError(_localizationService.FormatString("LoginFailed", "Login failed: {0}", ex.Message));
 		}
 		finally
 		{
 			IsBusy = false;
 		}
+
+		string? GetSelectedProfileName()
+		{
+			return IAwsProfileService.ProfileNameComparer.Equals(SelectedProfileName, _automaticProfileOption) ? null : SelectedProfileName;
+		}
 	}
 
-	private string? GetSelectedProfileName() =>
-		IAwsProfileService.ProfileNameComparer.Equals(SelectedProfileName, AutomaticProfileOption) ? null : SelectedProfileName;
+	private string GetAutomaticProfileOption() =>
+		_localizationService.GetString("AutomaticProfileOption", AutomaticProfileOption);
 }

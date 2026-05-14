@@ -1,5 +1,6 @@
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
+using Pail.Core.Tests.Unit.TestInfrastructure;
 using Pail.Models;
 using Pail.Services;
 using Pail.ViewModels;
@@ -13,6 +14,7 @@ public sealed class SettingsViewModelTests
 	private readonly IFolderPickerService _folderPickerService = Substitute.For<IFolderPickerService>();
 	private readonly IStatusMessageService _statusMessageService = Substitute.For<IStatusMessageService>();
 	private readonly INavigationService _navigationService = Substitute.For<INavigationService>();
+	private readonly ILocalizationService _localizationService = Substitute.For<ILocalizationService>();
 	private readonly AppSettings _settings = new()
 	{
 		AppTheme = AppThemeMode.Dark,
@@ -43,6 +45,8 @@ public sealed class SettingsViewModelTests
 				callInfo.Arg<Action<AppSettings>>().Invoke(_settings);
 				return Task.CompletedTask;
 			});
+
+		_localizationService.ReturnsFallbackStrings();
 	}
 
 	[Fact]
@@ -206,5 +210,5 @@ public sealed class SettingsViewModelTests
 		_statusMessageService.Received(1).ShowError(Arg.Is<string>(message => message.Contains("Failed to select folder: picker unavailable")));
 	}
 
-	private SettingsViewModel CreateViewModel() => new(_appThemeService, _settingsService, _folderPickerService, _statusMessageService, _navigationService);
+	private SettingsViewModel CreateViewModel() => new(_appThemeService, _settingsService, _folderPickerService, _statusMessageService, _navigationService, _localizationService);
 }

@@ -12,18 +12,21 @@ public partial class BucketListViewModel : ObservableObject
 	private readonly INavigationService _navigationService;
 	private readonly ICopyActionService _copyActionService;
 	private readonly IStatusMessageService _statusMessageService;
+	private readonly ILocalizationService _localizationService;
 	private readonly List<S3BucketItem> _allBuckets = [];
 
 	public BucketListViewModel(
 		IS3Service s3Service,
 		INavigationService navigationService,
 		ICopyActionService copyActionService,
-		IStatusMessageService statusMessageService)
+		IStatusMessageService statusMessageService,
+		ILocalizationService localizationService)
 	{
 		_s3Service = s3Service;
 		_navigationService = navigationService;
 		_copyActionService = copyActionService;
 		_statusMessageService = statusMessageService;
+		_localizationService = localizationService;
 	}
 
 	[ObservableProperty]
@@ -57,7 +60,7 @@ public partial class BucketListViewModel : ObservableObject
 		}
 		catch (Exception ex)
 		{
-			_statusMessageService.ShowError($"Failed to load buckets: {ex.Message}");
+			_statusMessageService.ShowError(_localizationService.FormatString("BucketListLoadFailed", "Failed to load buckets: {0}", ex.Message));
 		}
 		finally
 		{
@@ -104,8 +107,8 @@ public partial class BucketListViewModel : ObservableObject
 
 		await _copyActionService.CopyWithFeedbackAsync(
 			SelectedBucket.Name,
-			$"Copied bucket name: {SelectedBucket.Name}",
-			"Failed to copy bucket name.");
+			_localizationService.FormatString("BucketNameCopied", "Copied bucket name: {0}", SelectedBucket.Name),
+			_localizationService.GetString("BucketNameCopyFailed", "Failed to copy bucket name."));
 	}
 
 	private bool CanCopySelectedBucket() => IsBusy is false && SelectedBucket is not null;
