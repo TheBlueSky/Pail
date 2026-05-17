@@ -1,8 +1,10 @@
+using System.Diagnostics;
 using Amazon;
 using Amazon.Runtime;
 using Amazon.Runtime.CredentialManagement;
 using Amazon.S3;
 using Amazon.S3.Model;
+using Pail.Extensions;
 using Pail.Models;
 
 namespace Pail.Services;
@@ -81,9 +83,10 @@ public sealed class S3Service : IS3Service
 		return new S3ObjectPage(items, hasMoreItems, nextContinuationToken);
 	}
 
-	public async Task DownloadObjectAsync(string bucketName, string key, string destinationPath)
+	public async Task DownloadObjectAsync(string bucketName, string key, string destinationPath, IProgress<DownloadProgress>? progress = null, CancellationToken cancellationToken = default)
 	{
 		var directory = Path.GetDirectoryName(destinationPath);
+
 		if (!string.IsNullOrEmpty(directory))
 		{
 			Directory.CreateDirectory(directory);
@@ -92,30 +95,52 @@ public sealed class S3Service : IS3Service
 		var request = new GetObjectRequest
 		{
 			BucketName = bucketName,
-			Key = key
+			Key = key,
 		};
 
-		using var response = await S3Client.GetObjectAsync(request);
-		await response.WriteResponseStreamToFileAsync(destinationPath, false, default);
-	}
-
-	public async Task DownloadObjectsAsync(string bucketName, IEnumerable<string> keys, string destinationFolder)
-	{
-		foreach (var key in keys)
+		try
 		{
-			var fileName = Path.GetFileName(key);
+			using var response = await S3Client.GetObjectAsync(request, cancellationToken);
+			using var fileStream = new FileStream(destinationPath, FileMode.Create, FileAccess.Write, FileShare.None, bufferSize: 81_920, useAsync: true);
 
-			if (string.IsNullOrEmpty(fileName))
-			{
-				continue; // It's a folder
-			}
-
-			var destinationPath = Path.Combine(destinationFolder, fileName);
-			await DownloadObjectAsync(bucketName, key, destinationPath);
+			await response.ResponseStream.CopyToWithProgressAsync(
+				fileStream,
+				fileName: Path.GetFileName(key),
+				totalBytes: response.ContentLength,
+				progress,
+				cancellationToken);
+		}
+		catch
+		{
+			// Any failure (cancellation, network, disk full, etc.) leaves a partial file behind.
+			// Delete it so retries start clean, then re-throw the original exception.
+			TryDeletePartialFile(destinationPath);
+			throw;
 		}
 	}
 
-	public async Task DownloadFolderAsync(string bucketName, string prefix, string destinationFolder)
+	private static void TryDeletePartialFile(string path)
+	{
+		if (!File.Exists(path))
+		{
+			return;
+		}
+
+		try
+		{
+			File.Delete(path);
+		}
+		catch (IOException)
+		{
+			// Best-effort cleanup; nothing actionable if the file is locked or temporarily unavailable.
+		}
+		catch (UnauthorizedAccessException)
+		{
+			// Best-effort cleanup; user lacks permission to delete the partial file.
+		}
+	}
+
+	public async Task DownloadFolderAsync(string bucketName, string prefix, string destinationFolder, IProgress<DownloadProgress>? progress = null, CancellationToken cancellationToken = default)
 	{
 		var request = new ListObjectsV2Request
 		{
@@ -123,7 +148,11 @@ public sealed class S3Service : IS3Service
 			Prefix = prefix,
 		};
 
-		await foreach (var response in S3Client.Paginators.ListObjectsV2(request).Responses)
+		var itemsToDownload = new List<S3Object>();
+		var totalBytesKnown = 0L;
+		var totalFiles = 0;
+
+		await foreach (var response in S3Client.Paginators.ListObjectsV2(request).Responses.WithCancellation(cancellationToken))
 		{
 			foreach (var s3Object in response.S3Objects ?? [])
 			{
@@ -134,17 +163,98 @@ public sealed class S3Service : IS3Service
 					continue;
 				}
 
-				var destinationPath = Path.Combine(destinationFolder, relativeKey.Replace('/', Path.DirectorySeparatorChar));
+				itemsToDownload.Add(s3Object);
 
-				if (s3Object.Key.EndsWith('/'))
+				if (!s3Object.Key.EndsWith('/'))
 				{
-					Directory.CreateDirectory(destinationPath);
-				}
-				else
-				{
-					await DownloadObjectAsync(bucketName, s3Object.Key, destinationPath);
+					totalFiles++;
+					totalBytesKnown += s3Object.Size ?? 0;
 				}
 			}
+		}
+
+		var filesCompleted = 0;
+		var totalBytesDownloaded = 0L;
+		var folderStopwatch = Stopwatch.StartNew();
+		var folderThrottleInterval = TimeSpan.FromMilliseconds(100);
+		var lastFolderReportTime = TimeSpan.Zero;
+		var lastReportedFilesCompleted = -1;
+		var reportedTotalBytes = totalBytesKnown > 0 ? totalBytesKnown : null as long?;
+
+		foreach (var s3Object in itemsToDownload)
+		{
+			cancellationToken.ThrowIfCancellationRequested();
+
+			var relativeKey = s3Object.Key[prefix.Length..];
+			var destinationPath = Path.Combine(destinationFolder, relativeKey.Replace('/', Path.DirectorySeparatorChar));
+
+			if (s3Object.Key.EndsWith('/'))
+			{
+				Directory.CreateDirectory(destinationPath);
+			}
+			else
+			{
+				var fileInitialDownloadedBytes = totalBytesDownloaded;
+
+				var fileProgress = new SyncProgress<DownloadProgress>(
+					downloadProgress =>
+					{
+						if (progress is null)
+						{
+							return;
+						}
+
+						var elapsed = folderStopwatch.Elapsed;
+						var fileCountChanged = filesCompleted != lastReportedFilesCompleted;
+
+						if (elapsed - lastFolderReportTime < folderThrottleInterval && !fileCountChanged)
+						{
+							return;
+						}
+
+						lastFolderReportTime = elapsed;
+						lastReportedFilesCompleted = filesCompleted;
+
+						var currentTotalBytesDownloaded = fileInitialDownloadedBytes + downloadProgress.BytesDownloaded;
+						var speed = elapsed.TotalSeconds > 0 ? currentTotalBytesDownloaded / elapsed.TotalSeconds : 0;
+						var remainingTime = speed > 0 && totalBytesKnown > 0
+							? TimeSpan.FromSeconds(Math.Max(0, totalBytesKnown - currentTotalBytesDownloaded) / speed)
+							: null as TimeSpan?;
+
+						progress.Report(
+							new DownloadProgress(
+								BytesDownloaded: currentTotalBytesDownloaded,
+								TotalBytes: reportedTotalBytes,
+								FileName: downloadProgress.FileName,
+								Speed: speed,
+								ElapsedTime: elapsed,
+								RemainingTime: remainingTime,
+								FilesCompleted: filesCompleted,
+								TotalFiles: totalFiles));
+					});
+
+				await DownloadObjectAsync(bucketName, s3Object.Key, destinationPath, fileProgress, cancellationToken);
+
+				filesCompleted++;
+				totalBytesDownloaded += s3Object.Size ?? 0;
+			}
+		}
+
+		if (progress is not null && totalFiles > 0)
+		{
+			var elapsed = folderStopwatch.Elapsed;
+			var speed = elapsed.TotalSeconds > 0 ? totalBytesDownloaded / elapsed.TotalSeconds : 0;
+
+			progress.Report(
+				new DownloadProgress(
+					BytesDownloaded: totalBytesDownloaded,
+					TotalBytes: reportedTotalBytes,
+					FileName: string.Empty,
+					Speed: speed,
+					ElapsedTime: elapsed,
+					RemainingTime: TimeSpan.Zero,
+					FilesCompleted: filesCompleted,
+					TotalFiles: totalFiles));
 		}
 	}
 

@@ -2,6 +2,7 @@ using System.Reflection;
 using Amazon.S3;
 using Amazon.S3.Model;
 using NSubstitute;
+using Pail.Models;
 using Pail.Services;
 
 namespace Pail.Core.Tests.Unit.Services;
@@ -148,6 +149,127 @@ public sealed class S3ServiceTests
 		Assert.Equal(200, requests[0].MaxKeys);
 	}
 
+	[Fact]
+	internal async Task DownloadObjectAsync_ReportsProgressAndThrottles()
+	{
+		// Arrange
+		const int bufferSize = 81_920; // 80 KB, as configured in S3Service
+		const int contentLength = 204_800; // 200 KB
+
+		var bucketName = "bucket-a";
+		var key = "test.txt";
+		var tempFile = Path.Combine(Path.GetTempPath(), "pail_test_" + Guid.NewGuid() + ".txt");
+
+		var testStream = new MemoryStream(new byte[contentLength]);
+		var response = new GetObjectResponse
+		{
+			ContentLength = contentLength,
+			ResponseStream = testStream,
+		};
+
+		_s3Client
+			.GetObjectAsync(Arg.Any<GetObjectRequest>(), Arg.Any<CancellationToken>())
+			.Returns(Task.FromResult(response));
+
+		var service = CreateService(_s3Client);
+		var progressUpdates = new List<DownloadProgress>();
+		var progress = new SyncProgress<DownloadProgress>(progressUpdates.Add);
+
+		try
+		{
+			// Act
+			await service.DownloadObjectAsync(bucketName, key, tempFile, progress);
+
+			// Assert
+			Assert.NotEmpty(progressUpdates);
+
+			var finalUpdate = progressUpdates[^1];
+			Assert.Equal(contentLength, finalUpdate.BytesDownloaded);
+			Assert.Equal(contentLength, finalUpdate.TotalBytes);
+			Assert.Equal("test.txt", finalUpdate.FileName);
+
+			// Check throttling (81920 buffer means 3 reads for 200 KB)
+			// Meaning we expect <= 3 updates
+			Assert.True(progressUpdates.Count <= contentLength / bufferSize);
+		}
+		finally
+		{
+			if (File.Exists(tempFile))
+			{
+				File.Delete(tempFile);
+			}
+		}
+	}
+
+	[Fact]
+	internal async Task DownloadObjectAsync_FailureMidway_CleansUpPartialFile()
+	{
+		// Arrange
+		var bucketName = "bucket-a";
+		var key = "test.txt";
+		var tempFile = Path.Combine(Path.GetTempPath(), "pail_test_" + Guid.NewGuid() + ".txt");
+
+		var throwingStream = new DelegateStream(onRead: _ => throw new IOException("simulated disk failure"));
+
+		var response = new GetObjectResponse
+		{
+			ContentLength = 204_800,
+			ResponseStream = throwingStream,
+		};
+
+		_s3Client
+			.GetObjectAsync(Arg.Any<GetObjectRequest>(), Arg.Any<CancellationToken>())
+			.Returns(Task.FromResult(response));
+
+		var service = CreateService(_s3Client);
+
+		// Act
+		var action = () => service.DownloadObjectAsync(bucketName, key, tempFile);
+
+		// Assert
+		await Assert.ThrowsAsync<IOException>(action);
+
+		Assert.False(File.Exists(tempFile), "Partial file should be cleaned up on any failure, not only cancellation.");
+	}
+
+	[Fact]
+	internal async Task DownloadObjectAsync_CancelledMidway_CleansUpPartialFile()
+	{
+		// Arrange
+		var bucketName = "bucket-a";
+		var key = "test.txt";
+		var tempFile = Path.Combine(Path.GetTempPath(), "pail_test_" + Guid.NewGuid() + ".txt");
+
+		var cancellationTokenSource = new CancellationTokenSource();
+		var throwingStream = new DelegateStream(
+			onRead: ct =>
+			{
+				cancellationTokenSource.Cancel();
+				cancellationTokenSource.Token.ThrowIfCancellationRequested();
+				return 0;
+			});
+
+		var response = new GetObjectResponse
+		{
+			ContentLength = 204_800,
+			ResponseStream = throwingStream,
+		};
+
+		_s3Client
+			.GetObjectAsync(Arg.Any<GetObjectRequest>(), Arg.Any<CancellationToken>())
+			.Returns(Task.FromResult(response));
+
+		var service = CreateService(_s3Client);
+
+		// Act
+		var action = () => service.DownloadObjectAsync(bucketName, key, tempFile, null, cancellationTokenSource.Token);
+
+		// Assert
+		await Assert.ThrowsAsync<OperationCanceledException>(action);
+
+		Assert.False(File.Exists(tempFile), "Partial file should be cleaned up on cancellation.");
+	}
+
 	private static S3Service CreateService(IAmazonS3 s3Client)
 	{
 		var service = new S3Service();
@@ -192,6 +314,36 @@ public sealed class S3ServiceTests
 				Size = sequence,
 				LastModified = DateTime.UtcNow.AddMinutes(sequence),
 			};
+		}
+	}
+
+	private sealed class DelegateStream(Func<CancellationToken, int> onRead) : Stream
+	{
+		public override bool CanRead => true;
+		public override bool CanSeek => false;
+		public override bool CanWrite => false;
+		public override long Length => throw new NotSupportedException();
+		public override long Position { get => throw new NotSupportedException(); set => throw new NotSupportedException(); }
+		public override void Flush() { }
+		public override int Read(byte[] buffer, int offset, int count) => throw new NotSupportedException();
+		public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
+		public override void SetLength(long value) => throw new NotSupportedException();
+		public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
+
+		public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default)
+		{
+			if (cancellationToken.IsCancellationRequested)
+			{
+				return ValueTask.FromCanceled<int>(cancellationToken);
+			}
+			try
+			{
+				return new ValueTask<int>(onRead(cancellationToken));
+			}
+			catch (Exception ex)
+			{
+				return ValueTask.FromException<int>(ex);
+			}
 		}
 	}
 }
