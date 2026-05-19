@@ -47,6 +47,12 @@ public sealed class SettingsService : ISettingsService
 
 	public string? LastProfileName => _optionsMonitor.CurrentValue.LastProfileName;
 
+	public int MaxParallelDownloads => _optionsMonitor.CurrentValue.MaxParallelDownloads;
+
+	public bool AutoClearCompletedDownloads => _optionsMonitor.CurrentValue.AutoClearCompletedDownloads;
+
+	public int AutoClearCompletedDownloadsDelaySeconds => _optionsMonitor.CurrentValue.AutoClearCompletedDownloadsDelaySeconds;
+
 	public async Task UpdateAsync(Action<AppSettings> applyChanges, CancellationToken cancellationToken = default)
 	{
 		ArgumentNullException.ThrowIfNull(applyChanges);
@@ -83,5 +89,8 @@ public sealed class SettingsService : ISettingsService
 		DefaultRegion = source.DefaultRegion,
 		UseCredentialChainByDefault = source.UseCredentialChainByDefault,
 		LastProfileName = source.LastProfileName,
+		MaxParallelDownloads = source.MaxParallelDownloads,
+		AutoClearCompletedDownloads = source.AutoClearCompletedDownloads,
+		AutoClearCompletedDownloadsDelaySeconds = source.AutoClearCompletedDownloadsDelaySeconds,
 	};
 }

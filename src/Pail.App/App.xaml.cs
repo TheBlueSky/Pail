@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.UI.Dispatching;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml.Navigation;
 using Pail.App.Services;
@@ -41,6 +42,8 @@ public partial class PailApp : Application
 		services.AddSingleton<IAwsConsoleCredentialsParser, AwsConsoleCredentialsParser>();
 		services.AddSingleton<IClipboardService, ClipboardService>();
 		services.AddSingleton<ICopyActionService, CopyActionService>();
+		services.AddSingleton<IDispatcherService>(_ => new DispatcherService(DispatcherQueue.GetForCurrentThread()));
+		services.AddSingleton<IDownloadManager, DownloadManager>();
 		services.AddSingleton<IFolderPickerService, FolderPickerService>();
 		services.AddSingleton<ILocalizationService, ResourceLocalizationService>();
 		services.AddSingleton<INavigationHostService, NavigationService>();

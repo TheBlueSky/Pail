@@ -22,4 +22,10 @@ public sealed class AppSettings
 	public bool UseCredentialChainByDefault { get; set; } = true;
 
 	public string? LastProfileName { get; set; }
+
+	public int MaxParallelDownloads { get; set; } = 3;
+
+	public bool AutoClearCompletedDownloads { get; set; } = true;
+
+	public int AutoClearCompletedDownloadsDelaySeconds { get; set; } = 5;
 }

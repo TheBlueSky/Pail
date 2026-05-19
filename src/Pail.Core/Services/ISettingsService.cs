@@ -22,5 +22,11 @@ public interface ISettingsService
 
 	public string? LastProfileName { get; }
 
+	public int MaxParallelDownloads { get; }
+
+	public bool AutoClearCompletedDownloads { get; }
+
+	public int AutoClearCompletedDownloadsDelaySeconds { get; }
+
 	public Task UpdateAsync(Action<AppSettings> applyChanges, CancellationToken cancellationToken = default);
 }
