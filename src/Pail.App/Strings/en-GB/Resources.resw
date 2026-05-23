@@ -393,6 +393,18 @@
     <value>Buckets</value>
     <comment>Main navigation item: Buckets</comment>
   </data>
+  <data name="DownloadsNavItem.Content" xml:space="preserve">
+    <value>Downloads</value>
+    <comment>Main navigation footer item: Downloads</comment>
+  </data>
+  <data name="DownloadsNavItem.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.AcceleratorKey" xml:space="preserve">
+    <value>Ctrl+J</value>
+    <comment>Keyboard shortcut announced for opening the download queue</comment>
+  </data>
+  <data name="DownloadsNavItem.ToolTipService.ToolTip" xml:space="preserve">
+    <value>Downloads (Ctrl+J)</value>
+    <comment>Tooltip for the main navigation downloads item</comment>
+  </data>
   <data name="SettingsMainRegion.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.LocalizedLandmarkType" xml:space="preserve">
     <value>Settings</value>
     <comment>Localized landmark type for the settings page main region</comment>
@@ -644,6 +656,62 @@
   <data name="DownloadTimeRemaining" xml:space="preserve">
     <value>about {0} remaining</value>
     <comment>Download time remaining text. {0} is a compact duration.</comment>
+  </data>
+  <data name="DownloadCancelAutomationName" xml:space="preserve">
+    <value>Cancel download {0}</value>
+    <comment>Accessible name and tooltip for cancelling a download. {0} is the file or folder name.</comment>
+  </data>
+  <data name="DownloadQueueActiveCount" xml:space="preserve">
+    <value>{0} active</value>
+    <comment>Download queue summary. {0} is the number of queued or downloading items.</comment>
+  </data>
+  <data name="DownloadQueueOverallProgress" xml:space="preserve">
+    <value>{0:n0}%</value>
+    <comment>Download queue aggregate byte progress percentage. {0} is the percentage.</comment>
+  </data>
+  <data name="DownloadQueueOverallProgressUnknown" xml:space="preserve">
+    <value>Progress unavailable</value>
+    <comment>Download queue aggregate progress text when byte totals are unknown.</comment>
+  </data>
+  <data name="DownloadQueueTitle.Text" xml:space="preserve">
+    <value>Downloads</value>
+    <comment>Download queue flyout title</comment>
+  </data>
+  <data name="CancelAllDownloadsButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Cancel all active downloads</value>
+    <comment>Accessible name for cancelling all active downloads</comment>
+  </data>
+  <data name="CancelAllDownloadsButton.ToolTipService.ToolTip" xml:space="preserve">
+    <value>Cancel all active downloads</value>
+    <comment>Tooltip for cancelling all active downloads</comment>
+  </data>
+  <data name="CancelAllDownloadsText.Text" xml:space="preserve">
+    <value>Cancel all</value>
+    <comment>Download queue cancel all button text</comment>
+  </data>
+  <data name="ClearFinishedDownloadsButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Clear finished downloads</value>
+    <comment>Accessible name for clearing completed, failed, and cancelled downloads</comment>
+  </data>
+  <data name="ClearFinishedDownloadsButton.ToolTipService.ToolTip" xml:space="preserve">
+    <value>Clear finished downloads</value>
+    <comment>Tooltip for clearing completed, failed, and cancelled downloads</comment>
+  </data>
+  <data name="ClearFinishedDownloadsText.Text" xml:space="preserve">
+    <value>Clear</value>
+    <comment>Download queue clear finished button text</comment>
+  </data>
+  <data name="DownloadQueueEmptyTitle.Text" xml:space="preserve">
+    <value>No downloads</value>
+    <comment>Download queue empty state title</comment>
+  </data>
+  <data name="DownloadQueueEmptyDescription.Text" xml:space="preserve">
+    <value>Downloads you start will appear here.</value>
+    <comment>Download queue empty state description</comment>
+  </data>
+  <data name="DownloadQueueList.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Download queue</value>
+    <comment>Accessible name for the download queue list</comment>
   </data>
   <data name="DownloadStatusQueued" xml:space="preserve">
     <value>Queued</value>

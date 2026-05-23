@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Navigation;
 using Pail.App.Services;
@@ -14,10 +15,15 @@ public sealed partial class MainPage : Page
 
 	public MainPage()
 	{
+		DownloadViewModel = PailApp.Services.GetRequiredService<DownloadManagerViewModel>();
+
 		InitializeComponent();
 		Loaded += OnLoaded;
 		Unloaded += OnUnloaded;
+		DownloadQueueControl.CloseRequested += OnDownloadQueueCloseRequested;
 	}
+
+	public DownloadManagerViewModel DownloadViewModel { get; }
 
 	private void OnLoaded(object sender, RoutedEventArgs e)
 	{
@@ -35,13 +41,24 @@ public sealed partial class MainPage : Page
 		UpdateBackButtonState();
 	}
 
-	private void OnUnloaded(object sender, RoutedEventArgs e) => TrackObjectBrowserViewModel(null);
+	private void OnUnloaded(object sender, RoutedEventArgs e)
+	{
+		TrackObjectBrowserViewModel(null);
+		DownloadQueueControl.CloseRequested -= OnDownloadQueueCloseRequested;
+		DownloadViewModel.Dispose();
+	}
 
 	private void OnItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
 	{
 		if (args.IsSettingsInvoked)
 		{
 			NavigateToTopLevelPage(nameof(SettingsPage));
+			return;
+		}
+
+		if (ReferenceEquals(args.InvokedItemContainer, DownloadsNavItem))
+		{
+			ShowDownloadsFlyout();
 			return;
 		}
 
@@ -57,6 +74,12 @@ public sealed partial class MainPage : Page
 	private async void OnPageBackKeyboardAcceleratorInvoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args) =>
 		args.Handled = await TryGoBackAsync();
 
+	private void OnDownloadsKeyboardAcceleratorInvoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
+	{
+		ShowDownloadsFlyout();
+		args.Handled = true;
+	}
+
 	private async void OnPointerPressed(object sender, PointerRoutedEventArgs e)
 	{
 		if (e.GetCurrentPoint(this).Properties.IsXButton1Pressed)
@@ -71,6 +94,8 @@ public sealed partial class MainPage : Page
 		SyncSelectedItem(e.SourcePageType);
 		UpdateBackButtonState();
 	}
+
+	private void OnDownloadQueueCloseRequested(object? sender, EventArgs e) => DownloadsFlyout.Hide();
 
 	private void NavigateToTopLevelPage(string pageKey)
 	{
@@ -88,6 +113,12 @@ public sealed partial class MainPage : Page
 
 		_navigationService.NavigateTo(pageKey, clearBackStack: pageKey == nameof(BucketListPage));
 		UpdateBackButtonState();
+	}
+
+	private void ShowDownloadsFlyout()
+	{
+		FlyoutBase.ShowAttachedFlyout(DownloadsNavItem);
+		SyncSelectedItem(ContentFrame.CurrentSourcePageType);
 	}
 
 	private void SyncSelectedItem(Type? pageType) =>

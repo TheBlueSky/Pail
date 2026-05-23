@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UserControl
+    x:Class="Pail.App.Controls.DownloadQueueFlyout"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:converters="using:Pail.App.Converters"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:viewModels="using:Pail.ViewModels"
+    mc:Ignorable="d"
+    KeyDown="OnRootKeyDown">
+
+    <UserControl.Resources>
+        <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+        <converters:DownloadStatusBrushConverter x:Key="DownloadStatusBrushConverter" />
+        <converters:DownloadStatusSymbolConverter x:Key="DownloadStatusSymbolConverter" />
+        <converters:FolderIconConverter x:Key="FolderIconConverter" />
+        <converters:InverseBooleanConverter x:Key="InverseBooleanConverter" />
+
+        <Style x:Key="DownloadQueueSecondaryTextBlockStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}" />
+            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+        </Style>
+
+        <Style x:Key="DownloadQueueListViewItemStyle" TargetType="ListViewItem">
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="MinHeight" Value="0" />
+        </Style>
+    </UserControl.Resources>
+
+    <Grid
+        AutomationProperties.LandmarkType="Custom"
+        AutomationProperties.LocalizedLandmarkType="Download queue">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid
+            Padding="16,14,16,12"
+            ColumnSpacing="8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Spacing="2">
+                <TextBlock
+                    x:Uid="DownloadQueueTitle"
+                    AutomationProperties.HeadingLevel="Level2"
+                    Style="{StaticResource BodyStrongTextBlockStyle}"
+                    Text="Downloads" />
+                <TextBlock
+                    Style="{StaticResource DownloadQueueSecondaryTextBlockStyle}"
+                    Text="{Binding ActiveCountText}"
+                    AutomationProperties.LiveSetting="Polite" />
+            </StackPanel>
+
+            <Button
+                x:Uid="CancelAllDownloadsButton"
+                Grid.Column="1"
+                Command="{Binding CancelAllCommand}"
+                ToolTipService.ToolTip="Cancel all active downloads">
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                    <SymbolIcon Symbol="Cancel" AutomationProperties.AccessibilityView="Raw" />
+                    <TextBlock x:Uid="CancelAllDownloadsText" Text="Cancel all" />
+                </StackPanel>
+            </Button>
+
+            <Button
+                x:Uid="ClearFinishedDownloadsButton"
+                Grid.Column="2"
+                Command="{Binding ClearCompletedCommand}"
+                ToolTipService.ToolTip="Clear finished downloads">
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                    <SymbolIcon Symbol="Delete" AutomationProperties.AccessibilityView="Raw" />
+                    <TextBlock x:Uid="ClearFinishedDownloadsText" Text="Clear" />
+                </StackPanel>
+            </Button>
+        </Grid>
+
+        <StackPanel
+            Grid.Row="1"
+            Padding="16,0,16,12"
+            Spacing="6"
+            Visibility="{Binding HasItems, Converter={StaticResource BoolToVisibilityConverter}}">
+            <ProgressBar
+                Minimum="0"
+                Maximum="100"
+                Value="{Binding OverallProgress}"
+                IsIndeterminate="{Binding IsOverallProgressIndeterminate}"
+                AutomationProperties.Name="{Binding OverallProgressText}" />
+
+            <Grid ColumnSpacing="12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock
+                    Style="{StaticResource DownloadQueueSecondaryTextBlockStyle}"
+                    Text="{Binding OverallProgressText}" />
+                <TextBlock
+                    Grid.Column="1"
+                    Style="{StaticResource DownloadQueueSecondaryTextBlockStyle}"
+                    Text="{Binding OverallSpeedText}" />
+            </Grid>
+        </StackPanel>
+
+        <Grid Grid.Row="2">
+            <StackPanel
+                Padding="24,28,24,32"
+                Spacing="8"
+                HorizontalAlignment="Center"
+                Visibility="{Binding HasItems, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=Invert}">
+                <SymbolIcon
+                    Symbol="Download"
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                    AutomationProperties.AccessibilityView="Raw" />
+                <TextBlock
+                    x:Uid="DownloadQueueEmptyTitle"
+                    HorizontalAlignment="Center"
+                    Style="{StaticResource BodyStrongTextBlockStyle}"
+                    Text="No downloads" />
+                <TextBlock
+                    x:Uid="DownloadQueueEmptyDescription"
+                    MaxWidth="320"
+                    HorizontalAlignment="Center"
+                    TextAlignment="Center"
+                    TextWrapping="Wrap"
+                    Style="{StaticResource DownloadQueueSecondaryTextBlockStyle}"
+                    Text="Downloads you start will appear here." />
+            </StackPanel>
+
+            <ListView
+                x:Uid="DownloadQueueList"
+                x:Name="DownloadsList"
+                MaxHeight="380"
+                ItemsSource="{Binding Items}"
+                ItemContainerStyle="{StaticResource DownloadQueueListViewItemStyle}"
+                KeyDown="OnDownloadsListKeyDown"
+                SelectionMode="Single"
+                Visibility="{Binding HasItems, Converter={StaticResource BoolToVisibilityConverter}}"
+                AutomationProperties.Name="Download queue">
+
+                <ListView.ItemContainerTransitions>
+                    <TransitionCollection>
+                        <AddDeleteThemeTransition />
+                        <ReorderThemeTransition />
+                    </TransitionCollection>
+                </ListView.ItemContainerTransitions>
+
+                <ListView.ItemTemplate>
+                    <DataTemplate x:DataType="viewModels:DownloadItemViewModel">
+                        <Grid
+                            MinHeight="84"
+                            Padding="12,10"
+                            ColumnSpacing="10"
+                            ToolTipService.ToolTip="{x:Bind ErrorMessage, Mode=OneWay}"
+                            AutomationProperties.Name="{x:Bind FileName, Mode=OneWay}"
+                            AutomationProperties.HelpText="{x:Bind ErrorMessage, Mode=OneWay}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <SymbolIcon
+                                Width="22"
+                                Height="22"
+                                Margin="0,3,0,0"
+                                VerticalAlignment="Top"
+                                Symbol="{x:Bind IsFolder, Converter={StaticResource FolderIconConverter}, Mode=OneWay}"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                AutomationProperties.AccessibilityView="Raw" />
+
+                            <Grid Grid.Column="1" RowSpacing="6">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+
+                                <Grid ColumnSpacing="10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBlock
+                                        FontWeight="SemiBold"
+                                        Text="{x:Bind FileName, Mode=OneWay}"
+                                        TextTrimming="CharacterEllipsis" />
+
+                                    <StackPanel
+                                        Grid.Column="1"
+                                        Orientation="Horizontal"
+                                        Spacing="4"
+                                        VerticalAlignment="Center">
+                                        <SymbolIcon
+                                            Width="14"
+                                            Height="14"
+                                            Symbol="{x:Bind Status, Converter={StaticResource DownloadStatusSymbolConverter}, Mode=OneWay}"
+                                            Foreground="{x:Bind Status, Converter={StaticResource DownloadStatusBrushConverter}, Mode=OneWay}"
+                                            AutomationProperties.AccessibilityView="Raw" />
+                                        <TextBlock
+                                            Style="{StaticResource CaptionTextBlockStyle}"
+                                            Text="{x:Bind StatusText, Mode=OneWay}"
+                                            Foreground="{x:Bind Status, Converter={StaticResource DownloadStatusBrushConverter}, Mode=OneWay}" />
+                                    </StackPanel>
+                                </Grid>
+
+                                <ProgressBar
+                                    Grid.Row="1"
+                                    Height="4"
+                                    Minimum="0"
+                                    Maximum="100"
+                                    Value="{x:Bind ProgressBarValue, Mode=OneWay}"
+                                    IsIndeterminate="{x:Bind IsByteProgressIndeterminate, Mode=OneWay}"
+                                    AutomationProperties.Name="{x:Bind ProgressText, Mode=OneWay}" />
+
+                                <Grid Grid.Row="2" ColumnSpacing="8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBlock
+                                        Style="{StaticResource DownloadQueueSecondaryTextBlockStyle}"
+                                        Text="{x:Bind ProgressText, Mode=OneWay}" />
+                                    <TextBlock
+                                        Grid.Column="1"
+                                        Style="{StaticResource DownloadQueueSecondaryTextBlockStyle}"
+                                        Text="{x:Bind SpeedText, Mode=OneWay}" />
+                                    <TextBlock
+                                        Grid.Column="2"
+                                        Style="{StaticResource DownloadQueueSecondaryTextBlockStyle}"
+                                        Text="{x:Bind TimeRemainingText, Mode=OneWay}"
+                                        Visibility="{x:Bind HasTimeRemainingText, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}" />
+                                </Grid>
+                            </Grid>
+
+                            <Button
+                                Grid.Column="2"
+                                Width="32"
+                                Height="32"
+                                Padding="0"
+                                VerticalAlignment="Top"
+                                Command="{x:Bind CancelCommand, Mode=OneWay}"
+                                ToolTipService.ToolTip="{x:Bind CancelAutomationName, Mode=OneWay}"
+                                AutomationProperties.Name="{x:Bind CancelAutomationName, Mode=OneWay}">
+                                <SymbolIcon Symbol="Cancel" AutomationProperties.AccessibilityView="Raw" />
+                            </Button>
+                        </Grid>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </Grid>
+    </Grid>
+</UserControl>
