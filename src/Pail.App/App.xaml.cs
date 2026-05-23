@@ -54,6 +54,7 @@ public partial class PailApp : Application
 
 		// ViewModels
 		services.AddTransient<BucketListViewModel>();
+		services.AddTransient<DownloadManagerViewModel>();
 		services.AddTransient<LoginViewModel>();
 		services.AddTransient<ObjectBrowserViewModel>();
 		services.AddTransient<SettingsViewModel>();

@@ -621,6 +621,50 @@
     <value>Download failed: {0}</value>
     <comment>Status error shown when download fails. {0} is the error message.</comment>
   </data>
+  <data name="DownloadProgressBytes" xml:space="preserve">
+    <value>{0} of {1}</value>
+    <comment>Download progress text when byte totals are known. {0} is downloaded bytes; {1} is total bytes.</comment>
+  </data>
+  <data name="DownloadProgressFiles" xml:space="preserve">
+    <value>{0} of {1} files</value>
+    <comment>Download progress text for folders when only file counts are shown. {0} is completed files; {1} is total files.</comment>
+  </data>
+  <data name="DownloadProgressFilesWithBytes" xml:space="preserve">
+    <value>{0} of {1} files &#183; {2} downloaded</value>
+    <comment>Download progress text for folders when file counts and downloaded bytes are shown. {0} is completed files; {1} is total files; {2} is downloaded bytes.</comment>
+  </data>
+  <data name="DownloadProgressIndeterminate" xml:space="preserve">
+    <value>{0} downloaded</value>
+    <comment>Download progress text when total size is unknown. {0} is downloaded bytes.</comment>
+  </data>
+  <data name="DownloadSpeed" xml:space="preserve">
+    <value>{0}/s</value>
+    <comment>Download speed text. {0} is formatted bytes per second.</comment>
+  </data>
+  <data name="DownloadTimeRemaining" xml:space="preserve">
+    <value>about {0} remaining</value>
+    <comment>Download time remaining text. {0} is a compact duration.</comment>
+  </data>
+  <data name="DownloadStatusQueued" xml:space="preserve">
+    <value>Queued</value>
+    <comment>Download status label: queued</comment>
+  </data>
+  <data name="DownloadStatusDownloading" xml:space="preserve">
+    <value>Downloading</value>
+    <comment>Download status label: downloading</comment>
+  </data>
+  <data name="DownloadStatusCompleted" xml:space="preserve">
+    <value>Completed</value>
+    <comment>Download status label: completed</comment>
+  </data>
+  <data name="DownloadStatusFailed" xml:space="preserve">
+    <value>Failed</value>
+    <comment>Download status label: failed</comment>
+  </data>
+  <data name="DownloadStatusCancelled" xml:space="preserve">
+    <value>Cancelled</value>
+    <comment>Download status label: cancelled</comment>
+  </data>
   <data name="ObjectNamesCopied" xml:space="preserve">
     <value>Copied object names.</value>
     <comment>Status message shown after copying selected S3 object names</comment>
