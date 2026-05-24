@@ -633,6 +633,18 @@
     <value>Download failed: {0}</value>
     <comment>Status error shown when download fails. {0} is the error message.</comment>
   </data>
+  <data name="DownloadsEnqueuedOne" xml:space="preserve">
+    <value>Enqueued 1 download to: {0}</value>
+    <comment>Status message shown after one download is queued. {0} is the destination folder.</comment>
+  </data>
+  <data name="DownloadsEnqueuedMany" xml:space="preserve">
+    <value>Enqueued {0} downloads to: {1}</value>
+    <comment>Status message shown after multiple downloads are queued. {0} is the download count; {1} is the destination folder.</comment>
+  </data>
+  <data name="DownloadsEnqueueFailed" xml:space="preserve">
+    <value>Failed to enqueue downloads: {0}</value>
+    <comment>Status error shown when downloads could not be queued. {0} is the error message.</comment>
+  </data>
   <data name="DownloadProgressBytes" xml:space="preserve">
     <value>{0} of {1}</value>
     <comment>Download progress text when byte totals are known. {0} is downloaded bytes; {1} is total bytes.</comment>

@@ -9,6 +9,7 @@ namespace Pail.ViewModels;
 public partial class ObjectBrowserViewModel : ObservableObject
 {
 	private readonly IS3Service _s3Service;
+	private readonly IDownloadManager _downloadManager;
 	private readonly INavigationService _navigationService;
 	private readonly ICopyActionService _copyActionService;
 	private readonly IFolderPickerService _folderPickerService;
@@ -19,10 +20,12 @@ public partial class ObjectBrowserViewModel : ObservableObject
 	private string? _nextContinuationToken;
 
 	private bool _canNavigateBackWithinBucket;
+	private bool _isPreparingDownloads;
 	private string _bucketName = string.Empty;
 
 	public ObjectBrowserViewModel(
 		IS3Service s3Service,
+		IDownloadManager downloadManager,
 		INavigationService navigationService,
 		ICopyActionService copyActionService,
 		IFolderPickerService folderPickerService,
@@ -31,6 +34,7 @@ public partial class ObjectBrowserViewModel : ObservableObject
 		ILocalizationService localizationService)
 	{
 		_s3Service = s3Service;
+		_downloadManager = downloadManager;
 		_navigationService = navigationService;
 		_copyActionService = copyActionService;
 		_folderPickerService = folderPickerService;
@@ -203,15 +207,16 @@ public partial class ObjectBrowserViewModel : ObservableObject
 	[RelayCommand]
 	private async Task DownloadSelectedAsync(IList<S3ObjectItem> selectedItems)
 	{
-		if (selectedItems is null || !selectedItems.Any())
+		if (selectedItems is null || !selectedItems.Any() || _isPreparingDownloads)
 		{
 			return;
 		}
 
-		IsBusy = true;
+		_isPreparingDownloads = true;
 
 		try
 		{
+			var selectedItemsSnapshot = selectedItems.ToArray();
 			var currentDownloadFolder = _settingsService.DownloadFolder;
 			var downloadsFolder = ResolveDownloadFolder(currentDownloadFolder);
 
@@ -235,19 +240,13 @@ public partial class ObjectBrowserViewModel : ObservableObject
 
 			Directory.CreateDirectory(downloadsFolder);
 
-			foreach (var item in selectedItems)
-			{
-				if (item.IsFolder)
-				{
-					await _s3Service.DownloadFolderAsync(_bucketName, item.Key, Path.Combine(downloadsFolder, item.Name));
-				}
-				else
-				{
-					await _s3Service.DownloadObjectAsync(_bucketName, item.Key, Path.Combine(downloadsFolder, item.Name));
-				}
-			}
+			var downloadItems = selectedItemsSnapshot
+				.Select(item => CreateDownloadItem(item, downloadsFolder))
+				.ToArray();
 
-			_statusMessageService.ShowInfo(_localizationService.FormatString("DownloadComplete", "Download complete! Files saved to: {0}", downloadsFolder));
+			await _downloadManager.EnqueueBatchAsync(downloadItems);
+
+			ShowDownloadsEnqueuedMessage(downloadItems.Length, downloadsFolder);
 
 			static string ResolveDownloadFolder(string? downloadFolder)
 			{
@@ -258,11 +257,11 @@ public partial class ObjectBrowserViewModel : ObservableObject
 		}
 		catch (Exception ex)
 		{
-			_statusMessageService.ShowError(_localizationService.FormatString("DownloadFailed", "Download failed: {0}", ex.Message));
+			_statusMessageService.ShowError(_localizationService.FormatString("DownloadsEnqueueFailed", "Failed to enqueue downloads: {0}", ex.Message));
 		}
 		finally
 		{
-			IsBusy = false;
+			_isPreparingDownloads = false;
 		}
 	}
 
@@ -304,6 +303,26 @@ public partial class ObjectBrowserViewModel : ObservableObject
 		IsBusy is false &&
 		HasMoreItems &&
 		string.IsNullOrWhiteSpace(_nextContinuationToken) is false;
+
+	private DownloadItem CreateDownloadItem(S3ObjectItem item, string downloadsFolder) =>
+		new()
+		{
+			BucketName = _bucketName,
+			Key = item.Key,
+			DestinationPath = Path.Combine(downloadsFolder, item.Name),
+			FileName = item.Name,
+			TotalBytes = item.IsFolder || item.Size is < 0 ? null : item.Size,
+			IsFolder = item.IsFolder,
+		};
+
+	private void ShowDownloadsEnqueuedMessage(int count, string destinationFolder)
+	{
+		var message = count == 1
+			? _localizationService.FormatString("DownloadsEnqueuedOne", "Enqueued 1 download to: {0}", destinationFolder)
+			: _localizationService.FormatString("DownloadsEnqueuedMany", "Enqueued {0} downloads to: {1}", count, destinationFolder);
+
+		_statusMessageService.ShowInfo(message);
+	}
 
 	private void UpdateCanNavigateBackWithinBucket() => CanNavigateBackWithinBucket = _pathStack.Count > 0;
 
@@ -347,4 +366,5 @@ public partial class ObjectBrowserViewModel : ObservableObject
 			: HasMoreItems
 				? _localizationService.FormatString("ObjectLoadedItemsMoreAvailableStatus", "Loaded {0} items, more available", Items.Count)
 				: _localizationService.FormatString("ObjectLoadedItemsStatus", "Loaded {0} items", Items.Count);
+
 }

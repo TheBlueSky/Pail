@@ -9,12 +9,14 @@ namespace Pail.Core.Tests.Unit.ViewModels;
 public sealed class ObjectBrowserViewModelTests
 {
 	private readonly IS3Service _s3Service = Substitute.For<IS3Service>();
+	private readonly IDownloadManager _downloadManager = Substitute.For<IDownloadManager>();
 	private readonly INavigationService _navigationService = Substitute.For<INavigationService>();
 	private readonly ICopyActionService _copyActionService = Substitute.For<ICopyActionService>();
 	private readonly IFolderPickerService _folderPickerService = Substitute.For<IFolderPickerService>();
 	private readonly ISettingsService _settingsService = Substitute.For<ISettingsService>();
 	private readonly IStatusMessageService _statusMessageService = Substitute.For<IStatusMessageService>();
 	private readonly ILocalizationService _localizationService = Substitute.For<ILocalizationService>();
+	private readonly List<DownloadItem> _enqueuedItems = [];
 	private readonly string _defaultDownloadFolder = Path.Combine(Path.GetTempPath(), "Pail.Tests", "Downloads.Default");
 	private readonly string _pickedDownloadFolder = Path.Combine(Path.GetTempPath(), "Pail.Tests", "Downloads.Picked");
 	private readonly AppSettings _appSettings = new()
@@ -31,6 +33,13 @@ public sealed class ObjectBrowserViewModelTests
 		_s3Service
 			.GetObjectsAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<int>(), Arg.Any<string?>())
 			.Returns(Task.FromResult(CreatePage()));
+		_downloadManager
+			.EnqueueBatchAsync(Arg.Any<IEnumerable<DownloadItem>>(), Arg.Any<CancellationToken>())
+			.Returns(callInfo =>
+			{
+				_enqueuedItems.AddRange(callInfo.Arg<IEnumerable<DownloadItem>>());
+				return Task.CompletedTask;
+			});
 		_settingsService.DownloadFolder.Returns(_ => _appSettings.DownloadFolder);
 		_settingsService.AlwaysPromptDownloadLocation.Returns(_ => _appSettings.AlwaysPromptDownloadLocation);
 		_settingsService.InitialObjectLoadCount.Returns(_ => _appSettings.InitialObjectLoadCount);
@@ -109,7 +118,7 @@ public sealed class ObjectBrowserViewModelTests
 
 		var selectedItems = new List<S3ObjectItem>
 		{
-			new() { Name = "report.csv", Key = "reports/report.csv", IsFolder = false },
+			new() { Name = "report.csv", Key = "reports/report.csv", Size = 123, IsFolder = false },
 		};
 
 		// Act
@@ -117,12 +126,21 @@ public sealed class ObjectBrowserViewModelTests
 
 		// Assert
 		await _folderPickerService.DidNotReceive().PickFolderAsync();
-		await _s3Service.Received(1).DownloadObjectAsync("bucket-a", "reports/report.csv", Path.Combine(_defaultDownloadFolder, "report.csv"));
+		var item = Assert.Single(_enqueuedItems);
+		Assert.Equal("bucket-a", item.BucketName);
+		Assert.Equal("reports/report.csv", item.Key);
+		Assert.Equal(Path.Combine(_defaultDownloadFolder, "report.csv"), item.DestinationPath);
+		Assert.Equal("report.csv", item.FileName);
+		Assert.Equal(123, item.TotalBytes);
+		Assert.False(item.IsFolder);
+		await _downloadManager.Received(1).EnqueueBatchAsync(Arg.Any<IEnumerable<DownloadItem>>(), Arg.Any<CancellationToken>());
+		await _s3Service.DidNotReceive().DownloadObjectAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<IProgress<DownloadProgress>?>(), Arg.Any<CancellationToken>());
 		await _settingsService.DidNotReceive().UpdateAsync(Arg.Any<Action<AppSettings>>(), Arg.Any<CancellationToken>());
+		_statusMessageService.Received(1).ShowInfo($"Enqueued 1 download to: {_defaultDownloadFolder}");
 	}
 
 	[Fact]
-	internal async Task DownloadSelectedCommand_AlwaysPromptEnabled_SavesPickedFolderAndDownloads()
+	internal async Task DownloadSelectedCommand_AlwaysPromptEnabled_SavesPickedFolderAndQueuesDownload()
 	{
 		// Arrange
 		_appSettings.AlwaysPromptDownloadLocation = true;
@@ -141,8 +159,10 @@ public sealed class ObjectBrowserViewModelTests
 
 		// Assert
 		Assert.Equal(_pickedDownloadFolder, _appSettings.DownloadFolder);
+		var item = Assert.Single(_enqueuedItems);
+		Assert.Equal(Path.Combine(_pickedDownloadFolder, "report.csv"), item.DestinationPath);
 		await _settingsService.Received(1).UpdateAsync(Arg.Any<Action<AppSettings>>(), Arg.Any<CancellationToken>());
-		await _s3Service.Received(1).DownloadObjectAsync("bucket-a", "reports/report.csv", Path.Combine(_pickedDownloadFolder, "report.csv"));
+		await _downloadManager.Received(1).EnqueueBatchAsync(Arg.Any<IEnumerable<DownloadItem>>(), Arg.Any<CancellationToken>());
 	}
 
 	[Fact]
@@ -164,9 +184,117 @@ public sealed class ObjectBrowserViewModelTests
 		await viewModel.DownloadSelectedCommand.ExecuteAsync(selectedItems);
 
 		// Assert
-		await _s3Service.DidNotReceive().DownloadObjectAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>());
+		await _downloadManager.DidNotReceive().EnqueueBatchAsync(Arg.Any<IEnumerable<DownloadItem>>(), Arg.Any<CancellationToken>());
+		await _s3Service.DidNotReceive().DownloadObjectAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<IProgress<DownloadProgress>?>(), Arg.Any<CancellationToken>());
 		await _settingsService.DidNotReceive().UpdateAsync(Arg.Any<Action<AppSettings>>(), Arg.Any<CancellationToken>());
 		_statusMessageService.Received(1).ShowInfo("Download cancelled.");
+	}
+
+	[Fact]
+	internal async Task DownloadSelectedCommand_MultipleSelection_QueuesSeparateDownloads()
+	{
+		// Arrange
+		var viewModel = CreateViewModel();
+		await viewModel.InitializeAsync("bucket-a");
+
+		var selectedItems = new List<S3ObjectItem>
+		{
+			new() { Name = "report.csv", Key = "reports/report.csv", Size = 1024, IsFolder = false },
+			new() { Name = "logs", Key = "logs/", IsFolder = true },
+		};
+
+		// Act
+		await viewModel.DownloadSelectedCommand.ExecuteAsync(selectedItems);
+
+		// Assert
+		Assert.Collection(
+			_enqueuedItems,
+			item =>
+			{
+				Assert.Equal("reports/report.csv", item.Key);
+				Assert.Equal(Path.Combine(_defaultDownloadFolder, "report.csv"), item.DestinationPath);
+				Assert.Equal(1024, item.TotalBytes);
+				Assert.False(item.IsFolder);
+			},
+			item =>
+			{
+				Assert.Equal("logs/", item.Key);
+				Assert.Equal(Path.Combine(_defaultDownloadFolder, "logs"), item.DestinationPath);
+				Assert.Null(item.TotalBytes);
+				Assert.True(item.IsFolder);
+			});
+		_statusMessageService.Received(1).ShowInfo($"Enqueued 2 downloads to: {_defaultDownloadFolder}");
+	}
+
+	[Fact]
+	internal async Task DownloadSelectedCommand_UnknownSizeObject_QueuesWithoutByteTotal()
+	{
+		// Arrange
+		var viewModel = CreateViewModel();
+		await viewModel.InitializeAsync("bucket-a");
+
+		var selectedItems = new List<S3ObjectItem>
+		{
+			new() { Name = "unknown.bin", Key = "unknown.bin", Size = -1, IsFolder = false },
+		};
+
+		// Act
+		await viewModel.DownloadSelectedCommand.ExecuteAsync(selectedItems);
+
+		// Assert
+		var item = Assert.Single(_enqueuedItems);
+		Assert.Null(item.TotalBytes);
+	}
+
+	[Fact]
+	internal async Task DownloadSelectedCommand_DoesNotSetBusyWhileQueueingDownloads()
+	{
+		// Arrange
+		var viewModel = CreateViewModel();
+		await viewModel.InitializeAsync("bucket-a");
+
+		var selectedItems = new List<S3ObjectItem>
+		{
+			new() { Name = "report.csv", Key = "reports/report.csv", IsFolder = false },
+		};
+
+		// Act
+		await viewModel.DownloadSelectedCommand.ExecuteAsync(selectedItems);
+
+		// Assert
+		Assert.False(viewModel.IsBusy);
+	}
+
+	[Fact]
+	internal async Task DownloadSelectedCommand_WhenDestinationCannotBePrepared_ShowsErrorAndQueuesNothing()
+	{
+		// Arrange
+		var blockedPath = Path.Combine(Path.GetTempPath(), "pail-download-folder-" + Guid.NewGuid());
+		File.WriteAllText(blockedPath, string.Empty);
+		_appSettings.DownloadFolder = blockedPath;
+
+		try
+		{
+			var viewModel = CreateViewModel();
+			await viewModel.InitializeAsync("bucket-a");
+
+			var selectedItems = new List<S3ObjectItem>
+			{
+				new() { Name = "report.csv", Key = "reports/report.csv", IsFolder = false },
+			};
+
+			// Act
+			await viewModel.DownloadSelectedCommand.ExecuteAsync(selectedItems);
+
+			// Assert
+			Assert.Empty(_enqueuedItems);
+			await _downloadManager.DidNotReceive().EnqueueBatchAsync(Arg.Any<IEnumerable<DownloadItem>>(), Arg.Any<CancellationToken>());
+			_statusMessageService.Received(1).ShowError(Arg.Is<string>(message => message.StartsWith("Failed to enqueue downloads:", StringComparison.Ordinal)));
+		}
+		finally
+		{
+			File.Delete(blockedPath);
+		}
 	}
 
 	[Fact]
@@ -397,7 +525,7 @@ public sealed class ObjectBrowserViewModelTests
 	}
 
 	private ObjectBrowserViewModel CreateViewModel() =>
-		new(_s3Service, _navigationService, _copyActionService, _folderPickerService, _settingsService, _statusMessageService, _localizationService);
+		new(_s3Service, _downloadManager, _navigationService, _copyActionService, _folderPickerService, _settingsService, _statusMessageService, _localizationService);
 
 	private static S3ObjectItem CreateObject(string name, string key) =>
 		new()
