@@ -27,6 +27,9 @@ public sealed class SettingsServiceTests : IDisposable
 		Assert.Equal("eu-west-1", service.DefaultRegion);
 		Assert.True(service.UseCredentialChainByDefault);
 		Assert.Null(service.LastProfileName);
+		Assert.Equal(3, service.MaxParallelDownloads);
+		Assert.True(service.AutoClearCompletedDownloads);
+		Assert.Equal(5, service.AutoClearCompletedDownloadsDelaySeconds);
 	}
 
 	[Fact]
@@ -46,7 +49,10 @@ public sealed class SettingsServiceTests : IDisposable
 				"StatusOverlayDurationSeconds": 7,
 				"DefaultRegion": "us-east-1",
 				"UseCredentialChainByDefault": false,
-				"LastProfileName": "prod"
+				"LastProfileName": "prod",
+				"MaxParallelDownloads": 6,
+				"AutoClearCompletedDownloads": false,
+				"AutoClearCompletedDownloadsDelaySeconds": 12
 			}
 			""");
 
@@ -62,6 +68,9 @@ public sealed class SettingsServiceTests : IDisposable
 		Assert.Equal("us-east-1", service.DefaultRegion);
 		Assert.False(service.UseCredentialChainByDefault);
 		Assert.Equal("prod", service.LastProfileName);
+		Assert.Equal(6, service.MaxParallelDownloads);
+		Assert.False(service.AutoClearCompletedDownloads);
+		Assert.Equal(12, service.AutoClearCompletedDownloadsDelaySeconds);
 	}
 
 	[Fact]
@@ -82,6 +91,9 @@ public sealed class SettingsServiceTests : IDisposable
 			settings.DefaultRegion = "ap-southeast-2";
 			settings.UseCredentialChainByDefault = false;
 			settings.LastProfileName = "dev";
+			settings.MaxParallelDownloads = 4;
+			settings.AutoClearCompletedDownloads = false;
+			settings.AutoClearCompletedDownloadsDelaySeconds = 15;
 		});
 
 		var reloadedService = CreateService();
@@ -96,6 +108,9 @@ public sealed class SettingsServiceTests : IDisposable
 		Assert.Equal("ap-southeast-2", reloadedService.DefaultRegion);
 		Assert.False(reloadedService.UseCredentialChainByDefault);
 		Assert.Equal("dev", reloadedService.LastProfileName);
+		Assert.Equal(4, reloadedService.MaxParallelDownloads);
+		Assert.False(reloadedService.AutoClearCompletedDownloads);
+		Assert.Equal(15, reloadedService.AutoClearCompletedDownloadsDelaySeconds);
 
 		using var document = JsonDocument.Parse(await File.ReadAllTextAsync(GetSettingsFilePath()));
 		Assert.Equal("Light", document.RootElement.GetProperty(nameof(AppSettings.AppTheme)).GetString());
@@ -103,6 +118,9 @@ public sealed class SettingsServiceTests : IDisposable
 		Assert.Equal(325, document.RootElement.GetProperty(nameof(AppSettings.InitialObjectLoadCount)).GetInt32());
 		Assert.Equal(90, document.RootElement.GetProperty(nameof(AppSettings.LoadMoreObjectCount)).GetInt32());
 		Assert.Equal("dev", document.RootElement.GetProperty(nameof(AppSettings.LastProfileName)).GetString());
+		Assert.Equal(4, document.RootElement.GetProperty(nameof(AppSettings.MaxParallelDownloads)).GetInt32());
+		Assert.False(document.RootElement.GetProperty(nameof(AppSettings.AutoClearCompletedDownloads)).GetBoolean());
+		Assert.Equal(15, document.RootElement.GetProperty(nameof(AppSettings.AutoClearCompletedDownloadsDelaySeconds)).GetInt32());
 	}
 
 	[Fact]
@@ -123,6 +141,9 @@ public sealed class SettingsServiceTests : IDisposable
 			settings.DefaultRegion = "us-west-1";
 			settings.UseCredentialChainByDefault = false;
 			settings.LastProfileName = "ops";
+			settings.MaxParallelDownloads = 7;
+			settings.AutoClearCompletedDownloads = false;
+			settings.AutoClearCompletedDownloadsDelaySeconds = 30;
 		});
 
 		var reloadedService = CreateService();
@@ -137,6 +158,9 @@ public sealed class SettingsServiceTests : IDisposable
 		Assert.Equal("us-west-1", service.DefaultRegion);
 		Assert.False(service.UseCredentialChainByDefault);
 		Assert.Equal("ops", service.LastProfileName);
+		Assert.Equal(7, service.MaxParallelDownloads);
+		Assert.False(service.AutoClearCompletedDownloads);
+		Assert.Equal(30, service.AutoClearCompletedDownloadsDelaySeconds);
 
 		Assert.Equal(AppThemeMode.Dark, reloadedService.AppTheme);
 		Assert.Equal("F:\\Exports", reloadedService.DownloadFolder);
@@ -147,6 +171,9 @@ public sealed class SettingsServiceTests : IDisposable
 		Assert.Equal("us-west-1", reloadedService.DefaultRegion);
 		Assert.False(reloadedService.UseCredentialChainByDefault);
 		Assert.Equal("ops", reloadedService.LastProfileName);
+		Assert.Equal(7, reloadedService.MaxParallelDownloads);
+		Assert.False(reloadedService.AutoClearCompletedDownloads);
+		Assert.Equal(30, reloadedService.AutoClearCompletedDownloadsDelaySeconds);
 	}
 
 	public void Dispose()

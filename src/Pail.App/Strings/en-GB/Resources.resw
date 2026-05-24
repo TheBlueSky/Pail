@@ -505,6 +505,30 @@
     <value>Ask for a location every time before downloading an object.</value>
     <comment>Settings card: Download prompts description</comment>
   </data>
+  <data name="MaxParallelDownloadsTitle.Text" xml:space="preserve">
+    <value>Maximum parallel downloads</value>
+    <comment>Settings card: Maximum parallel downloads title</comment>
+  </data>
+  <data name="MaxParallelDownloadsDescription.Text" xml:space="preserve">
+    <value>Choose how many downloads Pail can run at once. Changes apply after restarting Pail.</value>
+    <comment>Settings card: Maximum parallel downloads description</comment>
+  </data>
+  <data name="AutoClearCompletedDownloadsTitle.Text" xml:space="preserve">
+    <value>Auto-clear finished downloads</value>
+    <comment>Settings card: Auto-clear finished downloads title</comment>
+  </data>
+  <data name="AutoClearCompletedDownloadsDescription.Text" xml:space="preserve">
+    <value>Remove completed and cancelled downloads from the queue after the delay. Failed downloads stay visible.</value>
+    <comment>Settings card: Auto-clear finished downloads description</comment>
+  </data>
+  <data name="AutoClearDelayTitle.Text" xml:space="preserve">
+    <value>Auto-clear delay</value>
+    <comment>Settings card: Auto-clear delay title</comment>
+  </data>
+  <data name="AutoClearDelayDescription.Text" xml:space="preserve">
+    <value>Set how many seconds finished downloads remain visible before they are cleared.</value>
+    <comment>Settings card: Auto-clear delay description</comment>
+  </data>
   <data name="AwsLoginSectionHeader.Text" xml:space="preserve">
     <value>AWS login defaults</value>
     <comment>Settings section: AWS login defaults</comment>

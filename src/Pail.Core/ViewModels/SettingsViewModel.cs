@@ -38,6 +38,9 @@ public partial class SettingsViewModel : ObservableObject
 		DefaultRegion = _settingsService.DefaultRegion;
 		UseCredentialChainByDefault = _settingsService.UseCredentialChainByDefault;
 		LastProfileName = _settingsService.LastProfileName ?? string.Empty;
+		MaxParallelDownloads = _settingsService.MaxParallelDownloads;
+		AutoClearCompletedDownloads = _settingsService.AutoClearCompletedDownloads;
+		AutoClearCompletedDownloadsDelaySeconds = _settingsService.AutoClearCompletedDownloadsDelaySeconds;
 	}
 
 	[ObservableProperty]
@@ -70,6 +73,15 @@ public partial class SettingsViewModel : ObservableObject
 
 	[ObservableProperty]
 	public partial string LastProfileName { get; set; } = string.Empty;
+
+	[ObservableProperty]
+	public partial int MaxParallelDownloads { get; set; }
+
+	[ObservableProperty]
+	public partial bool AutoClearCompletedDownloads { get; set; }
+
+	[ObservableProperty]
+	public partial int AutoClearCompletedDownloadsDelaySeconds { get; set; }
 
 	public IReadOnlyList<AppThemeMode> AvailableThemes { get; } =
 	[
@@ -120,6 +132,9 @@ public partial class SettingsViewModel : ObservableObject
 					settings.DefaultRegion = string.IsNullOrWhiteSpace(DefaultRegion) ? settings.DefaultRegion : DefaultRegion;
 					settings.UseCredentialChainByDefault = UseCredentialChainByDefault;
 					settings.LastProfileName = string.IsNullOrWhiteSpace(LastProfileName) ? null : LastProfileName.Trim();
+					settings.MaxParallelDownloads = Math.Clamp(MaxParallelDownloads, 1, 10);
+					settings.AutoClearCompletedDownloads = AutoClearCompletedDownloads;
+					settings.AutoClearCompletedDownloadsDelaySeconds = Math.Clamp(AutoClearCompletedDownloadsDelaySeconds, 0, 60);
 				});
 
 			ApplySettingsSnapshot();
@@ -159,5 +174,8 @@ public partial class SettingsViewModel : ObservableObject
 		DefaultRegion = _settingsService.DefaultRegion;
 		UseCredentialChainByDefault = _settingsService.UseCredentialChainByDefault;
 		LastProfileName = _settingsService.LastProfileName ?? string.Empty;
+		MaxParallelDownloads = _settingsService.MaxParallelDownloads;
+		AutoClearCompletedDownloads = _settingsService.AutoClearCompletedDownloads;
+		AutoClearCompletedDownloadsDelaySeconds = _settingsService.AutoClearCompletedDownloadsDelaySeconds;
 	}
 }

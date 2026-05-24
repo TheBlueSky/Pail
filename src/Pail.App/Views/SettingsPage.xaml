@@ -385,6 +385,131 @@
                     </Grid>
                 </Border>
 
+                <Border Style="{StaticResource SettingsCardBorderStyle}">
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <FontIcon
+                            Margin="0,4,0,0"
+                            VerticalAlignment="Top"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Glyph="&#xE7C1;"
+                            AutomationProperties.AccessibilityView="Raw" />
+
+                        <StackPanel
+                            Grid.Column="1"
+                            Spacing="2">
+                            <TextBlock
+                                x:Name="MaxParallelDownloadsTitleText"
+                                x:Uid="MaxParallelDownloadsTitle"
+                                Style="{StaticResource BodyStrongTextBlockStyle}"
+                                Text="Maximum parallel downloads" />
+                            <TextBlock
+                                x:Uid="MaxParallelDownloadsDescription"
+                                Style="{StaticResource SettingsCardDescriptionTextBlockStyle}"
+                                Text="Choose how many downloads Pail can run at once. Changes apply after restarting Pail." />
+                        </StackPanel>
+
+                        <NumberBox
+                            Grid.Column="2"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Top"
+                            Minimum="1"
+                            Maximum="10"
+                            MinWidth="160"
+                            SmallChange="1"
+                            SpinButtonPlacementMode="Compact"
+                            Value="{x:Bind ViewModel.MaxParallelDownloads, Mode=TwoWay}"
+                            AutomationProperties.LabeledBy="{Binding ElementName=MaxParallelDownloadsTitleText}" />
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource SettingsCardBorderStyle}">
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <FontIcon
+                            Margin="0,4,0,0"
+                            VerticalAlignment="Top"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Glyph="&#xE74C;"
+                            AutomationProperties.AccessibilityView="Raw" />
+
+                        <StackPanel
+                            Grid.Column="1"
+                            Spacing="2">
+                            <TextBlock
+                                x:Name="AutoClearCompletedDownloadsTitleText"
+                                x:Uid="AutoClearCompletedDownloadsTitle"
+                                Style="{StaticResource BodyStrongTextBlockStyle}"
+                                Text="Auto-clear finished downloads" />
+                            <TextBlock
+                                x:Uid="AutoClearCompletedDownloadsDescription"
+                                Style="{StaticResource SettingsCardDescriptionTextBlockStyle}"
+                                Text="Remove completed and cancelled downloads from the queue after the delay. Failed downloads stay visible." />
+                        </StackPanel>
+
+                        <ToggleSwitch
+                            Grid.Column="2"
+                            HorizontalAlignment="Right"
+                            MinWidth="0"
+                            IsOn="{x:Bind ViewModel.AutoClearCompletedDownloads, Mode=TwoWay}"
+                            AutomationProperties.LabeledBy="{Binding ElementName=AutoClearCompletedDownloadsTitleText}" />
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource SettingsCardBorderStyle}">
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <FontIcon
+                            Margin="0,4,0,0"
+                            VerticalAlignment="Top"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Glyph="&#xE916;"
+                            AutomationProperties.AccessibilityView="Raw" />
+
+                        <StackPanel
+                            Grid.Column="1"
+                            Spacing="2">
+                            <TextBlock
+                                x:Name="AutoClearDelayTitleText"
+                                x:Uid="AutoClearDelayTitle"
+                                Style="{StaticResource BodyStrongTextBlockStyle}"
+                                Text="Auto-clear delay" />
+                            <TextBlock
+                                x:Uid="AutoClearDelayDescription"
+                                Style="{StaticResource SettingsCardDescriptionTextBlockStyle}"
+                                Text="Set how many seconds finished downloads remain visible before they are cleared." />
+                        </StackPanel>
+
+                        <NumberBox
+                            Grid.Column="2"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Top"
+                            Minimum="0"
+                            Maximum="60"
+                            MinWidth="160"
+                            SmallChange="1"
+                            SpinButtonPlacementMode="Compact"
+                            Value="{x:Bind ViewModel.AutoClearCompletedDownloadsDelaySeconds, Mode=TwoWay}"
+                            IsEnabled="{x:Bind ViewModel.AutoClearCompletedDownloads, Mode=OneWay}"
+                            AutomationProperties.LabeledBy="{Binding ElementName=AutoClearDelayTitleText}" />
+                    </Grid>
+                </Border>
+
                 <TextBlock
                     x:Uid="AwsLoginSectionHeader"
                     Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"

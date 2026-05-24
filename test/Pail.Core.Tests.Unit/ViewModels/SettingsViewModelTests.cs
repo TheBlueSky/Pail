@@ -26,6 +26,9 @@ public sealed class SettingsViewModelTests
 		DefaultRegion = "us-east-1",
 		UseCredentialChainByDefault = false,
 		LastProfileName = "dev",
+		MaxParallelDownloads = 4,
+		AutoClearCompletedDownloads = false,
+		AutoClearCompletedDownloadsDelaySeconds = 12,
 	};
 
 	public SettingsViewModelTests()
@@ -39,6 +42,9 @@ public sealed class SettingsViewModelTests
 		_settingsService.DefaultRegion.Returns(_ => _settings.DefaultRegion);
 		_settingsService.UseCredentialChainByDefault.Returns(_ => _settings.UseCredentialChainByDefault);
 		_settingsService.LastProfileName.Returns(_ => _settings.LastProfileName);
+		_settingsService.MaxParallelDownloads.Returns(_ => _settings.MaxParallelDownloads);
+		_settingsService.AutoClearCompletedDownloads.Returns(_ => _settings.AutoClearCompletedDownloads);
+		_settingsService.AutoClearCompletedDownloadsDelaySeconds.Returns(_ => _settings.AutoClearCompletedDownloadsDelaySeconds);
 		_settingsService.UpdateAsync(Arg.Any<Action<AppSettings>>(), Arg.Any<CancellationToken>())
 			.Returns(callInfo =>
 			{
@@ -65,6 +71,9 @@ public sealed class SettingsViewModelTests
 		Assert.Equal("us-east-1", viewModel.DefaultRegion);
 		Assert.False(viewModel.UseCredentialChainByDefault);
 		Assert.Equal("dev", viewModel.LastProfileName);
+		Assert.Equal(4, viewModel.MaxParallelDownloads);
+		Assert.False(viewModel.AutoClearCompletedDownloads);
+		Assert.Equal(12, viewModel.AutoClearCompletedDownloadsDelaySeconds);
 		Assert.Contains(AppThemeMode.System, viewModel.AvailableThemes);
 		Assert.Contains(AppThemeMode.Light, viewModel.AvailableThemes);
 		Assert.Contains(AppThemeMode.Dark, viewModel.AvailableThemes);
@@ -85,6 +94,9 @@ public sealed class SettingsViewModelTests
 		viewModel.DefaultRegion = "ap-south-1";
 		viewModel.UseCredentialChainByDefault = true;
 		viewModel.LastProfileName = "prod";
+		viewModel.MaxParallelDownloads = 8;
+		viewModel.AutoClearCompletedDownloads = true;
+		viewModel.AutoClearCompletedDownloadsDelaySeconds = 25;
 
 		// Act
 		await viewModel.SaveCommand.ExecuteAsync(null);
@@ -99,6 +111,9 @@ public sealed class SettingsViewModelTests
 		Assert.Equal("ap-south-1", _settings.DefaultRegion);
 		Assert.True(_settings.UseCredentialChainByDefault);
 		Assert.Equal("prod", _settings.LastProfileName);
+		Assert.Equal(8, _settings.MaxParallelDownloads);
+		Assert.True(_settings.AutoClearCompletedDownloads);
+		Assert.Equal(25, _settings.AutoClearCompletedDownloadsDelaySeconds);
 		await _settingsService.Received(1).UpdateAsync(Arg.Any<Action<AppSettings>>(), Arg.Any<CancellationToken>());
 		_appThemeService.Received(1).ApplyTheme(AppThemeMode.System);
 		_statusMessageService.Received(1).ShowInfo("Settings saved.");
@@ -132,6 +147,33 @@ public sealed class SettingsViewModelTests
 		// Assert
 		Assert.Equal(1, _settings.InitialObjectLoadCount);
 		Assert.Equal(5005, _settings.LoadMoreObjectCount);
+	}
+
+	[Fact]
+	internal async Task SaveCommand_DownloadSettings_ClampToSupportedRanges()
+	{
+		// Arrange
+		var viewModel = CreateViewModel();
+		viewModel.MaxParallelDownloads = 0;
+		viewModel.AutoClearCompletedDownloadsDelaySeconds = -5;
+
+		// Act
+		await viewModel.SaveCommand.ExecuteAsync(null);
+
+		// Assert
+		Assert.Equal(1, _settings.MaxParallelDownloads);
+		Assert.Equal(0, _settings.AutoClearCompletedDownloadsDelaySeconds);
+
+		// Arrange
+		viewModel.MaxParallelDownloads = 99;
+		viewModel.AutoClearCompletedDownloadsDelaySeconds = 99;
+
+		// Act
+		await viewModel.SaveCommand.ExecuteAsync(null);
+
+		// Assert
+		Assert.Equal(10, _settings.MaxParallelDownloads);
+		Assert.Equal(60, _settings.AutoClearCompletedDownloadsDelaySeconds);
 	}
 
 	[Fact]
