@@ -68,7 +68,7 @@ public partial class PailApp : Application
 		Services.GetRequiredService<IAppThemeService>().ApplyTheme(Services.GetRequiredService<ISettingsService>().AppTheme);
 
 		SetWindowIcon(_window);
-		SetWindowSize(_window, 1024, 640); // Enough to have the log in page visible, and the app somewhat usable on smaller screens
+		SetInitialWindowSize(_window);
 		CenterWindow(_window);
 		GetAppWindow(_window).Closing += OnWindowClosing;
 
@@ -144,10 +144,28 @@ public partial class PailApp : Application
 		appWindow.Move(new PointInt32(x, y));
 	}
 
-	private static void SetWindowSize(Window window, int width, int height)
+	private static void SetInitialWindowSize(Window window)
 	{
 		var appWindow = GetAppWindow(window);
-		appWindow.Resize(new SizeInt32(width, height));
+		var workArea = DisplayArea.GetFromWindowId(appWindow.Id, DisplayAreaFallback.Primary).WorkArea;
+
+		const int preferredWidth = 1440;
+		const int preferredHeight = 900;
+		const int compactWidth = 1024;
+		const int compactHeight = 640;
+		const int margin = 48;
+
+		var useCompact =
+			workArea.Width < preferredWidth + margin ||
+			workArea.Height < preferredHeight + margin;
+
+		var width = useCompact ? compactWidth : preferredWidth;
+		var height = useCompact ? compactHeight : preferredHeight;
+
+		width = Math.Min(width, workArea.Width - margin);
+		height = Math.Min(height, workArea.Height - margin);
+
+		appWindow.ResizeClient(new SizeInt32(width, height));
 	}
 
 	private static AppWindow GetAppWindow(Window window)
