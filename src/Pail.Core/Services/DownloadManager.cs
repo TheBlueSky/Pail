@@ -78,6 +78,36 @@ public sealed class DownloadManager : IDownloadManager, IDisposable
 		return Task.CompletedTask;
 	}
 
+	public Task RetryAsync(Guid downloadId, CancellationToken cancellationToken = default)
+	{
+		if (!_registrations.TryGetValue(downloadId, out var currentRegistration))
+		{
+			return Task.CompletedTask;
+		}
+
+		if (currentRegistration.Item.Status is not DownloadStatus.Failed)
+		{
+			return Task.CompletedTask;
+		}
+
+		var linkedCancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+		var retryRegistration = new DownloadRegistration(currentRegistration.Item, linkedCancellationTokenSource);
+
+		if (!_registrations.TryUpdate(downloadId, retryRegistration, currentRegistration))
+		{
+			linkedCancellationTokenSource.Dispose();
+			return Task.CompletedTask;
+		}
+
+		currentRegistration.CancellationTokenSource.Dispose();
+		_dispatcherService.Run(() => retryRegistration.Item.TransitionTo(DownloadStatus.Queued));
+		RaiseProgressChanged(retryRegistration.Item);
+
+		_ = RunDownloadAsync(retryRegistration);
+
+		return Task.CompletedTask;
+	}
+
 	public void ClearCompleted()
 	{
 		foreach (var entry in _registrations)

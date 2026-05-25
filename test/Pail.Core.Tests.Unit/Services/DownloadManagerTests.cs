@@ -64,6 +64,35 @@ public sealed class DownloadManagerTests
 	}
 
 	[Fact]
+	internal async Task RetryAsync_FailedDownload_ResetsAndRunsAgain()
+	{
+		// Arrange
+		var attempts = 0;
+		_s3Service
+			.DownloadObjectAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<IProgress<DownloadProgress>?>(), Arg.Any<CancellationToken>())
+			.Returns(_ =>
+			{
+				var attempt = Interlocked.Increment(ref attempts);
+				return attempt == 1 ? Task.FromException(new IOException("disk full")) : Task.CompletedTask;
+			});
+
+		var manager = CreateManager();
+		var item = CreateItem();
+
+		await manager.EnqueueAsync(item);
+		await WaitForStatusAsync(item, DownloadStatus.Failed);
+
+		// Act
+		await manager.RetryAsync(item.Id);
+		await WaitForStatusAsync(item, DownloadStatus.Completed);
+
+		// Assert
+		Assert.Equal(2, attempts);
+		Assert.Equal(DownloadStatus.Completed, item.Status);
+		Assert.Null(item.ErrorMessage);
+	}
+
+	[Fact]
 	internal async Task EnqueueAsync_ReturnsBeforeDownloadCompletesAndRegistersItem()
 	{
 		// Arrange

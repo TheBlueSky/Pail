@@ -16,6 +16,8 @@ public interface IDownloadManager
 
 	public Task CancelAllAsync();
 
+	public Task RetryAsync(Guid downloadId, CancellationToken cancellationToken = default);
+
 	public IReadOnlyCollection<DownloadItem> GetActiveDownloads();
 
 	public void ClearCompleted();

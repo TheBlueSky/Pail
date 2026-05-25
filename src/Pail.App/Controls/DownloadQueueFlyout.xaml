@@ -244,17 +244,32 @@
                                 </Grid>
                             </Grid>
 
-                            <Button
+                            <StackPanel
                                 Grid.Column="2"
-                                Width="32"
-                                Height="32"
-                                Padding="0"
                                 VerticalAlignment="Top"
-                                Command="{x:Bind CancelCommand, Mode=OneWay}"
-                                ToolTipService.ToolTip="{x:Bind CancelAutomationName, Mode=OneWay}"
-                                AutomationProperties.Name="{x:Bind CancelAutomationName, Mode=OneWay}">
-                                <SymbolIcon Symbol="Cancel" AutomationProperties.AccessibilityView="Raw" />
-                            </Button>
+                                Spacing="6">
+                                <Button
+                                    Width="32"
+                                    Height="32"
+                                    Padding="0"
+                                    Command="{x:Bind RetryCommand, Mode=OneWay}"
+                                    Visibility="{x:Bind CanRetry, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"
+                                    ToolTipService.ToolTip="{x:Bind RetryAutomationName, Mode=OneWay}"
+                                    AutomationProperties.Name="{x:Bind RetryAutomationName, Mode=OneWay}">
+                                    <SymbolIcon Symbol="Refresh" AutomationProperties.AccessibilityView="Raw" />
+                                </Button>
+
+                                <Button
+                                    Width="32"
+                                    Height="32"
+                                    Padding="0"
+                                    Command="{x:Bind CancelCommand, Mode=OneWay}"
+                                    Visibility="{x:Bind CanCancel, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"
+                                    ToolTipService.ToolTip="{x:Bind CancelAutomationName, Mode=OneWay}"
+                                    AutomationProperties.Name="{x:Bind CancelAutomationName, Mode=OneWay}">
+                                    <SymbolIcon Symbol="Cancel" AutomationProperties.AccessibilityView="Raw" />
+                                </Button>
+                            </StackPanel>
                         </Grid>
                     </DataTemplate>
                 </ListView.ItemTemplate>

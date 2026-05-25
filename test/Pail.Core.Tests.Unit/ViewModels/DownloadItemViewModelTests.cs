@@ -16,6 +16,7 @@ public sealed class DownloadItemViewModelTests
 	public DownloadItemViewModelTests()
 	{
 		_manager.CancelAsync(Arg.Any<Guid>()).Returns(Task.CompletedTask);
+		_manager.RetryAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>()).Returns(Task.CompletedTask);
 		_localizationService.ReturnsFallbackStrings();
 	}
 
@@ -213,6 +214,24 @@ public sealed class DownloadItemViewModelTests
 		{
 			changedProperties.Add(args.PropertyName);
 		}
+	}
+
+	[Fact]
+	internal async Task RetryCommand_CallsManagerForFailedDownloads()
+	{
+		// Arrange
+		var item = CreateItem();
+		item.TransitionTo(DownloadStatus.Downloading);
+		item.TransitionTo(DownloadStatus.Failed, "Could not finish download.");
+		var viewModel = CreateViewModel(item);
+
+		// Act
+		await viewModel.RetryCommand.ExecuteAsync(null);
+
+		// Assert
+		Assert.True(viewModel.CanRetry);
+		Assert.True(viewModel.RetryCommand.CanExecute(null));
+		await _manager.Received(1).RetryAsync(item.Id, Arg.Any<CancellationToken>());
 	}
 
 	private DownloadItemViewModel CreateViewModel(DownloadItem item) => new(item, _manager, _localizationService);

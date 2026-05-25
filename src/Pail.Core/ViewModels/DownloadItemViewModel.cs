@@ -38,10 +38,12 @@ public sealed partial class DownloadItemViewModel : ObservableObject
 
 	[ObservableProperty]
 	[NotifyPropertyChangedFor(nameof(CanCancel))]
+	[NotifyPropertyChangedFor(nameof(CanRetry))]
 	[NotifyPropertyChangedFor(nameof(StatusText))]
 	[NotifyPropertyChangedFor(nameof(IsByteProgressIndeterminate))]
 	[NotifyPropertyChangedFor(nameof(ProgressBarValue))]
 	[NotifyCanExecuteChangedFor(nameof(CancelCommand))]
+	[NotifyCanExecuteChangedFor(nameof(RetryCommand))]
 	public partial DownloadStatus Status { get; set; }
 
 	[ObservableProperty]
@@ -88,6 +90,8 @@ public sealed partial class DownloadItemViewModel : ObservableObject
 
 	public bool CanCancel => Status is DownloadStatus.Queued or DownloadStatus.Downloading;
 
+	public bool CanRetry => Status is DownloadStatus.Failed;
+
 	internal void Refresh()
 	{
 		Status = Item.Status;
@@ -101,6 +105,11 @@ public sealed partial class DownloadItemViewModel : ObservableObject
 
 	[RelayCommand(CanExecute = nameof(CanCancel))]
 	private Task CancelAsync() => _manager.CancelAsync(Item.Id);
+
+	[RelayCommand(CanExecute = nameof(CanRetry))]
+	private Task RetryAsync() => _manager.RetryAsync(Item.Id);
+
+	public string RetryAutomationName => _localizationService.FormatString("DownloadRetryAutomationName", "Retry download {0}", FileName);
 
 	private string GetProgressText() =>
 		Item switch

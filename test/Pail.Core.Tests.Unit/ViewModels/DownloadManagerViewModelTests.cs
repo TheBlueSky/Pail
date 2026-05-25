@@ -14,9 +14,10 @@ public sealed class DownloadManagerViewModelTests
 
 	public DownloadManagerViewModelTests()
 	{
-		_manager.GetActiveDownloads().Returns(Array.Empty<DownloadItem>());
+		_manager.GetActiveDownloads().Returns([]);
 		_manager.CancelAsync(Arg.Any<Guid>()).Returns(Task.CompletedTask);
 		_manager.CancelAllAsync().Returns(Task.CompletedTask);
+		_manager.RetryAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>()).Returns(Task.CompletedTask);
 		_localizationService.ReturnsFallbackStrings();
 	}
 
