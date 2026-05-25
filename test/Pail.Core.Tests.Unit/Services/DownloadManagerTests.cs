@@ -1,4 +1,5 @@
 using NSubstitute;
+using Pail.Core.Tests.Unit.TestInfrastructure;
 using Pail.Models;
 using Pail.Services;
 
@@ -9,12 +10,14 @@ public sealed class DownloadManagerTests
 	private readonly IS3Service _s3Service = Substitute.For<IS3Service>();
 	private readonly ISettingsService _settingsService = Substitute.For<ISettingsService>();
 	private readonly IDispatcherService _dispatcherService = CreateSynchronousDispatcher();
+	private readonly ILocalizationService _localizationService = Substitute.For<ILocalizationService>();
 
 	public DownloadManagerTests()
 	{
 		_settingsService.MaxParallelDownloads.Returns(3);
 		_settingsService.AutoClearCompletedDownloads.Returns(false);
 		_settingsService.AutoClearCompletedDownloadsDelaySeconds.Returns(0);
+		_localizationService.ReturnsFallbackStrings();
 	}
 
 	[Fact]
@@ -60,7 +63,29 @@ public sealed class DownloadManagerTests
 
 		// Assert
 		Assert.Equal(DownloadStatus.Failed, item.Status);
-		Assert.Equal("disk full", item.ErrorMessage);
+		Assert.Equal("Pail could not finish the download. Check your connection, free disk space, and folder permissions, then try again.", item.ErrorMessage);
+		Assert.Equal("disk full", item.ErrorDetails);
+	}
+
+	[Fact]
+	internal async Task EnqueueAsync_S3ServiceTimesOut_TransitionsToFailed()
+	{
+		// Arrange
+		_s3Service
+			.DownloadObjectAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<IProgress<DownloadProgress>?>(), Arg.Any<CancellationToken>())
+			.Returns(_ => Task.FromException(new TimeoutException("request timed out")));
+
+		var manager = CreateManager();
+		var item = CreateItem();
+
+		// Act
+		await manager.EnqueueAsync(item);
+		await WaitForStatusAsync(item, DownloadStatus.Failed);
+
+		// Assert
+		Assert.Equal(DownloadStatus.Failed, item.Status);
+		Assert.Equal("The network connection was interrupted. Check your connection and try again.", item.ErrorMessage);
+		Assert.Equal("request timed out", item.ErrorDetails);
 	}
 
 	[Fact]
@@ -90,6 +115,7 @@ public sealed class DownloadManagerTests
 		Assert.Equal(2, attempts);
 		Assert.Equal(DownloadStatus.Completed, item.Status);
 		Assert.Null(item.ErrorMessage);
+		Assert.Null(item.ErrorDetails);
 	}
 
 	[Fact]
@@ -500,7 +526,7 @@ public sealed class DownloadManagerTests
 		Assert.Same(item, removed.Item);
 	}
 
-	private DownloadManager CreateManager() => new(_s3Service, _settingsService, _dispatcherService);
+	private DownloadManager CreateManager() => new(_s3Service, _settingsService, _dispatcherService, _localizationService);
 
 	private static DownloadItem CreateItem() => new()
 	{

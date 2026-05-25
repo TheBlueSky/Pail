@@ -159,9 +159,9 @@
                             MinHeight="84"
                             Padding="12,10"
                             ColumnSpacing="10"
-                            ToolTipService.ToolTip="{x:Bind ErrorMessage, Mode=OneWay}"
+                            ToolTipService.ToolTip="{x:Bind ErrorDetailsText, Mode=OneWay}"
                             AutomationProperties.Name="{x:Bind FileName, Mode=OneWay}"
-                            AutomationProperties.HelpText="{x:Bind ErrorMessage, Mode=OneWay}">
+                            AutomationProperties.HelpText="{x:Bind ErrorDetailsText, Mode=OneWay}">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="*" />

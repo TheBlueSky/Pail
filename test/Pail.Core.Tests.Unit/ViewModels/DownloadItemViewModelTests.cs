@@ -207,6 +207,7 @@ public sealed class DownloadItemViewModelTests
 		Assert.Contains(nameof(DownloadItemViewModel.SpeedText), changedProperties);
 		Assert.Contains(nameof(DownloadItemViewModel.TimeRemainingText), changedProperties);
 		Assert.Contains(nameof(DownloadItemViewModel.ErrorMessage), changedProperties);
+		Assert.Contains(nameof(DownloadItemViewModel.ErrorDetailsText), changedProperties);
 
 		viewModel.PropertyChanged -= OnPropertyChanged;
 
@@ -214,6 +215,21 @@ public sealed class DownloadItemViewModelTests
 		{
 			changedProperties.Add(args.PropertyName);
 		}
+	}
+
+	[Fact]
+	internal void ErrorDetailsText_CombinesFriendlyMessageAndTechnicalDetails()
+	{
+		// Arrange
+		var item = CreateItem();
+		item.TransitionTo(DownloadStatus.Downloading);
+		item.TransitionTo(DownloadStatus.Failed, "Could not finish download.", "disk full");
+
+		// Act
+		var viewModel = CreateViewModel(item);
+
+		// Assert
+		Assert.Equal("Could not finish download.\n\nDetails: disk full", viewModel.ErrorDetailsText);
 	}
 
 	[Fact]

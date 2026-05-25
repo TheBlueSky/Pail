@@ -68,7 +68,11 @@ public sealed partial class DownloadItemViewModel : ObservableObject
 	[NotifyPropertyChangedFor(nameof(HasError))]
 	public partial string? ErrorMessage { get; set; }
 
-	public bool IsByteProgressIndeterminate => ByteProgress is null && Status is (DownloadStatus.Queued or DownloadStatus.Downloading);
+	[ObservableProperty]
+	[NotifyPropertyChangedFor(nameof(HasError))]
+	public partial string? ErrorDetailsText { get; set; }
+
+	public bool IsByteProgressIndeterminate => ByteProgress is null && Status is DownloadStatus.Queued or DownloadStatus.Downloading;
 
 	public double ProgressBarValue => ByteProgress ?? (Status is DownloadStatus.Completed ? 100 : 0);
 
@@ -101,6 +105,7 @@ public sealed partial class DownloadItemViewModel : ObservableObject
 		SpeedText = _localizationService.FormatString("DownloadSpeed", "{0}/s", FormatBytes(Item.Speed));
 		TimeRemainingText = GetTimeRemainingText();
 		ErrorMessage = Item.ErrorMessage;
+		ErrorDetailsText = GetErrorDetailsText();
 	}
 
 	[RelayCommand(CanExecute = nameof(CanCancel))]
@@ -139,6 +144,21 @@ public sealed partial class DownloadItemViewModel : ObservableObject
 		return remaining is null
 			? string.Empty
 			: _localizationService.FormatString("DownloadTimeRemaining", "about {0} remaining", FormatDuration(remaining.Value));
+	}
+
+	private string? GetErrorDetailsText()
+	{
+		if (string.IsNullOrWhiteSpace(Item.ErrorMessage))
+		{
+			return null;
+		}
+
+		if (string.IsNullOrWhiteSpace(Item.ErrorDetails) || string.Equals(Item.ErrorMessage, Item.ErrorDetails, StringComparison.Ordinal))
+		{
+			return Item.ErrorMessage;
+		}
+
+		return _localizationService.FormatString("DownloadErrorTooltipWithDetails", "{0}\n\nDetails: {1}", Item.ErrorMessage, Item.ErrorDetails);
 	}
 
 	private static string FormatBytes(double bytes)

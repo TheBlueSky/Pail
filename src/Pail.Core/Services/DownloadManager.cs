@@ -11,18 +11,21 @@ public sealed class DownloadManager : IDownloadManager, IDisposable
 	private readonly IS3Service _s3Service;
 	private readonly ISettingsService _settingsService;
 	private readonly IDispatcherService _dispatcherService;
+	private readonly ILocalizationService _localizationService;
 	private readonly SemaphoreSlim _semaphore;
 	private readonly ConcurrentDictionary<Guid, DownloadRegistration> _registrations = new();
 
-	public DownloadManager(IS3Service s3Service, ISettingsService settingsService, IDispatcherService dispatcherService)
+	public DownloadManager(IS3Service s3Service, ISettingsService settingsService, IDispatcherService dispatcherService, ILocalizationService localizationService)
 	{
 		ArgumentNullException.ThrowIfNull(s3Service);
 		ArgumentNullException.ThrowIfNull(settingsService);
 		ArgumentNullException.ThrowIfNull(dispatcherService);
+		ArgumentNullException.ThrowIfNull(localizationService);
 
 		_s3Service = s3Service;
 		_settingsService = settingsService;
 		_dispatcherService = dispatcherService;
+		_localizationService = localizationService;
 
 		// SemaphoreSlim cannot be resized; the parallel limit is snapshotted at construction.
 		// Changes to MaxParallelDownloads take effect on next app start.
@@ -163,7 +166,7 @@ public sealed class DownloadManager : IDownloadManager, IDisposable
 		{
 			await _semaphore.WaitAsync(token);
 		}
-		catch (OperationCanceledException)
+		catch (OperationCanceledException ex) when (IsDownloadCancellation(ex, token))
 		{
 			_dispatcherService.Run(() => item.TransitionTo(DownloadStatus.Cancelled));
 			RaiseProgressChanged(item);
@@ -197,13 +200,21 @@ public sealed class DownloadManager : IDownloadManager, IDisposable
 		}
 		catch (Exception ex)
 		{
-			_dispatcherService.Run(() => item.TransitionTo(DownloadStatus.Failed, ex.Message));
+			var failureMessage = DownloadErrorMessageFormatter.Format(ex, _localizationService);
+			_dispatcherService.Run(() => item.TransitionTo(DownloadStatus.Failed, failureMessage.Summary, failureMessage.Details));
 			RaiseProgressChanged(item);
 		}
 		finally
 		{
 			_semaphore.Release();
 			ScheduleAutoClearIfApplicable(registration);
+		}
+
+		static bool IsDownloadCancellation(OperationCanceledException exception, CancellationToken cancellationToken)
+		{
+			return cancellationToken.IsCancellationRequested &&
+				exception.CancellationToken.CanBeCanceled &&
+				exception.CancellationToken.Equals(cancellationToken);
 		}
 	}
 

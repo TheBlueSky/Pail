@@ -701,6 +701,50 @@
     <value>Retry download {0}</value>
     <comment>Accessible name and tooltip for retrying a failed download. {0} is the file or folder name.</comment>
   </data>
+  <data name="DownloadErrorPermission" xml:space="preserve">
+    <value>Pail could not read this object from S3. Check permissions and try again.</value>
+    <comment>Friendly download failure shown for S3 permission errors.</comment>
+  </data>
+  <data name="DownloadErrorNotFound" xml:space="preserve">
+    <value>The S3 object was not found. It may have been deleted or moved.</value>
+    <comment>Friendly download failure shown when an S3 object or bucket is not found.</comment>
+  </data>
+  <data name="DownloadErrorRegionMismatch" xml:space="preserve">
+    <value>This bucket is in a different region. Reconnect using the bucket's region, then try again.</value>
+    <comment>Friendly download failure shown when the selected S3 bucket is in another region.</comment>
+  </data>
+  <data name="DownloadErrorThrottled" xml:space="preserve">
+    <value>Amazon S3 is throttling download requests. Try again in a moment.</value>
+    <comment>Friendly download failure shown when S3 throttles requests.</comment>
+  </data>
+  <data name="DownloadErrorNetwork" xml:space="preserve">
+    <value>The network connection was interrupted. Check your connection and try again.</value>
+    <comment>Friendly download failure shown for network and timeout errors.</comment>
+  </data>
+  <data name="DownloadErrorStoragePermission" xml:space="preserve">
+    <value>Pail could not write to the download location. Check folder permissions and try again.</value>
+    <comment>Friendly download failure shown when Pail cannot write to the selected folder.</comment>
+  </data>
+  <data name="DownloadErrorDownloadFolderMissing" xml:space="preserve">
+    <value>The download folder was not found. Choose a valid folder and try again.</value>
+    <comment>Friendly download failure shown when the selected download folder no longer exists.</comment>
+  </data>
+  <data name="DownloadErrorStorageOrNetwork" xml:space="preserve">
+    <value>Pail could not finish the download. Check your connection, free disk space, and folder permissions, then try again.</value>
+    <comment>Friendly download failure shown for ambiguous I/O failures.</comment>
+  </data>
+  <data name="DownloadErrorS3" xml:space="preserve">
+    <value>Amazon S3 download failed: {0}</value>
+    <comment>Friendly download failure shown for uncategorised S3 failures. {0} is the technical message.</comment>
+  </data>
+  <data name="DownloadErrorUnknown" xml:space="preserve">
+    <value>Download failed: {0}</value>
+    <comment>Friendly download failure shown for uncategorised failures. {0} is the technical message.</comment>
+  </data>
+  <data name="DownloadErrorTooltipWithDetails" xml:space="preserve">
+    <value>{0}&#x0a;&#x0a;Details: {1}</value>
+    <comment>Download failure tooltip/help text. {0} is the friendly summary; {1} is the technical detail.</comment>
+  </data>
   <data name="DownloadQueueActiveCount" xml:space="preserve">
     <value>{0} active</value>
     <comment>Download queue summary. {0} is the number of queued or downloading items.</comment>

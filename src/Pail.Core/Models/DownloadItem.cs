@@ -26,17 +26,19 @@ public sealed class DownloadItem
 
 	public string? ErrorMessage { get; private set; }
 
+	public string? ErrorDetails { get; private set; }
+
 	public bool IsFolder { get; init; }
 
 	public int FilesCompleted { get; set; }
 
 	public int TotalFiles { get; set; }
 
-	public void TransitionTo(DownloadStatus newStatus, string? errorMessage = null)
+	public void TransitionTo(DownloadStatus newStatus, string? errorMessage = null, string? errorDetails = null)
 	{
-		if (newStatus is DownloadStatus.Queued && errorMessage is not null)
+		if (newStatus is DownloadStatus.Queued && (errorMessage is not null || errorDetails is not null))
 		{
-			throw new ArgumentException("Error message cannot be supplied when transitioning to Queued; the retry resets attempt state including ErrorMessage.", nameof(errorMessage));
+			throw new ArgumentException("Error information cannot be supplied when transitioning to Queued; the retry resets attempt state including ErrorMessage and ErrorDetails.", nameof(errorMessage));
 		}
 
 		if (Status is DownloadStatus.Completed or DownloadStatus.Cancelled or DownloadStatus.Failed)
@@ -74,6 +76,11 @@ public sealed class DownloadItem
 		{
 			ErrorMessage = errorMessage;
 		}
+
+		if (errorDetails is not null)
+		{
+			ErrorDetails = errorDetails;
+		}
 	}
 
 	private void ResetAttemptState()
@@ -83,6 +90,7 @@ public sealed class DownloadItem
 		StartTime = null;
 		EndTime = null;
 		ErrorMessage = null;
+		ErrorDetails = null;
 		FilesCompleted = 0;
 	}
 }

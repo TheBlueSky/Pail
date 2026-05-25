@@ -198,6 +198,29 @@ public sealed class DownloadManagerViewModelTests
 	}
 
 	[Fact]
+	internal void Constructor_WithLargeQueue_HydratesWithoutDroppingItems()
+	{
+		// Arrange
+		var items = Enumerable.Range(0, 150)
+			.Select(index => CreateItem(
+				status: index % 3 == 0 ? DownloadStatus.Downloading : DownloadStatus.Queued,
+				totalBytes: 1000,
+				bytesDownloaded: index % 3 == 0 ? 500 : 0,
+				speed: index % 3 == 0 ? 100 : 0))
+			.ToArray();
+		_manager.GetActiveDownloads().Returns(items);
+
+		// Act
+		var viewModel = CreateViewModel();
+
+		// Assert
+		Assert.Equal(150, viewModel.Items.Count);
+		Assert.Equal(150, viewModel.ActiveCount);
+		Assert.True(viewModel.HasItems);
+		Assert.True(viewModel.HasOverallByteProgress);
+	}
+
+	[Fact]
 	internal void Dispose_UnsubscribesFromManagerEvents()
 	{
 		// Arrange
