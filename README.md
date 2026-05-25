@@ -14,7 +14,7 @@
 - Navigate bucket folders, inspect object names, sizes, and last-modified timestamps
 - Control the number of items loaded, and load more results for large listings
 - Copy object names or full S3 keys from the object browser
-- Download one or more files or folders, using a configurable default download folder or a prompt for each download
+- Download one or more files or folders with queue progress, cancellation, failed-download retry, and configurable parallel downloads
 - Save app preferences for theme, default region, preferred profile, object browser load sizes, and status message timing
 
 ## How to use it
@@ -24,7 +24,8 @@
 3. Enter credentials, paste AWS Console credentials, or use the default credential chain with an AWS profile.
 4. Sign in to list your buckets.
 5. Search or open a bucket, browse folders, then copy or download the items you need.
-6. Open Settings to adjust theme, login defaults, object loading behaviour, and download preferences.
+6. Open the Downloads item in the sidebar to monitor progress, cancel active downloads, retry failed downloads, or clear finished items.
+7. Open Settings to adjust theme, login defaults, object loading behaviour, and download preferences.
 
 ## Download
 
