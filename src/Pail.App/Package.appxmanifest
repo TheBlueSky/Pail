@@ -9,7 +9,7 @@
   <Identity
     Name="56804TheBlueSky.TheBlueSky.Pail"
     Publisher="CN=BCFD3639-CDC0-444F-ABA0-78FD2419F1FA"
-    Version="1.0.0.0" />
+    Version="1.1.0.0" />
 
   <Properties>
     <DisplayName>ms-resource:AppDisplayName</DisplayName>
