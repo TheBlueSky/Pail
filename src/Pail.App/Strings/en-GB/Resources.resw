@@ -297,6 +297,26 @@
     <value>Browser</value>
     <comment>Object browser page heading</comment>
   </data>
+  <data name="ObjectSearchRegion.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.LocalizedLandmarkType" xml:space="preserve">
+    <value>Search objects</value>
+    <comment>Localized landmark type for the object search region</comment>
+  </data>
+  <data name="ObjectSearchTextBox.PlaceholderText" xml:space="preserve">
+    <value>Search objects</value>
+    <comment>Placeholder text for object search box</comment>
+  </data>
+  <data name="ObjectSearchTextBox.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Search objects</value>
+    <comment>Accessible name for object search box</comment>
+  </data>
+  <data name="ObjectSearchTextBox.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.AcceleratorKey" xml:space="preserve">
+    <value>Ctrl+F, F3</value>
+    <comment>Keyboard shortcuts announced for object search box</comment>
+  </data>
+  <data name="ObjectSearchTextBox.ToolTipService.ToolTip" xml:space="preserve">
+    <value>Search objects (Ctrl+F or F3)</value>
+    <comment>Tooltip for object search box</comment>
+  </data>
   <data name="ObjectBrowserCommandBar.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.LocalizedLandmarkType" xml:space="preserve">
     <value>Object commands</value>
     <comment>Localized landmark type for the object browser command bar</comment>

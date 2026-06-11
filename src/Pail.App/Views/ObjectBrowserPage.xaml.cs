@@ -156,6 +156,23 @@ public sealed partial class ObjectBrowserPage : Page
 		}
 	}
 
+	private void OnSearchTextChanged(object sender, TextChangedEventArgs e)
+	{
+		if (sender is TextBox searchTextBox)
+		{
+			ViewModel.SearchText = searchTextBox.Text ?? string.Empty;
+		}
+	}
+
+	private void OnPageKeyboardAcceleratorInvoked(KeyboardAccelerator accelerator, KeyboardAcceleratorInvokedEventArgs args)
+	{
+		if (accelerator == SearchKeyboardAcceleratorF || accelerator == SearchKeyboardAcceleratorF3)
+		{
+			SearchTextBox.Focus(FocusState.Programmatic);
+			args.Handled = true;
+		}
+	}
+
 	private void OnGridPointerPressed(object sender, PointerRoutedEventArgs e) =>
 		_keyboardNavigationRowIndex = null;
 

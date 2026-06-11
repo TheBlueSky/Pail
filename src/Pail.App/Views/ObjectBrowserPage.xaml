@@ -15,6 +15,11 @@
         <converters:FolderIconConverter x:Key="FolderIconConverter"/>
     </Page.Resources>
 
+    <Page.KeyboardAccelerators>
+        <KeyboardAccelerator x:Name="SearchKeyboardAcceleratorF" Key="F" Modifiers="Control" Invoked="OnPageKeyboardAcceleratorInvoked" />
+        <KeyboardAccelerator x:Name="SearchKeyboardAcceleratorF3" Key="F3" Modifiers="None" Invoked="OnPageKeyboardAcceleratorInvoked"/>
+    </Page.KeyboardAccelerators>
+
     <Grid
         x:Uid="ObjectBrowserMainRegion"
         Margin="24"
@@ -27,10 +32,39 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,0,0,12">
-            <TextBlock x:Uid="ObjectBrowserTitle" Text="Browser" Style="{StaticResource TitleTextBlockStyle}" VerticalAlignment="Center" AutomationProperties.HeadingLevel="Level1"/>
-            <TextBlock Text="{x:Bind ViewModel.CurrentPath, Mode=OneWay}" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
-        </StackPanel>
+        <Grid
+            x:Uid="ObjectSearchRegion"
+            Margin="0,0,0,12"
+            ColumnSpacing="12"
+            AutomationProperties.LandmarkType="Search"
+            AutomationProperties.LocalizedLandmarkType="Search objects">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock x:Uid="ObjectBrowserTitle" Grid.Column="0" Text="Browser" Style="{StaticResource TitleTextBlockStyle}" VerticalAlignment="Center" AutomationProperties.HeadingLevel="Level1"/>
+            <TextBlock
+                Grid.Column="1"
+                Text="{x:Bind ViewModel.CurrentPath, Mode=OneWay}"
+                VerticalAlignment="Center"
+                TextTrimming="CharacterEllipsis"
+                Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+            <TextBox
+                x:Uid="ObjectSearchTextBox"
+                x:Name="SearchTextBox"
+                Grid.Column="2"
+                MinWidth="240"
+                MaxWidth="400"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Center"
+                PlaceholderText="Search objects"
+                AutomationProperties.Name="Search objects"
+                AutomationProperties.AcceleratorKey="Ctrl+F, F3"
+                TextChanged="OnSearchTextChanged"
+                ToolTipService.ToolTip="Search objects (Ctrl+F or F3)"/>
+        </Grid>
 
         <CommandBar
             x:Uid="ObjectBrowserCommandBar"
@@ -92,7 +126,7 @@
             SelectionMode="Extended"
             SelectionUnit="Row"
             CanSortColumns="True"
-            CanFilterColumns="True"
+            CanFilterColumns="False"
             CornerButtonMode="None"
             PreviewKeyDown="OnGridPreviewKeyDown"
             CopyToClipboard="OnGridCopyToClipboard"
