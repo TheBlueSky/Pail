@@ -99,7 +99,7 @@ public partial class ObjectBrowserViewModel : ObservableObject
 
 		try
 		{
-			var page = await _s3Service.GetObjectsAsync(_bucketName, CurrentPath, GetInitialObjectLoadCount());
+			var page = await _s3Service.GetObjectsAsync(_bucketName, CurrentPath, pageSize: GetInitialObjectLoadCount());
 
 			AppendItems(page.Items);
 			UpdatePagingState(page);
@@ -138,8 +138,8 @@ public partial class ObjectBrowserViewModel : ObservableObject
 			var page = await _s3Service.GetObjectsAsync(
 				_bucketName,
 				CurrentPath,
-				GetLoadMoreObjectCount(),
-				_nextContinuationToken);
+				pageSize: GetLoadMoreObjectCount(),
+				continuationToken: _nextContinuationToken);
 
 			AppendItems(page.Items);
 			UpdatePagingState(page);

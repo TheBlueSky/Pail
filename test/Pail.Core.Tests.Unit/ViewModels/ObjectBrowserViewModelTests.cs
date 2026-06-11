@@ -31,7 +31,7 @@ public sealed class ObjectBrowserViewModelTests
 	{
 		_appSettings.DownloadFolder = _defaultDownloadFolder;
 		_s3Service
-			.GetObjectsAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<int>(), Arg.Any<string?>())
+			.GetObjectsAsync(Arg.Any<string>(), Arg.Any<string>(), pageSize: Arg.Any<int>(), continuationToken: Arg.Any<string?>())
 			.Returns(Task.FromResult(CreatePage()));
 		_downloadManager
 			.EnqueueBatchAsync(Arg.Any<IEnumerable<DownloadItem>>(), Arg.Any<CancellationToken>())
@@ -301,7 +301,7 @@ public sealed class ObjectBrowserViewModelTests
 	internal async Task InitializeAsync_LoadsConfiguredInitialBatchAndUpdatesStatus()
 	{
 		// Arrange
-		_s3Service.GetObjectsAsync("bucket-a", "", 2, null).Returns(
+		_s3Service.GetObjectsAsync("bucket-a", "", pageSize: 2, continuationToken: null).Returns(
 			Task.FromResult(
 				CreatePage(
 					[
@@ -320,14 +320,14 @@ public sealed class ObjectBrowserViewModelTests
 		Assert.Equal(2, viewModel.Items.Count);
 		Assert.Equal("Loaded 2 items, more available", viewModel.LoadedItemsStatus);
 		Assert.True(viewModel.HasMoreItems);
-		await _s3Service.Received(1).GetObjectsAsync("bucket-a", "", 2, null);
+		await _s3Service.Received(1).GetObjectsAsync("bucket-a", "", pageSize: 2, continuationToken: null);
 	}
 
 	[Fact]
 	internal async Task LoadMoreCommand_AppendsNextPageWithoutReplacingItems()
 	{
 		// Arrange
-		_s3Service.GetObjectsAsync("bucket-a", "", 2, null).Returns(
+		_s3Service.GetObjectsAsync("bucket-a", "", pageSize: 2, continuationToken: null).Returns(
 			Task.FromResult(
 				CreatePage(
 					[
@@ -336,7 +336,7 @@ public sealed class ObjectBrowserViewModelTests
 					],
 					hasMoreItems: true,
 					nextContinuationToken: "page-2")));
-		_s3Service.GetObjectsAsync("bucket-a", "", 2, "page-2").Returns(
+		_s3Service.GetObjectsAsync("bucket-a", "", pageSize: 2, continuationToken: "page-2").Returns(
 			Task.FromResult(
 				CreatePage(
 					[
@@ -360,7 +360,7 @@ public sealed class ObjectBrowserViewModelTests
 			item => Assert.Equal("report-3.csv", item.Name));
 		Assert.Equal("Loaded 3 items", viewModel.LoadedItemsStatus);
 		Assert.False(viewModel.HasMoreItems);
-		await _s3Service.Received(1).GetObjectsAsync("bucket-a", "", 2, "page-2");
+		await _s3Service.Received(1).GetObjectsAsync("bucket-a", "", pageSize: 2, continuationToken: "page-2");
 	}
 
 	[Fact]
@@ -368,7 +368,7 @@ public sealed class ObjectBrowserViewModelTests
 	{
 		// Arrange
 		_s3Service
-			.GetObjectsAsync("bucket-a", "", 2, null)
+			.GetObjectsAsync("bucket-a", "", pageSize: 2, continuationToken: null)
 			.Returns(Task.FromResult(CreatePage([CreateObject("report-1.csv", "reports/report-1.csv")], hasMoreItems: true, nextContinuationToken: "page-2")));
 
 		var viewModel = CreateViewModel();
@@ -378,7 +378,7 @@ public sealed class ObjectBrowserViewModelTests
 		await viewModel.LoadMoreCommand.ExecuteAsync(null);
 
 		// Assert
-		await _s3Service.Received(1).GetObjectsAsync("bucket-a", "", 2, "page-2");
+		await _s3Service.Received(1).GetObjectsAsync("bucket-a", "", pageSize: 2, continuationToken: "page-2");
 	}
 
 	[Fact]
@@ -387,7 +387,7 @@ public sealed class ObjectBrowserViewModelTests
 		// Arrange
 		_appSettings.LoadMoreObjectCount = 1500;
 		_s3Service
-			.GetObjectsAsync("bucket-a", "", 2, null)
+			.GetObjectsAsync("bucket-a", "", pageSize: 2, continuationToken: null)
 			.Returns(Task.FromResult(CreatePage([CreateObject("report-1.csv", "reports/report-1.csv")], hasMoreItems: true, nextContinuationToken: "page-2")));
 
 		var viewModel = CreateViewModel();
@@ -397,7 +397,7 @@ public sealed class ObjectBrowserViewModelTests
 		await viewModel.LoadMoreCommand.ExecuteAsync(null);
 
 		// Assert
-		await _s3Service.Received(1).GetObjectsAsync("bucket-a", "", 1500, "page-2");
+		await _s3Service.Received(1).GetObjectsAsync("bucket-a", "", pageSize: 1500, continuationToken: "page-2");
 	}
 
 	[Fact]
@@ -405,7 +405,7 @@ public sealed class ObjectBrowserViewModelTests
 	{
 		// Arrange
 		_appSettings.InitialObjectLoadCount = 2500;
-		_s3Service.GetObjectsAsync("bucket-a", "", 2500, null).Returns(Task.FromResult(CreatePage()));
+		_s3Service.GetObjectsAsync("bucket-a", "", pageSize: 2500, continuationToken: null).Returns(Task.FromResult(CreatePage()));
 
 		var viewModel = CreateViewModel();
 
@@ -413,14 +413,14 @@ public sealed class ObjectBrowserViewModelTests
 		await viewModel.InitializeAsync("bucket-a");
 
 		// Assert
-		await _s3Service.Received(1).GetObjectsAsync("bucket-a", "", 2500, null);
+		await _s3Service.Received(1).GetObjectsAsync("bucket-a", "", pageSize: 2500, continuationToken: null);
 	}
 
 	[Fact]
 	internal async Task LoadMoreCommand_WhenLoadFails_KeepsExistingItems()
 	{
 		// Arrange
-		_s3Service.GetObjectsAsync("bucket-a", "", 2, null).Returns(
+		_s3Service.GetObjectsAsync("bucket-a", "", pageSize: 2, continuationToken: null).Returns(
 			Task.FromResult(
 				CreatePage(
 					[
@@ -429,7 +429,7 @@ public sealed class ObjectBrowserViewModelTests
 					],
 					hasMoreItems: true,
 					nextContinuationToken: "page-2")));
-		_s3Service.GetObjectsAsync("bucket-a", "", 2, "page-2").Returns<Task<S3ObjectPage>>(_ => throw new InvalidOperationException("network glitch"));
+		_s3Service.GetObjectsAsync("bucket-a", "", pageSize: 2, continuationToken: "page-2").Returns<Task<S3ObjectPage>>(_ => throw new InvalidOperationException("network glitch"));
 
 		var viewModel = CreateViewModel();
 		await viewModel.InitializeAsync("bucket-a");
@@ -448,8 +448,8 @@ public sealed class ObjectBrowserViewModelTests
 	internal async Task OpenItemCommand_FolderSelected_UpdatesPathAndEnablesBucketBack()
 	{
 		// Arrange
-		_s3Service.GetObjectsAsync("bucket-a", "", 2, null).Returns(Task.FromResult(CreatePage()));
-		_s3Service.GetObjectsAsync("bucket-a", "reports/", 2, null).Returns(Task.FromResult(CreatePage()));
+		_s3Service.GetObjectsAsync("bucket-a", "", pageSize: 2, continuationToken: null).Returns(Task.FromResult(CreatePage()));
+		_s3Service.GetObjectsAsync("bucket-a", "reports/", pageSize: 2, continuationToken: null).Returns(Task.FromResult(CreatePage()));
 
 		var viewModel = CreateViewModel();
 		var folder = new S3ObjectItem
@@ -467,16 +467,16 @@ public sealed class ObjectBrowserViewModelTests
 		// Assert
 		Assert.Equal("reports/", viewModel.CurrentPath);
 		Assert.True(viewModel.CanNavigateBackWithinBucket);
-		await _s3Service.Received(1).GetObjectsAsync("bucket-a", "reports/", 2, null);
+		await _s3Service.Received(1).GetObjectsAsync("bucket-a", "reports/", pageSize: 2, continuationToken: null);
 	}
 
 	[Fact]
 	internal async Task GoBackCommand_WhenInsideBucket_GoesToParentWithoutLeavingPage()
 	{
 		// Arrange
-		_s3Service.GetObjectsAsync("bucket-a", "", 2, null).Returns(Task.FromResult(CreatePage()));
-		_s3Service.GetObjectsAsync("bucket-a", "reports/", 2, null).Returns(Task.FromResult(CreatePage()));
-		_s3Service.GetObjectsAsync("bucket-a", "reports/2026/", 2, null).Returns(Task.FromResult(CreatePage()));
+		_s3Service.GetObjectsAsync("bucket-a", "", pageSize: 2, continuationToken: null).Returns(Task.FromResult(CreatePage()));
+		_s3Service.GetObjectsAsync("bucket-a", "reports/", pageSize: 2, continuationToken: null).Returns(Task.FromResult(CreatePage()));
+		_s3Service.GetObjectsAsync("bucket-a", "reports/2026/", pageSize: 2, continuationToken: null).Returns(Task.FromResult(CreatePage()));
 
 		var viewModel = CreateViewModel();
 		var parentFolder = new S3ObjectItem
@@ -503,14 +503,14 @@ public sealed class ObjectBrowserViewModelTests
 		Assert.Equal("reports/", viewModel.CurrentPath);
 		Assert.True(viewModel.CanNavigateBackWithinBucket);
 		_navigationService.DidNotReceive().GoBack();
-		await _s3Service.Received(2).GetObjectsAsync("bucket-a", "reports/", 2, null);
+		await _s3Service.Received(2).GetObjectsAsync("bucket-a", "reports/", pageSize: 2, continuationToken: null);
 	}
 
 	[Fact]
 	internal async Task GoBackCommand_AtBucketRoot_DelegatesToNavigationService()
 	{
 		// Arrange
-		_s3Service.GetObjectsAsync("bucket-a", "", 2, null).Returns(Task.FromResult(CreatePage()));
+		_s3Service.GetObjectsAsync("bucket-a", "", pageSize: 2, continuationToken: null).Returns(Task.FromResult(CreatePage()));
 
 		var viewModel = CreateViewModel();
 

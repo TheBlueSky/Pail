@@ -34,7 +34,7 @@ public sealed class S3ServiceTests
 		var service = CreateService(_s3Client);
 
 		// Act
-		var page = await service.GetObjectsAsync("bucket-a", "logs/", 1500);
+		var page = await service.GetObjectsAsync("bucket-a", "logs/", pageSize: 1500);
 
 		// Assert
 		Assert.Equal(1500, page.Items.Count);
@@ -109,7 +109,7 @@ public sealed class S3ServiceTests
 		var service = CreateService(_s3Client);
 
 		// Act
-		var page = await service.GetObjectsAsync("bucket-a", "logs/", 1500);
+		var page = await service.GetObjectsAsync("bucket-a", "logs/", pageSize: 1500);
 
 		// Assert
 		Assert.Equal(700, page.Items.Count);
@@ -138,7 +138,7 @@ public sealed class S3ServiceTests
 		var service = CreateService(_s3Client);
 
 		// Act
-		var page = await service.GetObjectsAsync("bucket-a", "logs/", 200, "page-6");
+		var page = await service.GetObjectsAsync("bucket-a", "logs/", pageSize: 200, continuationToken: "page-6");
 
 		// Assert
 		Assert.Equal(200, page.Items.Count);
@@ -147,6 +147,66 @@ public sealed class S3ServiceTests
 		Assert.Single(requests);
 		Assert.Equal("page-6", requests[0].ContinuationToken);
 		Assert.Equal(200, requests[0].MaxKeys);
+	}
+
+	[Fact]
+	internal async Task GetObjectsAsync_WithPrefixFilter_QueriesFolderPlusSearchTermButStripsNamesToFolder()
+	{
+		// Arrange
+		var requests = new List<ListObjectsV2Request>();
+		_s3Client
+			.ListObjectsV2Async(Arg.Any<ListObjectsV2Request>(), Arg.Any<CancellationToken>())
+			.Returns(callInfo =>
+			{
+				var request = callInfo.Arg<ListObjectsV2Request>();
+				requests.Add(CloneRequest(request));
+
+				return Task.FromResult(
+					CreateResponse(
+						[
+							new S3Object { Key = "logs/report-1.txt", Size = 1, LastModified = DateTime.UtcNow },
+							new S3Object { Key = "logs/report-2.txt", Size = 2, LastModified = DateTime.UtcNow },
+						],
+						isTruncated: false,
+						nextContinuationToken: null));
+			});
+
+		var service = CreateService(_s3Client);
+
+		// Act
+		var page = await service.GetObjectsAsync("bucket-a", "logs/", "rep", 1000, null);
+
+		// Assert
+		var request = Assert.Single(requests);
+		Assert.Equal("logs/rep", request.Prefix);
+		Assert.Equal("/", request.Delimiter);
+		Assert.Collection(
+			page.Items,
+			item => Assert.Equal("report-1.txt", item.Name),
+			item => Assert.Equal("report-2.txt", item.Name));
+	}
+
+	[Fact]
+	internal async Task GetObjectsAsync_WithoutPrefixFilter_UsesFolderPrefixUnchanged()
+	{
+		// Arrange
+		var requests = new List<ListObjectsV2Request>();
+		_s3Client
+			.ListObjectsV2Async(Arg.Any<ListObjectsV2Request>(), Arg.Any<CancellationToken>())
+			.Returns(callInfo =>
+			{
+				requests.Add(CloneRequest(callInfo.Arg<ListObjectsV2Request>()));
+				return Task.FromResult(CreateResponse(CreateS3Objects("logs/", 0, 3), isTruncated: false, nextContinuationToken: null));
+			});
+
+		var service = CreateService(_s3Client);
+
+		// Act
+		await service.GetObjectsAsync("bucket-a", "logs/", pageSize: 1000);
+
+		// Assert
+		var request = Assert.Single(requests);
+		Assert.Equal("logs/", request.Prefix);
 	}
 
 	[Fact]

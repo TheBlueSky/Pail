@@ -50,8 +50,9 @@ public sealed class S3Service : IS3Service
 		return [.. response.Buckets.Select(b => new S3BucketItem(b.BucketName, b.CreationDate))];
 	}
 
-	public async Task<S3ObjectPage> GetObjectsAsync(string bucketName, string prefix = "", int pageSize = MaximumRequestPageSize, string? continuationToken = null)
+	public async Task<S3ObjectPage> GetObjectsAsync(string bucketName, string prefix = "", string? prefixFilter = null, int pageSize = MaximumRequestPageSize, string? continuationToken = null)
 	{
+		var requestPrefix = string.IsNullOrEmpty(prefixFilter) ? prefix : prefix + prefixFilter;
 		var requestedItemCount = Math.Max(MinimumRequestedItemCount, pageSize);
 		var items = new List<S3ObjectItem>();
 		var nextContinuationToken = string.IsNullOrWhiteSpace(continuationToken) ? null : continuationToken;
@@ -62,7 +63,7 @@ public sealed class S3Service : IS3Service
 			var request = new ListObjectsV2Request
 			{
 				BucketName = bucketName,
-				Prefix = prefix,
+				Prefix = requestPrefix,
 				Delimiter = "/",
 				MaxKeys = Math.Min(requestedItemCount - items.Count, MaximumRequestPageSize),
 				ContinuationToken = nextContinuationToken,
