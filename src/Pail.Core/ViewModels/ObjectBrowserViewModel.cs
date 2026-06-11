@@ -17,11 +17,15 @@ public partial class ObjectBrowserViewModel : ObservableObject
 	private readonly IStatusMessageService _statusMessageService;
 	private readonly ILocalizationService _localizationService;
 	private readonly Stack<string> _pathStack = new();
-	private string? _nextContinuationToken;
+	private readonly List<S3ObjectItem> _loadedItems = [];
+	private readonly TimeSpan _searchDebounceDelay;
 
+	private string _bucketName = string.Empty;
+	private string? _nextContinuationToken;
+	private string? _activeSearchPrefix;
 	private bool _canNavigateBackWithinBucket;
 	private bool _isPreparingDownloads;
-	private string _bucketName = string.Empty;
+	private CancellationTokenSource? _searchDebounceCts;
 
 	public ObjectBrowserViewModel(
 		IS3Service s3Service,
@@ -42,11 +46,16 @@ public partial class ObjectBrowserViewModel : ObservableObject
 		_statusMessageService = statusMessageService;
 		_localizationService = localizationService;
 
+		_searchDebounceDelay = _settingsService.ObjectSearchDebounceDelay;
+
 		UpdateLoadedItemsStatus();
 	}
 
 	[ObservableProperty]
 	public partial string CurrentPath { get; set; } = string.Empty;
+
+	[ObservableProperty]
+	public partial string SearchText { get; set; } = string.Empty;
 
 	[ObservableProperty]
 	[NotifyCanExecuteChangedFor(nameof(CopyObjectNameCommand))]
@@ -88,6 +97,12 @@ public partial class ObjectBrowserViewModel : ObservableObject
 	[RelayCommand]
 	public async Task LoadItemsAsync()
 	{
+		ExitSearch();
+		await LoadAsync(searchPrefix: null);
+	}
+
+	private async Task LoadAsync(string? searchPrefix)
+	{
 		if (IsBusy)
 		{
 			return;
@@ -95,11 +110,12 @@ public partial class ObjectBrowserViewModel : ObservableObject
 
 		IsBusy = true;
 		IsInitialLoadInProgress = true;
+		_activeSearchPrefix = searchPrefix;
 		ResetListingState();
 
 		try
 		{
-			var page = await _s3Service.GetObjectsAsync(_bucketName, CurrentPath, pageSize: GetInitialObjectLoadCount());
+			var page = await _s3Service.GetObjectsAsync(_bucketName, CurrentPath, prefixFilter: searchPrefix, pageSize: GetInitialObjectLoadCount());
 
 			AppendItems(page.Items);
 			UpdatePagingState(page);
@@ -138,8 +154,9 @@ public partial class ObjectBrowserViewModel : ObservableObject
 			var page = await _s3Service.GetObjectsAsync(
 				_bucketName,
 				CurrentPath,
-				pageSize: GetLoadMoreObjectCount(),
-				continuationToken: _nextContinuationToken);
+				_activeSearchPrefix,
+				GetLoadMoreObjectCount(),
+				_nextContinuationToken);
 
 			AppendItems(page.Items);
 			UpdatePagingState(page);
@@ -166,6 +183,90 @@ public partial class ObjectBrowserViewModel : ObservableObject
 			LoadMoreCommand.NotifyCanExecuteChanged();
 		}
 	}
+
+	[RelayCommand]
+	private async Task SearchAsync()
+	{
+		if (string.IsNullOrWhiteSpace(SearchText))
+		{
+			// Clearing the box returns to the unfiltered folder listing without an explicit action.
+			if (_activeSearchPrefix is not null)
+			{
+				await LoadAsync(searchPrefix: null);
+			}
+
+			return;
+		}
+
+		if (string.Equals(_activeSearchPrefix, SearchText, StringComparison.Ordinal))
+		{
+			return;
+		}
+
+		await LoadAsync(SearchText);
+	}
+
+	partial void OnSearchTextChanged(string value)
+	{
+		// Filter the already-loaded rows instantly (contains match), then debounce the S3 prefix search.
+		ApplyLocalFilter();
+		ScheduleSearch(value);
+	}
+
+	private void ScheduleSearch(string value)
+	{
+		_searchDebounceCts?.Cancel();
+		_searchDebounceCts = new CancellationTokenSource();
+
+		// Clearing reloads immediately; typing waits out the debounce window.
+		var delay = string.IsNullOrEmpty(value) ? TimeSpan.Zero : _searchDebounceDelay;
+		_ = RunDebouncedSearchAsync(delay, _searchDebounceCts.Token);
+	}
+
+	private async Task RunDebouncedSearchAsync(TimeSpan delay, CancellationToken cancellationToken)
+	{
+		try
+		{
+			if (delay > TimeSpan.Zero)
+			{
+				await Task.Delay(delay, cancellationToken);
+			}
+		}
+		catch (OperationCanceledException)
+		{
+			return;
+		}
+
+		if (cancellationToken.IsCancellationRequested is false)
+		{
+			await SearchAsync();
+		}
+	}
+
+	private void ExitSearch()
+	{
+		_searchDebounceCts?.Cancel();
+		_activeSearchPrefix = null;
+		SearchText = string.Empty;
+	}
+
+	private void ApplyLocalFilter()
+	{
+		Items.Clear();
+
+		foreach (var item in _loadedItems)
+		{
+			if (MatchesLocalFilter(item))
+			{
+				Items.Add(item);
+			}
+		}
+
+		UpdateLoadedItemsStatus();
+	}
+
+	private bool MatchesLocalFilter(S3ObjectItem item) =>
+		string.IsNullOrWhiteSpace(SearchText) || item.Name.Contains(SearchText, StringComparison.OrdinalIgnoreCase);
 
 	[RelayCommand]
 	private async Task OpenItemAsync(S3ObjectItem item)
@@ -330,7 +431,12 @@ public partial class ObjectBrowserViewModel : ObservableObject
 	{
 		foreach (var item in items)
 		{
-			Items.Add(item);
+			_loadedItems.Add(item);
+
+			if (MatchesLocalFilter(item))
+			{
+				Items.Add(item);
+			}
 		}
 	}
 
@@ -339,6 +445,7 @@ public partial class ObjectBrowserViewModel : ObservableObject
 	private void ResetListingState()
 	{
 		Items.Clear();
+		_loadedItems.Clear();
 		ClearPagingState();
 		UpdateLoadedItemsStatus();
 	}
@@ -359,12 +466,12 @@ public partial class ObjectBrowserViewModel : ObservableObject
 	}
 
 	private void UpdateLoadedItemsStatus() =>
-		LoadedItemsStatus = Items.Count == 1
+		LoadedItemsStatus = _loadedItems.Count == 1
 			? HasMoreItems
 				? _localizationService.GetString("ObjectLoadedOneItemMoreAvailableStatus", "Loaded 1 item, more available")
 				: _localizationService.GetString("ObjectLoadedOneItemStatus", "Loaded 1 item")
 			: HasMoreItems
-				? _localizationService.FormatString("ObjectLoadedItemsMoreAvailableStatus", "Loaded {0} items, more available", Items.Count)
-				: _localizationService.FormatString("ObjectLoadedItemsStatus", "Loaded {0} items", Items.Count);
+				? _localizationService.FormatString("ObjectLoadedItemsMoreAvailableStatus", "Loaded {0} items, more available", _loadedItems.Count)
+				: _localizationService.FormatString("ObjectLoadedItemsStatus", "Loaded {0} items", _loadedItems.Count);
 
 }

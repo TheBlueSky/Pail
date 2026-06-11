@@ -28,5 +28,7 @@ public interface ISettingsService
 
 	public int AutoClearCompletedDownloadsDelaySeconds { get; }
 
+	public TimeSpan ObjectSearchDebounceDelay { get; }
+
 	public Task UpdateAsync(Action<AppSettings> applyChanges, CancellationToken cancellationToken = default);
 }

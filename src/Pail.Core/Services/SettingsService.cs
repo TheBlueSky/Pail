@@ -53,6 +53,8 @@ public sealed class SettingsService : ISettingsService
 
 	public int AutoClearCompletedDownloadsDelaySeconds => _optionsMonitor.CurrentValue.AutoClearCompletedDownloadsDelaySeconds;
 
+	public TimeSpan ObjectSearchDebounceDelay { get; } = TimeSpan.FromMilliseconds(350);
+
 	public async Task UpdateAsync(Action<AppSettings> applyChanges, CancellationToken cancellationToken = default)
 	{
 		ArgumentNullException.ThrowIfNull(applyChanges);
