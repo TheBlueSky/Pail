@@ -91,6 +91,22 @@
                 </StackPanel.ChildrenTransitions>
 
                 <TextBlock
+                    x:Uid="AccountSectionHeader"
+                    Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
+                    Text="Account"
+                    AutomationProperties.HeadingLevel="Level2" />
+
+                <tkcontrols:SettingsCard x:Uid="SignOutCard">
+                    <tkcontrols:SettingsCard.HeaderIcon>
+                        <FontIcon Glyph="&#xF3B1;" />
+                    </tkcontrols:SettingsCard.HeaderIcon>
+                    <Button
+                        x:Uid="SignOutButton"
+                        Command="{x:Bind ViewModel.LogoutCommand}"
+                        Content="Sign out" />
+                </tkcontrols:SettingsCard>
+
+                <TextBlock
                     x:Uid="AppearanceSectionHeader"
                     Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                     Text="Appearance &amp; behavior"
@@ -286,22 +302,6 @@
                         MinWidth="220"
                         PlaceholderText="Automatic (recommended)"
                         Text="{x:Bind ViewModel.LastProfileName, Mode=TwoWay}" />
-                </tkcontrols:SettingsCard>
-
-                <TextBlock
-                    x:Uid="AccountSectionHeader"
-                    Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                    Text="Account"
-                    AutomationProperties.HeadingLevel="Level2" />
-
-                <tkcontrols:SettingsCard x:Uid="SignOutCard">
-                    <tkcontrols:SettingsCard.HeaderIcon>
-                        <FontIcon Glyph="&#xF3B1;" />
-                    </tkcontrols:SettingsCard.HeaderIcon>
-                    <Button
-                        x:Uid="SignOutButton"
-                        Command="{x:Bind ViewModel.LogoutCommand}"
-                        Content="Sign out" />
                 </tkcontrols:SettingsCard>
 
                 <TextBlock
