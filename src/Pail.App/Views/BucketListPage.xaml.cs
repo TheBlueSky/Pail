@@ -23,6 +23,8 @@ public sealed partial class BucketListPage : Page
 		base.OnNavigatedTo(e);
 
 		await ViewModel.LoadBucketsAsync();
+
+		SearchTextBox.Focus(FocusState.Programmatic);
 	}
 
 	private void OnBucketDoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
