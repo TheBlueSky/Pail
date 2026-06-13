@@ -24,7 +24,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
     <!--  App Version and Assembly Info  -->
-    <Version>1.1.0.0</Version>
+    <Version>1.2.0.0</Version>
     <AssemblyTitle>Pail</AssemblyTitle>
     <AssemblyProduct>TheBlueSky.Pail</AssemblyProduct>
     <AssemblyCopyright>Copyright © TheBlueSky. All rights reserved.</AssemblyCopyright>
