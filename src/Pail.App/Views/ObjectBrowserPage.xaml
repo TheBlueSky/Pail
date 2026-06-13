@@ -47,10 +47,11 @@
             <TextBlock x:Uid="ObjectBrowserTitle" Grid.Column="0" Text="Browser" Style="{StaticResource TitleTextBlockStyle}" VerticalAlignment="Center" AutomationProperties.HeadingLevel="Level1"/>
             <TextBlock
                 Grid.Column="1"
-                Text="{x:Bind ViewModel.CurrentPath, Mode=OneWay}"
+                Text="{x:Bind ViewModel.LocationBreadcrumb, Mode=OneWay}"
                 VerticalAlignment="Center"
                 TextTrimming="CharacterEllipsis"
-                Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                ToolTipService.ToolTip="{x:Bind ViewModel.LocationBreadcrumb, Mode=OneWay}"/>
             <TextBox
                 x:Uid="ObjectSearchTextBox"
                 x:Name="SearchTextBox"

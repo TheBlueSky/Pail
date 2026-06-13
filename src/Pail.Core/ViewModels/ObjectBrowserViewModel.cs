@@ -20,7 +20,6 @@ public partial class ObjectBrowserViewModel : ObservableObject
 	private readonly List<S3ObjectItem> _loadedItems = [];
 	private readonly TimeSpan _searchDebounceDelay;
 
-	private string _bucketName = string.Empty;
 	private string? _nextContinuationToken;
 	private string? _activeSearchPrefix;
 	private bool _canNavigateBackWithinBucket;
@@ -52,10 +51,20 @@ public partial class ObjectBrowserViewModel : ObservableObject
 	}
 
 	[ObservableProperty]
+	[NotifyPropertyChangedFor(nameof(LocationBreadcrumb))]
+	public partial string BucketName { get; private set; } = string.Empty;
+
+	[ObservableProperty]
+	[NotifyPropertyChangedFor(nameof(LocationBreadcrumb))]
 	public partial string CurrentPath { get; set; } = string.Empty;
 
 	[ObservableProperty]
 	public partial string SearchText { get; set; } = string.Empty;
+
+	public string LocationBreadcrumb =>
+		string.Join(
+			" / ",
+			new[] { BucketName }.Concat(CurrentPath.Split('/', StringSplitOptions.RemoveEmptyEntries)));
 
 	[ObservableProperty]
 	[NotifyCanExecuteChangedFor(nameof(CopyObjectNameCommand))]
@@ -87,7 +96,7 @@ public partial class ObjectBrowserViewModel : ObservableObject
 
 	public async Task InitializeAsync(string bucketName)
 	{
-		_bucketName = bucketName;
+		BucketName = bucketName;
 		_pathStack.Clear();
 		UpdateCanNavigateBackWithinBucket();
 		CurrentPath = string.Empty;
@@ -115,7 +124,7 @@ public partial class ObjectBrowserViewModel : ObservableObject
 
 		try
 		{
-			var page = await _s3Service.GetObjectsAsync(_bucketName, CurrentPath, prefixFilter: searchPrefix, pageSize: GetInitialObjectLoadCount());
+			var page = await _s3Service.GetObjectsAsync(BucketName, CurrentPath, prefixFilter: searchPrefix, pageSize: GetInitialObjectLoadCount());
 
 			AppendItems(page.Items);
 			UpdatePagingState(page);
@@ -152,7 +161,7 @@ public partial class ObjectBrowserViewModel : ObservableObject
 		try
 		{
 			var page = await _s3Service.GetObjectsAsync(
-				_bucketName,
+				BucketName,
 				CurrentPath,
 				_activeSearchPrefix,
 				GetLoadMoreObjectCount(),
@@ -408,7 +417,7 @@ public partial class ObjectBrowserViewModel : ObservableObject
 	private DownloadItem CreateDownloadItem(S3ObjectItem item, string downloadsFolder) =>
 		new()
 		{
-			BucketName = _bucketName,
+			BucketName = BucketName,
 			Key = item.Key,
 			DestinationPath = Path.Combine(downloadsFolder, item.Name),
 			FileName = item.Name,

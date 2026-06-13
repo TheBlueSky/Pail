@@ -599,6 +599,48 @@ public sealed class ObjectBrowserViewModelTests
 	}
 
 	[Fact]
+	internal async Task InitializeAsync_SetsBucketNameAndBreadcrumbToBucket()
+	{
+		// Arrange
+		var viewModel = CreateViewModel();
+
+		// Act
+		await viewModel.InitializeAsync("bucket-a");
+
+		// Assert
+		Assert.Equal("bucket-a", viewModel.BucketName);
+		Assert.Equal("bucket-a", viewModel.LocationBreadcrumb);
+	}
+
+	[Fact]
+	internal async Task LocationBreadcrumb_AfterOpeningFolders_JoinsBucketAndPathSegments()
+	{
+		// Arrange
+		var viewModel = CreateViewModel();
+		var parentFolder = new S3ObjectItem
+		{
+			Name = "reports",
+			Key = "reports/",
+			IsFolder = true,
+		};
+		var childFolder = new S3ObjectItem
+		{
+			Name = "2026",
+			Key = "reports/2026/",
+			IsFolder = true,
+		};
+
+		await viewModel.InitializeAsync("bucket-a");
+		await viewModel.OpenItemCommand.ExecuteAsync(parentFolder);
+
+		// Act
+		await viewModel.OpenItemCommand.ExecuteAsync(childFolder);
+
+		// Assert
+		Assert.Equal("bucket-a / reports / 2026", viewModel.LocationBreadcrumb);
+	}
+
+	[Fact]
 	internal async Task GoBackCommand_WhenInsideBucket_GoesToParentWithoutLeavingPage()
 	{
 		// Arrange
