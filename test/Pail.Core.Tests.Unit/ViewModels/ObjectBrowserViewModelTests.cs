@@ -143,7 +143,7 @@ public sealed class ObjectBrowserViewModelTests
 	}
 
 	[Fact]
-	internal async Task DownloadSelectedCommand_AlwaysPromptEnabled_SavesPickedFolderAndQueuesDownload()
+	internal async Task DownloadSelectedCommand_AlwaysPromptEnabled_QueuesDownload()
 	{
 		// Arrange
 		_appSettings.AlwaysPromptDownloadLocation = true;
@@ -161,10 +161,8 @@ public sealed class ObjectBrowserViewModelTests
 		await viewModel.DownloadSelectedCommand.ExecuteAsync(selectedItems);
 
 		// Assert
-		Assert.Equal(_pickedDownloadFolder, _appSettings.DownloadFolder);
 		var item = Assert.Single(_enqueuedItems);
 		Assert.Equal(Path.Combine(_pickedDownloadFolder, "report.csv"), item.DestinationPath);
-		await _settingsService.Received(1).UpdateAsync(Arg.Any<Action<AppSettings>>(), Arg.Any<CancellationToken>());
 		await _downloadManager.Received(1).EnqueueBatchAsync(Arg.Any<IEnumerable<DownloadItem>>(), Arg.Any<CancellationToken>());
 	}
 

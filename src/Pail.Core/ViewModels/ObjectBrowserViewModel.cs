@@ -341,11 +341,6 @@ public partial class ObjectBrowserViewModel : ObservableObject
 				}
 
 				downloadsFolder = selectedFolder;
-
-				if (!string.Equals(currentDownloadFolder, selectedFolder, StringComparison.Ordinal))
-				{
-					await _settingsService.UpdateAsync(settings => settings.DownloadFolder = selectedFolder);
-				}
 			}
 
 			Directory.CreateDirectory(downloadsFolder);
