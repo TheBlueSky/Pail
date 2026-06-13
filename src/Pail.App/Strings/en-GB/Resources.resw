@@ -453,19 +453,19 @@
     <value>Appearance &amp; behaviour</value>
     <comment>Settings section: Appearance and behaviour</comment>
   </data>
-  <data name="AppThemeTitle.Text" xml:space="preserve">
+  <data name="AppThemeCard.Header" xml:space="preserve">
     <value>App theme</value>
     <comment>Settings card: App theme title</comment>
   </data>
-  <data name="AppThemeDescription.Text" xml:space="preserve">
+  <data name="AppThemeCard.Description" xml:space="preserve">
     <value>Choose whether the app follows the system theme or always uses a specific mode.</value>
     <comment>Settings card: App theme description</comment>
   </data>
-  <data name="StatusMessagesTitle.Text" xml:space="preserve">
+  <data name="StatusMessagesCard.Header" xml:space="preserve">
     <value>Status messages</value>
     <comment>Settings card: Status messages title</comment>
   </data>
-  <data name="StatusMessagesDescription.Text" xml:space="preserve">
+  <data name="StatusMessagesCard.Description" xml:space="preserve">
     <value>Control how long transient status overlays stay visible before they dismiss.</value>
     <comment>Settings card: Status messages description</comment>
   </data>
@@ -473,7 +473,7 @@
     <value>Object browser</value>
     <comment>Settings section: Object browser</comment>
   </data>
-  <data name="InitialObjectLoadTitle.Text" xml:space="preserve">
+  <data name="InitialObjectLoadCard.Header" xml:space="preserve">
     <value>Initial object load</value>
     <comment>Settings card: Initial object load title</comment>
   </data>
@@ -485,7 +485,7 @@
     <value>Values above 1000 are fetched through multiple S3 requests.</value>
     <comment>Settings card: Initial object load hint</comment>
   </data>
-  <data name="LoadMoreBatchTitle.Text" xml:space="preserve">
+  <data name="LoadMoreBatchCard.Header" xml:space="preserve">
     <value>Load more batch size</value>
     <comment>Settings card: Load more batch size title</comment>
   </data>
@@ -501,11 +501,11 @@
     <value>Downloads</value>
     <comment>Settings section: Downloads</comment>
   </data>
-  <data name="DefaultDownloadFolderTitle.Text" xml:space="preserve">
+  <data name="DefaultDownloadFolderCard.Header" xml:space="preserve">
     <value>Default download folder</value>
     <comment>Settings card: Default download folder title</comment>
   </data>
-  <data name="DefaultDownloadFolderDescription.Text" xml:space="preserve">
+  <data name="DefaultDownloadFolderCard.Description" xml:space="preserve">
     <value>Choose where downloaded objects go unless you pick a different location.</value>
     <comment>Settings card: Default download folder description</comment>
   </data>
@@ -517,35 +517,35 @@
     <value>Browse</value>
     <comment>Browse for download folder button</comment>
   </data>
-  <data name="DownloadPromptsTitle.Text" xml:space="preserve">
+  <data name="DownloadPromptsCard.Header" xml:space="preserve">
     <value>Download prompts</value>
     <comment>Settings card: Download prompts title</comment>
   </data>
-  <data name="DownloadPromptsDescription.Text" xml:space="preserve">
+  <data name="DownloadPromptsCard.Description" xml:space="preserve">
     <value>Ask for a location every time before downloading an object.</value>
     <comment>Settings card: Download prompts description</comment>
   </data>
-  <data name="MaxParallelDownloadsTitle.Text" xml:space="preserve">
+  <data name="MaxParallelDownloadsCard.Header" xml:space="preserve">
     <value>Maximum parallel downloads</value>
     <comment>Settings card: Maximum parallel downloads title</comment>
   </data>
-  <data name="MaxParallelDownloadsDescription.Text" xml:space="preserve">
+  <data name="MaxParallelDownloadsCard.Description" xml:space="preserve">
     <value>Choose how many downloads Pail can run at once. Changes apply after restarting Pail.</value>
     <comment>Settings card: Maximum parallel downloads description</comment>
   </data>
-  <data name="AutoClearCompletedDownloadsTitle.Text" xml:space="preserve">
+  <data name="AutoClearCompletedDownloadsCard.Header" xml:space="preserve">
     <value>Auto-clear finished downloads</value>
     <comment>Settings card: Auto-clear finished downloads title</comment>
   </data>
-  <data name="AutoClearCompletedDownloadsDescription.Text" xml:space="preserve">
+  <data name="AutoClearCompletedDownloadsCard.Description" xml:space="preserve">
     <value>Remove completed and cancelled downloads from the queue after the delay. Failed downloads stay visible.</value>
     <comment>Settings card: Auto-clear finished downloads description</comment>
   </data>
-  <data name="AutoClearDelayTitle.Text" xml:space="preserve">
+  <data name="AutoClearDelayCard.Header" xml:space="preserve">
     <value>Auto-clear delay</value>
     <comment>Settings card: Auto-clear delay title</comment>
   </data>
-  <data name="AutoClearDelayDescription.Text" xml:space="preserve">
+  <data name="AutoClearDelayCard.Description" xml:space="preserve">
     <value>Set how many seconds finished downloads remain visible before they are cleared.</value>
     <comment>Settings card: Auto-clear delay description</comment>
   </data>
@@ -553,27 +553,27 @@
     <value>AWS login defaults</value>
     <comment>Settings section: AWS login defaults</comment>
   </data>
-  <data name="DefaultRegionTitle.Text" xml:space="preserve">
+  <data name="DefaultRegionCard.Header" xml:space="preserve">
     <value>Default region</value>
     <comment>Settings card: Default region title</comment>
   </data>
-  <data name="DefaultRegionDescription.Text" xml:space="preserve">
+  <data name="DefaultRegionCard.Description" xml:space="preserve">
     <value>Preselect the region users see first on the sign-in page.</value>
     <comment>Settings card: Default region description</comment>
   </data>
-  <data name="CredentialChainTitle.Text" xml:space="preserve">
+  <data name="CredentialChainCard.Header" xml:space="preserve">
     <value>Use credential chain by default</value>
     <comment>Settings card: Credential chain title</comment>
   </data>
-  <data name="CredentialChainDescription.Text" xml:space="preserve">
+  <data name="CredentialChainCard.Description" xml:space="preserve">
     <value>Start with the default AWS credential chain enabled when users open the sign-in page.</value>
     <comment>Settings card: Credential chain description</comment>
   </data>
-  <data name="PreferredProfileTitle.Text" xml:space="preserve">
+  <data name="PreferredProfileCard.Header" xml:space="preserve">
     <value>Preferred profile name</value>
     <comment>Settings card: Preferred profile title</comment>
   </data>
-  <data name="PreferredProfileDescription.Text" xml:space="preserve">
+  <data name="PreferredProfileCard.Description" xml:space="preserve">
     <value>Leave blank to fall back to Automatic (recommended).</value>
     <comment>Settings card: Preferred profile description</comment>
   </data>
@@ -585,11 +585,11 @@
     <value>Account</value>
     <comment>Settings section: Account</comment>
   </data>
-  <data name="SignOutTitle.Text" xml:space="preserve">
+  <data name="SignOutCard.Header" xml:space="preserve">
     <value>Sign out</value>
     <comment>Settings card: Sign out title</comment>
   </data>
-  <data name="SignOutDescription.Text" xml:space="preserve">
+  <data name="SignOutCard.Description" xml:space="preserve">
     <value>Return to the sign-in page and switch to a different AWS account.</value>
     <comment>Settings card: Sign out description</comment>
   </data>
@@ -601,11 +601,7 @@
     <value>About</value>
     <comment>Settings section: About</comment>
   </data>
-  <data name="PailLogoImage.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
-    <value>Pail logo</value>
-    <comment>Accessible name for the Pail app logo</comment>
-  </data>
-  <data name="AboutAppName.Text" xml:space="preserve">
+  <data name="AboutCard.Header" xml:space="preserve">
     <value>Pail</value>
     <comment>About card: app name</comment>
   </data>
@@ -613,7 +609,7 @@
     <value>Status notifications</value>
     <comment>Accessible name for transient status notifications</comment>
   </data>
-  <data name="AboutAppDescription.Text" xml:space="preserve">
+  <data name="AboutCard.Description" xml:space="preserve">
     <value>AWS S3 browser for Windows.</value>
     <comment>About card: app description</comment>
   </data>
