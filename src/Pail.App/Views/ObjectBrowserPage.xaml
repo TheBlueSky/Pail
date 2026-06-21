@@ -39,14 +39,12 @@
             AutomationProperties.LandmarkType="Search"
             AutomationProperties.LocalizedLandmarkType="Search objects">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <TextBlock x:Uid="ObjectBrowserTitle" Grid.Column="0" Text="Browser" Style="{StaticResource TitleTextBlockStyle}" VerticalAlignment="Center" AutomationProperties.HeadingLevel="Level1"/>
             <TextBlock
-                Grid.Column="1"
+                Grid.Column="0"
                 Text="{x:Bind ViewModel.LocationBreadcrumb, Mode=OneWay}"
                 VerticalAlignment="Center"
                 TextTrimming="CharacterEllipsis"
@@ -55,7 +53,7 @@
             <TextBox
                 x:Uid="ObjectSearchTextBox"
                 x:Name="SearchTextBox"
-                Grid.Column="2"
+                Grid.Column="1"
                 MinWidth="240"
                 MaxWidth="400"
                 HorizontalAlignment="Right"
