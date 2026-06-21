@@ -2,6 +2,7 @@ using Amazon;
 using Amazon.IdentityManagement;
 using Amazon.Runtime;
 using Amazon.Runtime.CredentialManagement;
+using Amazon.S3;
 using Amazon.SecurityToken;
 using Pail.Models;
 
@@ -9,6 +10,18 @@ namespace Pail.Services;
 
 public sealed class AwsClientFactory : IAwsClientFactory
 {
+	public IAmazonS3 CreateS3Client(IAwsCredentials credentials)
+	{
+		ArgumentNullException.ThrowIfNull(credentials);
+
+		var region = RegionEndpoint.GetBySystemName(credentials.Region);
+		var awsCredentials = GetAwsCredentials(credentials);
+
+		return awsCredentials is null
+			? new AmazonS3Client(region)
+			: new AmazonS3Client(awsCredentials, region);
+	}
+
 	public IAmazonSecurityTokenService CreateSecurityTokenServiceClient(IAwsCredentials credentials)
 	{
 		ArgumentNullException.ThrowIfNull(credentials);

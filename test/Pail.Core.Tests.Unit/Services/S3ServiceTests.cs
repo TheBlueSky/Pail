@@ -1,4 +1,3 @@
-using System.Reflection;
 using Amazon.S3;
 using Amazon.S3.Model;
 using NSubstitute;
@@ -332,13 +331,11 @@ public sealed class S3ServiceTests
 
 	private static S3Service CreateService(IAmazonS3 s3Client)
 	{
-		var service = new S3Service();
-		var property = typeof(S3Service).GetProperty("S3Client", BindingFlags.Instance | BindingFlags.NonPublic)
-			?? throw new InvalidOperationException("S3Client property was not found.");
-		var setter = property.GetSetMethod(nonPublic: true)
-			?? throw new InvalidOperationException("S3Client setter was not found.");
+		var awsClientFactory = Substitute.For<IAwsClientFactory>();
+		awsClientFactory.CreateS3Client(Arg.Any<IAwsCredentials>()).Returns(s3Client);
 
-		setter.Invoke(service, [s3Client]);
+		var service = new S3Service(awsClientFactory);
+		service.InitializeAsync(new AwsDefaultChainCredentials(null, "eu-west-1"));
 		return service;
 	}
 

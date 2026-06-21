@@ -1,7 +1,4 @@
 using System.Diagnostics;
-using Amazon;
-using Amazon.Runtime;
-using Amazon.Runtime.CredentialManagement;
 using Amazon.S3;
 using Amazon.S3.Model;
 using Pail.Extensions;
@@ -13,27 +10,18 @@ public sealed class S3Service : IS3Service
 {
 	private const int MinimumRequestedItemCount = 1;
 	private const int MaximumRequestPageSize = 1000;
+	private readonly IAwsClientFactory _awsClientFactory;
+
+	public S3Service(IAwsClientFactory awsClientFactory)
+	{
+		ArgumentNullException.ThrowIfNull(awsClientFactory);
+
+		_awsClientFactory = awsClientFactory;
+	}
 
 	public Task InitializeAsync(IAwsCredentials credentials)
 	{
-		var region = RegionEndpoint.GetBySystemName(credentials.Region);
-
-		if (credentials is AwsSessionCredentials sessionCredentials)
-		{
-			S3Client = string.IsNullOrEmpty(sessionCredentials.SessionToken)
-				? new AmazonS3Client(sessionCredentials.AccessKey, sessionCredentials.SecretKey, region)
-				: new AmazonS3Client(sessionCredentials.AccessKey, sessionCredentials.SecretKey, sessionCredentials.SessionToken, region);
-		}
-		else if (credentials is AwsDefaultChainCredentials defaultChainCredentials)
-		{
-			S3Client = string.IsNullOrWhiteSpace(defaultChainCredentials.ProfileName)
-				? new AmazonS3Client(region)
-				: new AmazonS3Client(GetProfileCredentials(defaultChainCredentials.ProfileName), region);
-		}
-		else
-		{
-			throw new ArgumentOutOfRangeException(nameof(credentials), credentials, "Unsupported AWS credential type.");
-		}
+		S3Client = _awsClientFactory.CreateS3Client(credentials);
 
 		return Task.CompletedTask;
 	}
@@ -290,12 +278,4 @@ public sealed class S3Service : IS3Service
 		}
 	}
 
-	private static AWSCredentials GetProfileCredentials(string profileName)
-	{
-		var profileStore = new CredentialProfileStoreChain();
-
-		return profileStore.TryGetAWSCredentials(profileName, out var credentials) ?
-			credentials :
-			throw new InvalidOperationException($"AWS profile '{profileName}' was not found or could not be loaded.");
-	}
 }
