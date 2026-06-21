@@ -4,6 +4,7 @@ using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Navigation;
 using Pail.App.Services;
+using Pail.Services;
 using Pail.ViewModels;
 
 namespace Pail.App.Views;
@@ -17,6 +18,10 @@ public sealed partial class MainPage : Page
 	{
 		DownloadViewModel = PailApp.Services.GetRequiredService<DownloadManagerViewModel>();
 
+		var sessionInfo = PailApp.Services.GetRequiredService<IAwsSessionInfoService>().Current;
+		SessionInfoText = AwsSessionInfoFormatter.FormatSummary(sessionInfo);
+		SessionInfoToolTip = string.IsNullOrWhiteSpace(sessionInfo?.CallerArn) ? SessionInfoText : sessionInfo.CallerArn;
+
 		InitializeComponent();
 		Loaded += OnLoaded;
 		Unloaded += OnUnloaded;
@@ -24,6 +29,12 @@ public sealed partial class MainPage : Page
 	}
 
 	public DownloadManagerViewModel DownloadViewModel { get; }
+
+	public string SessionInfoText { get; }
+
+	public string SessionInfoToolTip { get; }
+
+	public bool HasSessionInfo => string.IsNullOrWhiteSpace(SessionInfoText) is false;
 
 	private void OnLoaded(object sender, RoutedEventArgs e)
 	{

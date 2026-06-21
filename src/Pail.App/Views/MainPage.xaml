@@ -77,11 +77,30 @@
             </NavigationViewItem>
         </NavigationView.FooterMenuItems>
 
-        <Frame
-            x:Uid="ContentFrame"
-            x:Name="ContentFrame"
-            Navigated="OnContentFrameNavigated"
-            AutomationProperties.LandmarkType="Main"
-            AutomationProperties.LocalizedLandmarkType="Page content" />
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <Border
+                Padding="24,8,24,0"
+                Visibility="{x:Bind HasSessionInfo, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}">
+                <TextBlock
+                    Style="{StaticResource CaptionTextBlockStyle}"
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                    Text="{x:Bind SessionInfoText, Mode=OneWay}"
+                    TextTrimming="CharacterEllipsis"
+                    ToolTipService.ToolTip="{x:Bind SessionInfoToolTip, Mode=OneWay}" />
+            </Border>
+
+            <Frame
+                x:Uid="ContentFrame"
+                x:Name="ContentFrame"
+                Grid.Row="1"
+                Navigated="OnContentFrameNavigated"
+                AutomationProperties.LandmarkType="Main"
+                AutomationProperties.LocalizedLandmarkType="Page content" />
+        </Grid>
     </NavigationView>
 </Page>
