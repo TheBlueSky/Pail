@@ -37,7 +37,10 @@ public partial class PailApp : Application
 		services.AddOptions<AppSettings>().Bind(settingsConfiguration);
 
 		// Services
+		services.AddSingleton<IAwsClientFactory, AwsClientFactory>();
+		services.AddSingleton<IAwsIdentityService, AwsIdentityService>();
 		services.AddSingleton<IAwsProfileService, AwsProfileService>();
+		services.AddSingleton<IAwsSessionInfoService, AwsSessionInfoService>();
 		services.AddSingleton<IAppThemeService, AppThemeService>();
 		services.AddSingleton<IAwsConsoleCredentialsParser, AwsConsoleCredentialsParser>();
 		services.AddSingleton<IClipboardService, ClipboardService>();

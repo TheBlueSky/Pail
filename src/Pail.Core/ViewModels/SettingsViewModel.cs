@@ -9,6 +9,7 @@ public partial class SettingsViewModel : ObservableObject
 {
 	private readonly IAppThemeService _appThemeService;
 	private readonly ISettingsService _settingsService;
+	private readonly IAwsSessionInfoService _awsSessionInfoService;
 	private readonly IFolderPickerService _folderPickerService;
 	private readonly IStatusMessageService _statusMessageService;
 	private readonly INavigationService _navigationService;
@@ -17,6 +18,7 @@ public partial class SettingsViewModel : ObservableObject
 	public SettingsViewModel(
 		IAppThemeService appThemeService,
 		ISettingsService settingsService,
+		IAwsSessionInfoService awsSessionInfoService,
 		IFolderPickerService folderPickerService,
 		IStatusMessageService statusMessageService,
 		INavigationService navigationService,
@@ -24,6 +26,7 @@ public partial class SettingsViewModel : ObservableObject
 	{
 		_appThemeService = appThemeService;
 		_settingsService = settingsService;
+		_awsSessionInfoService = awsSessionInfoService;
 		_folderPickerService = folderPickerService;
 		_statusMessageService = statusMessageService;
 		_navigationService = navigationService;
@@ -111,7 +114,11 @@ public partial class SettingsViewModel : ObservableObject
 	}
 
 	[RelayCommand]
-	private void Logout() => _navigationService.NavigateTo("LoginPage", clearBackStack: true);
+	private void Logout()
+	{
+		_awsSessionInfoService.Clear();
+		_navigationService.NavigateTo("LoginPage", clearBackStack: true);
+	}
 
 	[RelayCommand(CanExecute = nameof(CanSave))]
 	private async Task SaveAsync()

@@ -11,6 +11,7 @@ public sealed class SettingsViewModelTests
 {
 	private readonly IAppThemeService _appThemeService = Substitute.For<IAppThemeService>();
 	private readonly ISettingsService _settingsService = Substitute.For<ISettingsService>();
+	private readonly IAwsSessionInfoService _awsSessionInfoService = Substitute.For<IAwsSessionInfoService>();
 	private readonly IFolderPickerService _folderPickerService = Substitute.For<IFolderPickerService>();
 	private readonly IStatusMessageService _statusMessageService = Substitute.For<IStatusMessageService>();
 	private readonly INavigationService _navigationService = Substitute.For<INavigationService>();
@@ -252,5 +253,19 @@ public sealed class SettingsViewModelTests
 		_statusMessageService.Received(1).ShowError(Arg.Is<string>(message => message.Contains("Failed to select folder: picker unavailable")));
 	}
 
-	private SettingsViewModel CreateViewModel() => new(_appThemeService, _settingsService, _folderPickerService, _statusMessageService, _navigationService, _localizationService);
+	[Fact]
+	internal void LogoutCommand_ClearsSessionInfoAndNavigatesToLogin()
+	{
+		// Arrange
+		var viewModel = CreateViewModel();
+
+		// Act
+		viewModel.LogoutCommand.Execute(null);
+
+		// Assert
+		_awsSessionInfoService.Received(1).Clear();
+		_navigationService.Received(1).NavigateTo("LoginPage", null, true);
+	}
+
+	private SettingsViewModel CreateViewModel() => new(_appThemeService, _settingsService, _awsSessionInfoService, _folderPickerService, _statusMessageService, _navigationService, _localizationService);
 }

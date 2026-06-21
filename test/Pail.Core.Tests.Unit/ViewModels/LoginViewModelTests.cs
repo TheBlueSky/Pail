@@ -13,6 +13,8 @@ public sealed class LoginViewModelTests
 
 	private readonly IAwsProfileService _awsProfileService = Substitute.For<IAwsProfileService>();
 	private readonly IS3Service _s3Service = Substitute.For<IS3Service>();
+	private readonly IAwsIdentityService _awsIdentityService = Substitute.For<IAwsIdentityService>();
+	private readonly IAwsSessionInfoService _awsSessionInfoService = Substitute.For<IAwsSessionInfoService>();
 	private readonly INavigationService _navigationService = Substitute.For<INavigationService>();
 	private readonly ISettingsService _settingsService = Substitute.For<ISettingsService>();
 	private readonly IClipboardService _clipboardService = Substitute.For<IClipboardService>();
@@ -26,6 +28,8 @@ public sealed class LoginViewModelTests
 		_settingsService.DefaultRegion.Returns(_ => _appSettings.DefaultRegion);
 		_settingsService.UseCredentialChainByDefault.Returns(_ => _appSettings.UseCredentialChainByDefault);
 		_settingsService.LastProfileName.Returns(_ => _appSettings.LastProfileName);
+		_awsIdentityService.TryGetCallerIdentityAsync(Arg.Any<IAwsCredentials>(), Arg.Any<CancellationToken>()).Returns((AwsCallerIdentity?)null);
+		_awsIdentityService.TryGetAccountAliasAsync(Arg.Any<IAwsCredentials>(), Arg.Any<CancellationToken>()).Returns((string?)null);
 
 		_localizationService.ReturnsFallbackStrings();
 	}
@@ -174,6 +178,68 @@ public sealed class LoginViewModelTests
 	}
 
 	[Fact]
+	internal async Task LoginCommand_Successful_SetsSessionInfoWithIdentityAndAlias()
+	{
+		// Arrange
+		_s3Service.GetBucketsAsync().Returns([]);
+		_awsIdentityService
+			.TryGetCallerIdentityAsync(Arg.Any<IAwsCredentials>(), Arg.Any<CancellationToken>())
+			.Returns(new AwsCallerIdentity("123456789012", "arn:aws:sts::123456789012:assumed-role/Admin/essam"));
+		_awsIdentityService
+			.TryGetAccountAliasAsync(Arg.Any<IAwsCredentials>(), Arg.Any<CancellationToken>())
+			.Returns("production");
+
+		var viewModel = CreateViewModel();
+		viewModel.Region = "ap-southeast-2";
+		viewModel.UseDefaultChain = true;
+		viewModel.SelectedProfileName = "dev-profile";
+
+		// Act
+		await viewModel.LoginCommand.ExecuteAsync(null);
+
+		// Assert
+		_awsSessionInfoService.Received(1).SetCurrent(
+			Arg.Is<AwsSessionInfo>(sessionInfo =>
+				sessionInfo.Region == "ap-southeast-2" &&
+				sessionInfo.ProfileName == "dev-profile" &&
+				sessionInfo.AccountId == "123456789012" &&
+				sessionInfo.CallerArn == "arn:aws:sts::123456789012:assumed-role/Admin/essam" &&
+				sessionInfo.AccountAlias == "production"));
+	}
+
+	[Fact]
+	internal async Task LoginCommand_SuccessfulWithPastedCredentials_SetsIdentityInfoWithoutProfileName()
+	{
+		// Arrange
+		_s3Service.GetBucketsAsync().Returns([]);
+		_awsIdentityService
+			.TryGetCallerIdentityAsync(Arg.Any<IAwsCredentials>(), Arg.Any<CancellationToken>())
+			.Returns(new AwsCallerIdentity("210987654321", "arn:aws:sts::210987654321:assumed-role/ReadOnly/essam"));
+		_awsIdentityService
+			.TryGetAccountAliasAsync(Arg.Any<IAwsCredentials>(), Arg.Any<CancellationToken>())
+			.Returns("shared-services");
+
+		var viewModel = CreateViewModel();
+		viewModel.Region = "us-west-2";
+		viewModel.UseDefaultChain = false;
+		viewModel.AccessKey = "access-key";
+		viewModel.SecretKey = "secret-key";
+		viewModel.SessionToken = "session-token";
+
+		// Act
+		await viewModel.LoginCommand.ExecuteAsync(null);
+
+		// Assert
+		_awsSessionInfoService.Received(1).SetCurrent(
+			Arg.Is<AwsSessionInfo>(sessionInfo =>
+				sessionInfo.Region == "us-west-2" &&
+				sessionInfo.ProfileName == null &&
+				sessionInfo.AccountId == "210987654321" &&
+				sessionInfo.CallerArn == "arn:aws:sts::210987654321:assumed-role/ReadOnly/essam" &&
+				sessionInfo.AccountAlias == "shared-services"));
+	}
+
+	[Fact]
 	internal async Task LoginCommand_Failed_ShowsErrorMessage()
 	{
 		// Arrange
@@ -187,6 +253,7 @@ public sealed class LoginViewModelTests
 		// Assert
 		_statusMessageService.Received(1).ShowError(Arg.Is<string>(s => s.Contains("Login failed: Invalid credentials")));
 		_navigationService.DidNotReceive().NavigateTo(Arg.Any<string>(), Arg.Any<object>());
+		_awsSessionInfoService.DidNotReceive().SetCurrent(Arg.Any<AwsSessionInfo>());
 		await _settingsService.DidNotReceive().UpdateAsync(Arg.Any<Action<AppSettings>>(), Arg.Any<CancellationToken>());
 	}
 
@@ -298,5 +365,5 @@ public sealed class LoginViewModelTests
 	}
 
 	private LoginViewModel CreateViewModel() =>
-		new(_awsProfileService, _s3Service, _navigationService, _settingsService, _clipboardService, _awsConsoleCredentialsParser, _statusMessageService, _localizationService);
+		new(_awsProfileService, _s3Service, _awsIdentityService, _awsSessionInfoService, _navigationService, _settingsService, _clipboardService, _awsConsoleCredentialsParser, _statusMessageService, _localizationService);
 }

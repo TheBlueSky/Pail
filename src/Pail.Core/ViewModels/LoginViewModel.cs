@@ -12,6 +12,8 @@ public partial class LoginViewModel : ObservableObject
 
 	private readonly IAwsProfileService _awsProfileService;
 	private readonly IS3Service _s3Service;
+	private readonly IAwsIdentityService _awsIdentityService;
+	private readonly IAwsSessionInfoService _awsSessionInfoService;
 	private readonly INavigationService _navigationService;
 	private readonly ISettingsService _settingsService;
 	private readonly IClipboardService _clipboardService;
@@ -23,6 +25,8 @@ public partial class LoginViewModel : ObservableObject
 	public LoginViewModel(
 		IAwsProfileService awsProfileService,
 		IS3Service s3Service,
+		IAwsIdentityService awsIdentityService,
+		IAwsSessionInfoService awsSessionInfoService,
 		INavigationService navigationService,
 		ISettingsService settingsService,
 		IClipboardService clipboardService,
@@ -32,6 +36,8 @@ public partial class LoginViewModel : ObservableObject
 	{
 		_awsProfileService = awsProfileService;
 		_s3Service = s3Service;
+		_awsIdentityService = awsIdentityService;
+		_awsSessionInfoService = awsSessionInfoService;
 		_navigationService = navigationService;
 		_settingsService = settingsService;
 		_clipboardService = clipboardService;
@@ -155,6 +161,22 @@ public partial class LoginViewModel : ObservableObject
 
 			// Attempt a simple call to verify credentials
 			await _s3Service.GetBucketsAsync();
+
+			var identityTask = _awsIdentityService.TryGetCallerIdentityAsync(credentials);
+			var accountAliasTask = _awsIdentityService.TryGetAccountAliasAsync(credentials);
+
+			await Task.WhenAll(identityTask, accountAliasTask);
+
+			var identity = await identityTask;
+			var accountAlias = await accountAliasTask;
+
+			_awsSessionInfoService.SetCurrent(
+				new AwsSessionInfo(
+					credentials.Region,
+					credentials is AwsDefaultChainCredentials defaultChainCredentials ? defaultChainCredentials.ProfileName : null,
+					identity?.AccountId,
+					identity?.CallerArn,
+					accountAlias));
 
 			_navigationService.NavigateTo("MainPage", clearBackStack: true);
 		}
