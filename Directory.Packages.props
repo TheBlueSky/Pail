@@ -6,7 +6,9 @@
   </PropertyGroup>
 
   <ItemGroup Label="Main Packages">
+    <PackageVersion Include="AWSSDK.IdentityManagement" Version="4.0.10.8" />
     <PackageVersion Include="AWSSDK.S3" Version="4.0.23" />
+    <PackageVersion Include="AWSSDK.SecurityToken" Version="4.0.7.7" />
     <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.2" />
     <PackageVersion Include="CommunityToolkit.WinUI.Controls.SettingsControls" Version="8.2.251219" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions" Version="$(MicrosoftExtensionsVersion)" />
