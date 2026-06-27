@@ -8,6 +8,8 @@ namespace Pail.Core.Tests.Unit.ViewModels;
 
 public sealed class ObjectBrowserViewModelTests
 {
+	private const string UtcDisplaySuffix = "UTC";
+
 	private readonly IS3Service _s3Service = Substitute.For<IS3Service>();
 	private readonly IDownloadManager _downloadManager = Substitute.For<IDownloadManager>();
 	private readonly INavigationService _navigationService = Substitute.For<INavigationService>();
@@ -44,6 +46,7 @@ public sealed class ObjectBrowserViewModelTests
 		_settingsService.AlwaysPromptDownloadLocation.Returns(_ => _appSettings.AlwaysPromptDownloadLocation);
 		_settingsService.InitialObjectLoadCount.Returns(_ => _appSettings.InitialObjectLoadCount);
 		_settingsService.LoadMoreObjectCount.Returns(_ => _appSettings.LoadMoreObjectCount);
+		_settingsService.ObjectTimestampDisplayMode.Returns(_ => _appSettings.ObjectTimestampDisplayMode);
 		_settingsService
 			.UpdateAsync(Arg.Any<Action<AppSettings>>(), Arg.Any<CancellationToken>())
 			.Returns(callInfo =>
@@ -63,9 +66,9 @@ public sealed class ObjectBrowserViewModelTests
 	{
 		// Arrange
 		var viewModel = CreateViewModel();
-		var selectedItems = new List<S3ObjectItem>
+		var selectedItems = new List<ObjectBrowserItemViewModel>
 		{
-			new() { Name = "report.csv", Key = "reports/report.csv", IsFolder = false },
+			CreateRow("report.csv", "reports/report.csv"),
 		};
 
 		// Act
@@ -83,9 +86,9 @@ public sealed class ObjectBrowserViewModelTests
 	{
 		// Arrange
 		var viewModel = CreateViewModel();
-		var selectedItems = new List<S3ObjectItem>
+		var selectedItems = new List<ObjectBrowserItemViewModel>
 		{
-			new() { Name = "report.csv", Key = "reports/report.csv", IsFolder = false },
+			CreateRow("report.csv", "reports/report.csv"),
 		};
 
 		// Act
@@ -119,9 +122,9 @@ public sealed class ObjectBrowserViewModelTests
 		var viewModel = CreateViewModel();
 		await viewModel.InitializeAsync("bucket-a");
 
-		var selectedItems = new List<S3ObjectItem>
+		var selectedItems = new List<ObjectBrowserItemViewModel>
 		{
-			new() { Name = "report.csv", Key = "reports/report.csv", Size = 123, IsFolder = false },
+			CreateRow(new() { Name = "report.csv", Key = "reports/report.csv", Size = 123, IsFolder = false }),
 		};
 
 		// Act
@@ -152,9 +155,9 @@ public sealed class ObjectBrowserViewModelTests
 		var viewModel = CreateViewModel();
 		await viewModel.InitializeAsync("bucket-a");
 
-		var selectedItems = new List<S3ObjectItem>
+		var selectedItems = new List<ObjectBrowserItemViewModel>
 		{
-			new() { Name = "report.csv", Key = "reports/report.csv", IsFolder = false },
+			CreateRow("report.csv", "reports/report.csv"),
 		};
 
 		// Act
@@ -176,9 +179,9 @@ public sealed class ObjectBrowserViewModelTests
 		var viewModel = CreateViewModel();
 		await viewModel.InitializeAsync("bucket-a");
 
-		var selectedItems = new List<S3ObjectItem>
+		var selectedItems = new List<ObjectBrowserItemViewModel>
 		{
-			new() { Name = "report.csv", Key = "reports/report.csv", IsFolder = false },
+			CreateRow("report.csv", "reports/report.csv"),
 		};
 
 		// Act
@@ -198,10 +201,10 @@ public sealed class ObjectBrowserViewModelTests
 		var viewModel = CreateViewModel();
 		await viewModel.InitializeAsync("bucket-a");
 
-		var selectedItems = new List<S3ObjectItem>
+		var selectedItems = new List<ObjectBrowserItemViewModel>
 		{
-			new() { Name = "report.csv", Key = "reports/report.csv", Size = 1024, IsFolder = false },
-			new() { Name = "logs", Key = "logs/", IsFolder = true },
+			CreateRow(new() { Name = "report.csv", Key = "reports/report.csv", Size = 1024, IsFolder = false }),
+			CreateRow(new() { Name = "logs", Key = "logs/", IsFolder = true }),
 		};
 
 		// Act
@@ -234,9 +237,9 @@ public sealed class ObjectBrowserViewModelTests
 		var viewModel = CreateViewModel();
 		await viewModel.InitializeAsync("bucket-a");
 
-		var selectedItems = new List<S3ObjectItem>
+		var selectedItems = new List<ObjectBrowserItemViewModel>
 		{
-			new() { Name = "unknown.bin", Key = "unknown.bin", Size = -1, IsFolder = false },
+			CreateRow(new() { Name = "unknown.bin", Key = "unknown.bin", Size = -1, IsFolder = false }),
 		};
 
 		// Act
@@ -254,9 +257,9 @@ public sealed class ObjectBrowserViewModelTests
 		var viewModel = CreateViewModel();
 		await viewModel.InitializeAsync("bucket-a");
 
-		var selectedItems = new List<S3ObjectItem>
+		var selectedItems = new List<ObjectBrowserItemViewModel>
 		{
-			new() { Name = "report.csv", Key = "reports/report.csv", IsFolder = false },
+			CreateRow("report.csv", "reports/report.csv"),
 		};
 
 		// Act
@@ -279,9 +282,9 @@ public sealed class ObjectBrowserViewModelTests
 			var viewModel = CreateViewModel();
 			await viewModel.InitializeAsync("bucket-a");
 
-			var selectedItems = new List<S3ObjectItem>
+			var selectedItems = new List<ObjectBrowserItemViewModel>
 			{
-				new() { Name = "report.csv", Key = "reports/report.csv", IsFolder = false },
+				CreateRow("report.csv", "reports/report.csv"),
 			};
 
 			// Act
@@ -641,6 +644,34 @@ public sealed class ObjectBrowserViewModelTests
 		await _s3Service.Received(1).GetObjectsAsync("bucket-a", prefix: "", prefixFilter: "rep", pageSize: 2, continuationToken: "page-2");
 	}
 
+	[Theory]
+	[InlineData(DateTimeDisplayMode.Utc)]
+	[InlineData(DateTimeDisplayMode.Local)]
+	internal async Task InitializeAsync_AppliesObjectTimestampDisplayModeToRowLastModifiedDisplay(DateTimeDisplayMode displayMode)
+	{
+		// Arrange
+		_appSettings.ObjectTimestampDisplayMode = displayMode;
+		_localizationService.GetString("ObjectTimestampUtcSuffix", Arg.Any<string>()).Returns("Localized UTC");
+		var lastModified = new DateTimeOffset(2026, 6, 27, 14, 30, 45, TimeSpan.Zero);
+		_s3Service
+			.GetObjectsAsync("bucket-a", prefix: "", prefixFilter: null, pageSize: 2, continuationToken: null)
+			.Returns(Task.FromResult(CreatePage([CreateObject("report.csv", "report.csv", lastModified)])));
+
+		var viewModel = CreateViewModel();
+
+		// Act
+		await viewModel.InitializeAsync("bucket-a");
+
+		// Assert
+		var item = Assert.Single(viewModel.Items);
+		Assert.Equal(lastModified, item.LastModified);
+		Assert.Equal(
+			displayMode is DateTimeDisplayMode.Local
+				? lastModified.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss zzz", System.Globalization.CultureInfo.CurrentCulture)
+				: string.Format(System.Globalization.CultureInfo.CurrentCulture, "{0:yyyy-MM-dd HH:mm:ss} Localized UTC", lastModified.ToUniversalTime()),
+			item.LastModifiedDisplay);
+	}
+
 	[Fact]
 	internal async Task OpenItemCommand_FolderSelected_UpdatesPathAndEnablesBucketBack()
 	{
@@ -649,12 +680,14 @@ public sealed class ObjectBrowserViewModelTests
 		_s3Service.GetObjectsAsync("bucket-a", "reports/", prefixFilter: null, pageSize: 2, continuationToken: null).Returns(Task.FromResult(CreatePage()));
 
 		var viewModel = CreateViewModel();
-		var folder = new S3ObjectItem
-		{
-			Name = "reports",
-			Key = "reports/",
-			IsFolder = true,
-		};
+		var folder = new ObjectBrowserItemViewModel(
+			new S3ObjectItem
+			{
+				Name = "reports",
+				Key = "reports/",
+				IsFolder = true,
+			},
+			DateTimeDisplayMode.Utc, UtcDisplaySuffix);
 
 		await viewModel.InitializeAsync("bucket-a");
 
@@ -686,18 +719,22 @@ public sealed class ObjectBrowserViewModelTests
 	{
 		// Arrange
 		var viewModel = CreateViewModel();
-		var parentFolder = new S3ObjectItem
-		{
-			Name = "reports",
-			Key = "reports/",
-			IsFolder = true,
-		};
-		var childFolder = new S3ObjectItem
-		{
-			Name = "2026",
-			Key = "reports/2026/",
-			IsFolder = true,
-		};
+		var parentFolder = new ObjectBrowserItemViewModel(
+			new S3ObjectItem
+			{
+				Name = "reports",
+				Key = "reports/",
+				IsFolder = true,
+			},
+			DateTimeDisplayMode.Utc, UtcDisplaySuffix);
+		var childFolder = new ObjectBrowserItemViewModel(
+			new S3ObjectItem
+			{
+				Name = "2026",
+				Key = "reports/2026/",
+				IsFolder = true,
+			},
+			DateTimeDisplayMode.Utc, UtcDisplaySuffix);
 
 		await viewModel.InitializeAsync("bucket-a");
 		await viewModel.OpenItemCommand.ExecuteAsync(parentFolder);
@@ -718,18 +755,22 @@ public sealed class ObjectBrowserViewModelTests
 		_s3Service.GetObjectsAsync("bucket-a", prefix: "reports/2026/", prefixFilter: null, pageSize: 2, continuationToken: null).Returns(Task.FromResult(CreatePage()));
 
 		var viewModel = CreateViewModel();
-		var parentFolder = new S3ObjectItem
-		{
-			Name = "reports",
-			Key = "reports/",
-			IsFolder = true,
-		};
-		var childFolder = new S3ObjectItem
-		{
-			Name = "2026",
-			Key = "reports/2026/",
-			IsFolder = true,
-		};
+		var parentFolder = new ObjectBrowserItemViewModel(
+			new S3ObjectItem
+			{
+				Name = "reports",
+				Key = "reports/",
+				IsFolder = true,
+			},
+			DateTimeDisplayMode.Utc, UtcDisplaySuffix);
+		var childFolder = new ObjectBrowserItemViewModel(
+			new S3ObjectItem
+			{
+				Name = "2026",
+				Key = "reports/2026/",
+				IsFolder = true,
+			},
+			DateTimeDisplayMode.Utc, UtcDisplaySuffix);
 
 		await viewModel.InitializeAsync("bucket-a");
 		await viewModel.OpenItemCommand.ExecuteAsync(parentFolder);
@@ -766,11 +807,18 @@ public sealed class ObjectBrowserViewModelTests
 	private ObjectBrowserViewModel CreateViewModel() =>
 		new(_s3Service, _downloadManager, _navigationService, _copyActionService, _folderPickerService, _settingsService, _statusMessageService, _localizationService);
 
-	private static S3ObjectItem CreateObject(string name, string key) =>
+	private static ObjectBrowserItemViewModel CreateRow(string name, string key) =>
+		CreateRow(CreateObject(name, key));
+
+	private static ObjectBrowserItemViewModel CreateRow(S3ObjectItem item) =>
+		new(item, DateTimeDisplayMode.Utc, UtcDisplaySuffix);
+
+	private static S3ObjectItem CreateObject(string name, string key, DateTimeOffset? lastModified = null) =>
 		new()
 		{
 			Name = name,
 			Key = key,
+			LastModified = lastModified,
 			IsFolder = false,
 		};
 

@@ -2,7 +2,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Input;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Navigation;
-using Pail.Models;
 using Pail.ViewModels;
 using Windows.System;
 using Windows.UI.Core;
@@ -38,7 +37,7 @@ public sealed partial class ObjectBrowserPage : Page
 
 	private void OnGridCellDoubleTapped(object sender, TableViewCellDoubleTappedEventArgs e)
 	{
-		if (e.Item is S3ObjectItem item)
+		if (e.Item is ObjectBrowserItemViewModel item)
 		{
 			ViewModel.OpenItemCommand.Execute(item);
 		}
@@ -46,7 +45,7 @@ public sealed partial class ObjectBrowserPage : Page
 
 	private void OnGridRowContextFlyoutOpening(object sender, TableViewRowContextFlyoutEventArgs e)
 	{
-		if (e.Item is S3ObjectItem item && ObjectGrid.SelectedItems.Contains(item) is false)
+		if (e.Item is ObjectBrowserItemViewModel item && ObjectGrid.SelectedItems.Contains(item) is false)
 		{
 			ObjectGrid.SelectedItems.Clear();
 			ObjectGrid.SelectedItems.Add(item);
@@ -77,7 +76,7 @@ public sealed partial class ObjectBrowserPage : Page
 
 	private void OnDownloadClick(object sender, RoutedEventArgs e)
 	{
-		var selected = ObjectGrid.SelectedItems.Cast<S3ObjectItem>().ToList();
+		var selected = ObjectGrid.SelectedItems.Cast<ObjectBrowserItemViewModel>().ToList();
 		ViewModel.DownloadSelectedCommand.Execute(selected);
 	}
 
@@ -105,7 +104,7 @@ public sealed partial class ObjectBrowserPage : Page
 
 		if (e.Key == VirtualKey.Enter)
 		{
-			if (GetSingleSelectedItem() is S3ObjectItem item)
+			if (GetSingleSelectedItem() is ObjectBrowserItemViewModel item)
 			{
 				ViewModel.OpenItemCommand.Execute(item);
 			}
@@ -132,10 +131,10 @@ public sealed partial class ObjectBrowserPage : Page
 
 		e.Handled = await SelectRowAsync(nextIndex);
 
-		S3ObjectItem? GetSingleSelectedItem()
+		ObjectBrowserItemViewModel? GetSingleSelectedItem()
 		{
 			return ObjectGrid.SelectedItems.Count == 1
-				? ObjectGrid.SelectedItems[0] as S3ObjectItem
+				? ObjectGrid.SelectedItems[0] as ObjectBrowserItemViewModel
 				: null;
 		}
 
@@ -186,13 +185,13 @@ public sealed partial class ObjectBrowserPage : Page
 
 	private void CopyNames()
 	{
-		var selected = ObjectGrid.SelectedItems.Cast<S3ObjectItem>().ToList();
+		var selected = ObjectGrid.SelectedItems.Cast<ObjectBrowserItemViewModel>().ToList();
 		ViewModel.CopyObjectNameCommand.Execute(selected);
 	}
 
 	private void CopyFullKeys()
 	{
-		var selected = ObjectGrid.SelectedItems.Cast<S3ObjectItem>().ToList();
+		var selected = ObjectGrid.SelectedItems.Cast<ObjectBrowserItemViewModel>().ToList();
 		ViewModel.CopyObjectFullKeyCommand.Execute(selected);
 	}
 

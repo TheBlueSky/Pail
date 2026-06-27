@@ -6,7 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:tableView="using:WinUI.TableView"
-    xmlns:models="using:Pail.Models"
+    xmlns:viewModels="using:Pail.ViewModels"
     xmlns:converters="using:Pail.App.Converters"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
@@ -143,7 +143,7 @@
             <tableView:TableView.Columns>
                 <tableView:TableViewTemplateColumn Header="" Width="44">
                     <tableView:TableViewTemplateColumn.CellTemplate>
-                        <DataTemplate x:DataType="models:S3ObjectItem">
+                        <DataTemplate x:DataType="viewModels:ObjectBrowserItemViewModel">
                             <Grid>
                                 <SymbolIcon
                                     Symbol="{x:Bind IsFolder, Converter={StaticResource FolderIconConverter}}"
@@ -156,7 +156,7 @@
                 </tableView:TableViewTemplateColumn>
                 <tableView:TableViewTextColumn x:Uid="ObjectNameColumn" Header="Name" Binding="{Binding Name}" Width="*"/>
                 <tableView:TableViewTextColumn x:Uid="ObjectSizeColumn" Header="Size" Binding="{Binding SizeDisplay}" Width="100"/>
-                <tableView:TableViewTextColumn x:Uid="ObjectLastModifiedColumn" Header="Last Modified" Binding="{Binding LastModified}" Width="180"/>
+                <tableView:TableViewTextColumn x:Uid="ObjectLastModifiedColumn" Header="Last Modified" Binding="{Binding LastModifiedDisplay}" Width="200"/>
             </tableView:TableView.Columns>
         </tableView:TableView>
 

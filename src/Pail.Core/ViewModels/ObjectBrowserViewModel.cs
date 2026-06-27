@@ -16,8 +16,9 @@ public partial class ObjectBrowserViewModel : ObservableObject
 	private readonly ISettingsService _settingsService;
 	private readonly IStatusMessageService _statusMessageService;
 	private readonly ILocalizationService _localizationService;
+	private readonly string _utcTimestampDisplaySuffix;
 	private readonly Stack<string> _pathStack = new();
-	private readonly List<S3ObjectItem> _loadedItems = [];
+	private readonly List<ObjectBrowserItemViewModel> _loadedItems = [];
 	private readonly TimeSpan _searchDebounceDelay;
 
 	private string? _nextContinuationToken;
@@ -44,6 +45,7 @@ public partial class ObjectBrowserViewModel : ObservableObject
 		_settingsService = settingsService;
 		_statusMessageService = statusMessageService;
 		_localizationService = localizationService;
+		_utcTimestampDisplaySuffix = _localizationService.GetString("ObjectTimestampUtcSuffix", "UTC");
 
 		_searchDebounceDelay = _settingsService.ObjectSearchDebounceDelay;
 
@@ -86,7 +88,7 @@ public partial class ObjectBrowserViewModel : ObservableObject
 	[ObservableProperty]
 	public partial string LoadedItemsStatus { get; set; } = string.Empty;
 
-	public ObservableCollection<S3ObjectItem> Items { get; } = [];
+	public ObservableCollection<ObjectBrowserItemViewModel> Items { get; } = [];
 
 	public bool CanNavigateBackWithinBucket
 	{
@@ -319,11 +321,11 @@ public partial class ObjectBrowserViewModel : ObservableObject
 		UpdateLoadedItemsStatus();
 	}
 
-	private bool MatchesLocalFilter(S3ObjectItem item) =>
+	private bool MatchesLocalFilter(ObjectBrowserItemViewModel item) =>
 		string.IsNullOrWhiteSpace(SearchText) || item.Name.Contains(SearchText, StringComparison.OrdinalIgnoreCase);
 
 	[RelayCommand]
-	private async Task OpenItemAsync(S3ObjectItem item)
+	private async Task OpenItemAsync(ObjectBrowserItemViewModel item)
 	{
 		if (IsBusy)
 		{
@@ -360,7 +362,7 @@ public partial class ObjectBrowserViewModel : ObservableObject
 	}
 
 	[RelayCommand]
-	private async Task DownloadSelectedAsync(IList<S3ObjectItem> selectedItems)
+	private async Task DownloadSelectedAsync(IList<ObjectBrowserItemViewModel> selectedItems)
 	{
 		if (selectedItems is null || !selectedItems.Any() || _isPreparingDownloads)
 		{
@@ -416,7 +418,7 @@ public partial class ObjectBrowserViewModel : ObservableObject
 	}
 
 	[RelayCommand(CanExecute = nameof(CanCopySelectedObject))]
-	private async Task CopyObjectNameAsync(IList<S3ObjectItem> selectedItems)
+	private async Task CopyObjectNameAsync(IList<ObjectBrowserItemViewModel> selectedItems)
 	{
 		if (selectedItems is null || !selectedItems.Any())
 		{
@@ -432,7 +434,7 @@ public partial class ObjectBrowserViewModel : ObservableObject
 	}
 
 	[RelayCommand(CanExecute = nameof(CanCopySelectedObject))]
-	private async Task CopyObjectFullKeyAsync(IList<S3ObjectItem> selectedItems)
+	private async Task CopyObjectFullKeyAsync(IList<ObjectBrowserItemViewModel> selectedItems)
 	{
 		if (selectedItems is null || !selectedItems.Any())
 		{
@@ -454,7 +456,7 @@ public partial class ObjectBrowserViewModel : ObservableObject
 		HasMoreItems &&
 		string.IsNullOrWhiteSpace(_nextContinuationToken) is false;
 
-	private DownloadItem CreateDownloadItem(S3ObjectItem item, string downloadsFolder) =>
+	private DownloadItem CreateDownloadItem(ObjectBrowserItemViewModel item, string downloadsFolder) =>
 		new()
 		{
 			BucketName = BucketName,
@@ -480,11 +482,12 @@ public partial class ObjectBrowserViewModel : ObservableObject
 	{
 		foreach (var item in items)
 		{
-			_loadedItems.Add(item);
+			var row = CreateRow(item);
+			_loadedItems.Add(row);
 
-			if (MatchesLocalFilter(item))
+			if (MatchesLocalFilter(row))
 			{
-				Items.Add(item);
+				Items.Add(row);
 			}
 		}
 	}
@@ -498,14 +501,17 @@ public partial class ObjectBrowserViewModel : ObservableObject
 				continue;
 			}
 
-			_loadedItems.Add(item);
+			var row = CreateRow(item);
+			_loadedItems.Add(row);
 
-			if (MatchesLocalFilter(item))
+			if (MatchesLocalFilter(row))
 			{
-				Items.Add(item);
+				Items.Add(row);
 			}
 		}
 	}
+
+	private ObjectBrowserItemViewModel CreateRow(S3ObjectItem item) => new(item, _settingsService.ObjectTimestampDisplayMode, _utcTimestampDisplaySuffix);
 
 	private int GetInitialObjectLoadCount() => Math.Max(1, _settingsService.InitialObjectLoadCount);
 
@@ -540,5 +546,4 @@ public partial class ObjectBrowserViewModel : ObservableObject
 			: HasMoreItems
 				? _localizationService.FormatString("ObjectLoadedItemsMoreAvailableStatus", "Loaded {0} items, more available", _loadedItems.Count)
 				: _localizationService.FormatString("ObjectLoadedItemsStatus", "Loaded {0} items", _loadedItems.Count);
-
 }

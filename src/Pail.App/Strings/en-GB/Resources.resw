@@ -153,6 +153,10 @@
     <value>Local time</value>
     <comment>Object timestamp display option: local time zone</comment>
   </data>
+  <data name="ObjectTimestampUtcSuffix" xml:space="preserve">
+    <value>UTC</value>
+    <comment>Suffix appended to object timestamps displayed in UTC.</comment>
+  </data>
   <data name="AutomaticProfileOption" xml:space="preserve">
     <value>Automatic (recommended)</value>
     <comment>AWS profile selector option that lets the SDK choose credentials automatically</comment>
