@@ -481,7 +481,7 @@ public sealed class ObjectBrowserViewModelTests
 	}
 
 	[Fact]
-	internal async Task SearchCommand_WithTerm_QueriesS3WithSearchPrefixAndReplacesItems()
+	internal async Task SearchCommand_WithTerm_QueriesS3WithSearchPrefixAndShowsRemoteResults()
 	{
 		// Arrange
 		_s3Service
@@ -506,12 +506,83 @@ public sealed class ObjectBrowserViewModelTests
 		await viewModel.SearchCommand.ExecuteAsync(null);
 
 		// Assert
+		// The loaded "summary.txt" does not contain "rep", so only the remote prefix matches show.
 		Assert.Collection(
 			viewModel.Items,
 			item => Assert.Equal("report-1.csv", item.Name),
 			item => Assert.Equal("report-2.csv", item.Name));
 		Assert.True(viewModel.HasMoreItems);
 		await _s3Service.Received(1).GetObjectsAsync("bucket-a", prefix: "", prefixFilter: "rep", pageSize: 2, continuationToken: null);
+	}
+
+	[Fact]
+	internal async Task SearchCommand_AddsRemotePrefixMatchesToLocalContainsMatches()
+	{
+		// Arrange: two loaded items contain "xyz" in the middle; the remote prefix search finds a different item.
+		_s3Service
+			.GetObjectsAsync("bucket-a", prefix: "", prefixFilter: null, pageSize: 2, continuationToken: null)
+			.Returns(Task.FromResult(
+				CreatePage(
+					[
+						CreateObject("a-xyz-1.csv", "a-xyz-1.csv"),
+						CreateObject("b-xyz-2.csv", "b-xyz-2.csv"),
+						CreateObject("unrelated.csv", "unrelated.csv"),
+					])));
+		_s3Service
+			.GetObjectsAsync("bucket-a", prefix: "", prefixFilter: "xyz", pageSize: 2, continuationToken: null)
+			.Returns(Task.FromResult(CreatePage([CreateObject("xyz-remote.csv", "xyz-remote.csv")])));
+
+		var viewModel = CreateViewModel();
+		await viewModel.InitializeAsync("bucket-a");
+		viewModel.SearchText = "xyz";
+
+		// Act
+		await viewModel.SearchCommand.ExecuteAsync(null);
+
+		// Assert: two local "contains" matches plus the one remote "starts with" match.
+		Assert.Collection(
+			viewModel.Items,
+			item => Assert.Equal("a-xyz-1.csv", item.Name),
+			item => Assert.Equal("b-xyz-2.csv", item.Name),
+			item => Assert.Equal("xyz-remote.csv", item.Name));
+		Assert.Equal("Loaded 4 items", viewModel.LoadedItemsStatus);
+	}
+
+	[Fact]
+	internal async Task SearchCommand_ItemMatchingBothLocallyAndRemotely_ShownOnce()
+	{
+		// Arrange: "xyz-shared.csv" is both a loaded "contains" match and a remote "starts with" match.
+		_s3Service
+			.GetObjectsAsync("bucket-a", prefix: "", prefixFilter: null, pageSize: 2, continuationToken: null)
+			.Returns(Task.FromResult(
+				CreatePage(
+					[
+						CreateObject("xyz-shared.csv", "xyz-shared.csv"),
+						CreateObject("a-xyz.csv", "a-xyz.csv"),
+					])));
+		_s3Service
+			.GetObjectsAsync("bucket-a", prefix: "", prefixFilter: "xyz", pageSize: 2, continuationToken: null)
+			.Returns(Task.FromResult(
+				CreatePage(
+					[
+						CreateObject("xyz-shared.csv", "xyz-shared.csv"),
+						CreateObject("xyz-new.csv", "xyz-new.csv"),
+					])));
+
+		var viewModel = CreateViewModel();
+		await viewModel.InitializeAsync("bucket-a");
+		viewModel.SearchText = "xyz";
+
+		// Act
+		await viewModel.SearchCommand.ExecuteAsync(null);
+
+		// Assert: the shared key appears once; result is the deduplicated union.
+		Assert.Collection(
+			viewModel.Items,
+			item => Assert.Equal("xyz-shared.csv", item.Name),
+			item => Assert.Equal("a-xyz.csv", item.Name),
+			item => Assert.Equal("xyz-new.csv", item.Name));
+		Assert.Equal("Loaded 3 items", viewModel.LoadedItemsStatus);
 	}
 
 	[Fact]

@@ -167,7 +167,15 @@ public partial class ObjectBrowserViewModel : ObservableObject
 				GetLoadMoreObjectCount(),
 				_nextContinuationToken);
 
-			AppendItems(page.Items);
+			if (_activeSearchPrefix is null)
+			{
+				AppendItems(page.Items);
+			}
+			else
+			{
+				AppendMissingItems(page.Items);
+			}
+
 			UpdatePagingState(page);
 
 			int GetLoadMoreObjectCount()
@@ -212,7 +220,44 @@ public partial class ObjectBrowserViewModel : ObservableObject
 			return;
 		}
 
-		await LoadAsync(SearchText);
+		await LoadSearchResultsAsync(SearchText);
+	}
+
+	private async Task LoadSearchResultsAsync(string searchPrefix)
+	{
+		if (IsBusy)
+		{
+			return;
+		}
+
+		IsBusy = true;
+		IsInitialLoadInProgress = true;
+		ClearPagingState();
+
+		try
+		{
+			var page = await _s3Service.GetObjectsAsync(BucketName, CurrentPath, prefixFilter: searchPrefix, pageSize: GetInitialObjectLoadCount());
+
+			_activeSearchPrefix = searchPrefix;
+			AppendMissingItems(page.Items);
+			UpdatePagingState(page);
+		}
+		catch (Exception ex)
+		{
+			ClearPagingState();
+
+			var message = ex is Amazon.S3.AmazonS3Exception s3Ex && s3Ex.ErrorCode == "PermanentRedirect"
+				? _localizationService.GetString("BucketRegionMismatch", "This bucket is in a different region than the one you connected with. Please reconnect with the correct region.")
+				: _localizationService.FormatString("ObjectLoadFailed", "Failed to load objects: {0}", ex.Message);
+
+			_statusMessageService.ShowError(message);
+		}
+		finally
+		{
+			UpdateLoadedItemsStatus();
+			IsInitialLoadInProgress = false;
+			IsBusy = false;
+		}
 	}
 
 	partial void OnSearchTextChanged(string value)
@@ -435,6 +480,24 @@ public partial class ObjectBrowserViewModel : ObservableObject
 	{
 		foreach (var item in items)
 		{
+			_loadedItems.Add(item);
+
+			if (MatchesLocalFilter(item))
+			{
+				Items.Add(item);
+			}
+		}
+	}
+
+	private void AppendMissingItems(IEnumerable<S3ObjectItem> items)
+	{
+		foreach (var item in items)
+		{
+			if (_loadedItems.Any(loadedItem => string.Equals(loadedItem.Key, item.Key, StringComparison.Ordinal)))
+			{
+				continue;
+			}
+
 			_loadedItems.Add(item);
 
 			if (MatchesLocalFilter(item))
