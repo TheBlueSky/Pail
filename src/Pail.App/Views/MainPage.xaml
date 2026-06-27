@@ -84,7 +84,7 @@
             </Grid.RowDefinitions>
 
             <Border
-                Padding="24,8,24,0"
+                Padding="24,8,24,8"
                 Visibility="{x:Bind HasSessionInfo, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}">
                 <TextBlock
                     Style="{StaticResource CaptionTextBlockStyle}"
