@@ -23,6 +23,7 @@ public sealed class SettingsViewModelTests
 		AlwaysPromptDownloadLocation = true,
 		InitialObjectLoadCount = 250,
 		LoadMoreObjectCount = 100,
+		ObjectTimestampDisplayMode = DateTimeDisplayMode.Local,
 		StatusOverlayDurationSeconds = 5,
 		DefaultRegion = "us-east-1",
 		UseCredentialChainByDefault = false,
@@ -39,6 +40,7 @@ public sealed class SettingsViewModelTests
 		_settingsService.AlwaysPromptDownloadLocation.Returns(_ => _settings.AlwaysPromptDownloadLocation);
 		_settingsService.InitialObjectLoadCount.Returns(_ => _settings.InitialObjectLoadCount);
 		_settingsService.LoadMoreObjectCount.Returns(_ => _settings.LoadMoreObjectCount);
+		_settingsService.ObjectTimestampDisplayMode.Returns(_ => _settings.ObjectTimestampDisplayMode);
 		_settingsService.StatusOverlayDurationSeconds.Returns(_ => _settings.StatusOverlayDurationSeconds);
 		_settingsService.DefaultRegion.Returns(_ => _settings.DefaultRegion);
 		_settingsService.UseCredentialChainByDefault.Returns(_ => _settings.UseCredentialChainByDefault);
@@ -68,6 +70,7 @@ public sealed class SettingsViewModelTests
 		Assert.True(viewModel.AlwaysPromptDownloadLocation);
 		Assert.Equal(250, viewModel.InitialObjectLoadCount);
 		Assert.Equal(100, viewModel.LoadMoreObjectCount);
+		Assert.Equal(DateTimeDisplayMode.Local, viewModel.ObjectTimestampDisplayMode);
 		Assert.Equal(5, viewModel.StatusOverlayDurationSeconds);
 		Assert.Equal("us-east-1", viewModel.DefaultRegion);
 		Assert.False(viewModel.UseCredentialChainByDefault);
@@ -78,6 +81,8 @@ public sealed class SettingsViewModelTests
 		Assert.Contains(AppThemeMode.System, viewModel.AvailableThemes);
 		Assert.Contains(AppThemeMode.Light, viewModel.AvailableThemes);
 		Assert.Contains(AppThemeMode.Dark, viewModel.AvailableThemes);
+		Assert.Contains(DateTimeDisplayMode.Utc, viewModel.AvailableObjectTimestampDisplayModes);
+		Assert.Contains(DateTimeDisplayMode.Local, viewModel.AvailableObjectTimestampDisplayModes);
 		Assert.Contains("eu-west-1", viewModel.AvailableRegions);
 	}
 
@@ -91,6 +96,7 @@ public sealed class SettingsViewModelTests
 		viewModel.AlwaysPromptDownloadLocation = false;
 		viewModel.InitialObjectLoadCount = 400;
 		viewModel.LoadMoreObjectCount = 150;
+		viewModel.ObjectTimestampDisplayMode = DateTimeDisplayMode.Utc;
 		viewModel.StatusOverlayDurationSeconds = 8;
 		viewModel.DefaultRegion = "ap-south-1";
 		viewModel.UseCredentialChainByDefault = true;
@@ -108,6 +114,7 @@ public sealed class SettingsViewModelTests
 		Assert.False(_settings.AlwaysPromptDownloadLocation);
 		Assert.Equal(400, _settings.InitialObjectLoadCount);
 		Assert.Equal(150, _settings.LoadMoreObjectCount);
+		Assert.Equal(DateTimeDisplayMode.Utc, _settings.ObjectTimestampDisplayMode);
 		Assert.Equal(8, _settings.StatusOverlayDurationSeconds);
 		Assert.Equal("ap-south-1", _settings.DefaultRegion);
 		Assert.True(_settings.UseCredentialChainByDefault);

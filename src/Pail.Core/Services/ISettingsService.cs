@@ -14,6 +14,8 @@ public interface ISettingsService
 
 	public int LoadMoreObjectCount { get; }
 
+	public DateTimeDisplayMode ObjectTimestampDisplayMode { get; }
+
 	public int StatusOverlayDurationSeconds { get; }
 
 	public string DefaultRegion { get; }

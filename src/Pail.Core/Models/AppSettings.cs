@@ -15,6 +15,8 @@ public sealed class AppSettings
 
 	public int LoadMoreObjectCount { get; set; }
 
+	public DateTimeDisplayMode ObjectTimestampDisplayMode { get; set; } = DateTimeDisplayMode.Utc;
+
 	public int StatusOverlayDurationSeconds { get; set; } = 3;
 
 	public string DefaultRegion { get; set; } = "eu-west-1";

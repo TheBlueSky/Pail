@@ -23,6 +23,7 @@ public sealed class SettingsServiceTests : IDisposable
 		Assert.False(service.AlwaysPromptDownloadLocation);
 		Assert.Equal(1000, service.InitialObjectLoadCount);
 		Assert.Equal(0, service.LoadMoreObjectCount);
+		Assert.Equal(DateTimeDisplayMode.Utc, service.ObjectTimestampDisplayMode);
 		Assert.Equal(3, service.StatusOverlayDurationSeconds);
 		Assert.Equal("eu-west-1", service.DefaultRegion);
 		Assert.True(service.UseCredentialChainByDefault);
@@ -46,6 +47,7 @@ public sealed class SettingsServiceTests : IDisposable
 				"AlwaysPromptDownloadLocation": true,
 				"InitialObjectLoadCount": 150,
 				"LoadMoreObjectCount": 75,
+				"ObjectTimestampDisplayMode": "Local",
 				"StatusOverlayDurationSeconds": 7,
 				"DefaultRegion": "us-east-1",
 				"UseCredentialChainByDefault": false,
@@ -64,6 +66,7 @@ public sealed class SettingsServiceTests : IDisposable
 		Assert.True(service.AlwaysPromptDownloadLocation);
 		Assert.Equal(150, service.InitialObjectLoadCount);
 		Assert.Equal(75, service.LoadMoreObjectCount);
+		Assert.Equal(DateTimeDisplayMode.Local, service.ObjectTimestampDisplayMode);
 		Assert.Equal(7, service.StatusOverlayDurationSeconds);
 		Assert.Equal("us-east-1", service.DefaultRegion);
 		Assert.False(service.UseCredentialChainByDefault);
@@ -87,6 +90,7 @@ public sealed class SettingsServiceTests : IDisposable
 			settings.AlwaysPromptDownloadLocation = true;
 			settings.InitialObjectLoadCount = 325;
 			settings.LoadMoreObjectCount = 90;
+			settings.ObjectTimestampDisplayMode = DateTimeDisplayMode.Local;
 			settings.StatusOverlayDurationSeconds = 9;
 			settings.DefaultRegion = "ap-southeast-2";
 			settings.UseCredentialChainByDefault = false;
@@ -104,6 +108,7 @@ public sealed class SettingsServiceTests : IDisposable
 		Assert.True(reloadedService.AlwaysPromptDownloadLocation);
 		Assert.Equal(325, reloadedService.InitialObjectLoadCount);
 		Assert.Equal(90, reloadedService.LoadMoreObjectCount);
+		Assert.Equal(DateTimeDisplayMode.Local, reloadedService.ObjectTimestampDisplayMode);
 		Assert.Equal(9, reloadedService.StatusOverlayDurationSeconds);
 		Assert.Equal("ap-southeast-2", reloadedService.DefaultRegion);
 		Assert.False(reloadedService.UseCredentialChainByDefault);
@@ -117,6 +122,7 @@ public sealed class SettingsServiceTests : IDisposable
 		Assert.Equal("E:\\Exports", document.RootElement.GetProperty(nameof(AppSettings.DownloadFolder)).GetString());
 		Assert.Equal(325, document.RootElement.GetProperty(nameof(AppSettings.InitialObjectLoadCount)).GetInt32());
 		Assert.Equal(90, document.RootElement.GetProperty(nameof(AppSettings.LoadMoreObjectCount)).GetInt32());
+		Assert.Equal("Local", document.RootElement.GetProperty(nameof(AppSettings.ObjectTimestampDisplayMode)).GetString());
 		Assert.Equal("dev", document.RootElement.GetProperty(nameof(AppSettings.LastProfileName)).GetString());
 		Assert.Equal(4, document.RootElement.GetProperty(nameof(AppSettings.MaxParallelDownloads)).GetInt32());
 		Assert.False(document.RootElement.GetProperty(nameof(AppSettings.AutoClearCompletedDownloads)).GetBoolean());
@@ -137,6 +143,7 @@ public sealed class SettingsServiceTests : IDisposable
 			settings.AlwaysPromptDownloadLocation = true;
 			settings.InitialObjectLoadCount = 220;
 			settings.LoadMoreObjectCount = 0;
+			settings.ObjectTimestampDisplayMode = DateTimeDisplayMode.Local;
 			settings.StatusOverlayDurationSeconds = 6;
 			settings.DefaultRegion = "us-west-1";
 			settings.UseCredentialChainByDefault = false;
@@ -154,6 +161,7 @@ public sealed class SettingsServiceTests : IDisposable
 		Assert.True(service.AlwaysPromptDownloadLocation);
 		Assert.Equal(220, service.InitialObjectLoadCount);
 		Assert.Equal(0, service.LoadMoreObjectCount);
+		Assert.Equal(DateTimeDisplayMode.Local, service.ObjectTimestampDisplayMode);
 		Assert.Equal(6, service.StatusOverlayDurationSeconds);
 		Assert.Equal("us-west-1", service.DefaultRegion);
 		Assert.False(service.UseCredentialChainByDefault);
@@ -167,6 +175,7 @@ public sealed class SettingsServiceTests : IDisposable
 		Assert.True(reloadedService.AlwaysPromptDownloadLocation);
 		Assert.Equal(220, reloadedService.InitialObjectLoadCount);
 		Assert.Equal(0, reloadedService.LoadMoreObjectCount);
+		Assert.Equal(DateTimeDisplayMode.Local, reloadedService.ObjectTimestampDisplayMode);
 		Assert.Equal(6, reloadedService.StatusOverlayDurationSeconds);
 		Assert.Equal("us-west-1", reloadedService.DefaultRegion);
 		Assert.False(reloadedService.UseCredentialChainByDefault);

@@ -39,6 +39,8 @@ public sealed class SettingsService : ISettingsService
 
 	public int LoadMoreObjectCount => _optionsMonitor.CurrentValue.LoadMoreObjectCount;
 
+	public DateTimeDisplayMode ObjectTimestampDisplayMode => _optionsMonitor.CurrentValue.ObjectTimestampDisplayMode;
+
 	public int StatusOverlayDurationSeconds => _optionsMonitor.CurrentValue.StatusOverlayDurationSeconds;
 
 	public string DefaultRegion => _optionsMonitor.CurrentValue.DefaultRegion;
@@ -87,6 +89,7 @@ public sealed class SettingsService : ISettingsService
 		AlwaysPromptDownloadLocation = source.AlwaysPromptDownloadLocation,
 		InitialObjectLoadCount = source.InitialObjectLoadCount,
 		LoadMoreObjectCount = source.LoadMoreObjectCount,
+		ObjectTimestampDisplayMode = source.ObjectTimestampDisplayMode,
 		StatusOverlayDurationSeconds = source.StatusOverlayDurationSeconds,
 		DefaultRegion = source.DefaultRegion,
 		UseCredentialChainByDefault = source.UseCredentialChainByDefault,

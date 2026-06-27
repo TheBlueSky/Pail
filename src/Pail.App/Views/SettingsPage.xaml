@@ -12,6 +12,7 @@
 
     <Page.Resources>
         <converters:AppThemeModeDisplayConverter x:Key="AppThemeModeDisplayConverter" />
+        <converters:DateTimeDisplayModeDisplayConverter x:Key="DateTimeDisplayModeDisplayConverter" />
 
         <x:Double x:Key="SettingsCardSpacing">4</x:Double>
 
@@ -145,6 +146,22 @@
                     Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                     Text="Object browser"
                     AutomationProperties.HeadingLevel="Level2" />
+
+                <tkcontrols:SettingsCard x:Uid="ObjectTimestampDisplayModeCard">
+                    <tkcontrols:SettingsCard.HeaderIcon>
+                        <FontIcon Glyph="&#xE823;" />
+                    </tkcontrols:SettingsCard.HeaderIcon>
+                    <ComboBox
+                        MinWidth="220"
+                        ItemsSource="{x:Bind ViewModel.AvailableObjectTimestampDisplayModes}"
+                        SelectedItem="{x:Bind ViewModel.ObjectTimestampDisplayMode, Mode=TwoWay}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Converter={StaticResource DateTimeDisplayModeDisplayConverter}}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </tkcontrols:SettingsCard>
 
                 <tkcontrols:SettingsCard x:Uid="InitialObjectLoadCard">
                     <tkcontrols:SettingsCard.HeaderIcon>

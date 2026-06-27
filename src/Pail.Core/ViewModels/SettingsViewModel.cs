@@ -37,6 +37,7 @@ public partial class SettingsViewModel : ObservableObject
 		AlwaysPromptDownloadLocation = _settingsService.AlwaysPromptDownloadLocation;
 		InitialObjectLoadCount = _settingsService.InitialObjectLoadCount;
 		LoadMoreObjectCount = _settingsService.LoadMoreObjectCount;
+		ObjectTimestampDisplayMode = _settingsService.ObjectTimestampDisplayMode;
 		StatusOverlayDurationSeconds = _settingsService.StatusOverlayDurationSeconds;
 		DefaultRegion = _settingsService.DefaultRegion;
 		UseCredentialChainByDefault = _settingsService.UseCredentialChainByDefault;
@@ -66,6 +67,9 @@ public partial class SettingsViewModel : ObservableObject
 	public partial int LoadMoreObjectCount { get; set; }
 
 	[ObservableProperty]
+	public partial DateTimeDisplayMode ObjectTimestampDisplayMode { get; set; }
+
+	[ObservableProperty]
 	public partial int StatusOverlayDurationSeconds { get; set; }
 
 	[ObservableProperty]
@@ -91,6 +95,12 @@ public partial class SettingsViewModel : ObservableObject
 		AppThemeMode.Light,
 		AppThemeMode.Dark,
 		AppThemeMode.System,
+	];
+
+	public IReadOnlyList<DateTimeDisplayMode> AvailableObjectTimestampDisplayModes { get; } =
+	[
+		DateTimeDisplayMode.Utc,
+		DateTimeDisplayMode.Local,
 	];
 
 	public IReadOnlyList<string> AvailableRegions { get; } = AwsRegions.All;
@@ -135,6 +145,7 @@ public partial class SettingsViewModel : ObservableObject
 					settings.AlwaysPromptDownloadLocation = AlwaysPromptDownloadLocation;
 					settings.InitialObjectLoadCount = Math.Max(1, InitialObjectLoadCount);
 					settings.LoadMoreObjectCount = Math.Max(0, LoadMoreObjectCount);
+					settings.ObjectTimestampDisplayMode = ObjectTimestampDisplayMode;
 					settings.StatusOverlayDurationSeconds = Math.Max(1, StatusOverlayDurationSeconds);
 					settings.DefaultRegion = string.IsNullOrWhiteSpace(DefaultRegion) ? settings.DefaultRegion : DefaultRegion;
 					settings.UseCredentialChainByDefault = UseCredentialChainByDefault;
@@ -177,6 +188,7 @@ public partial class SettingsViewModel : ObservableObject
 		AlwaysPromptDownloadLocation = _settingsService.AlwaysPromptDownloadLocation;
 		InitialObjectLoadCount = _settingsService.InitialObjectLoadCount;
 		LoadMoreObjectCount = _settingsService.LoadMoreObjectCount;
+		ObjectTimestampDisplayMode = _settingsService.ObjectTimestampDisplayMode;
 		StatusOverlayDurationSeconds = _settingsService.StatusOverlayDurationSeconds;
 		DefaultRegion = _settingsService.DefaultRegion;
 		UseCredentialChainByDefault = _settingsService.UseCredentialChainByDefault;
