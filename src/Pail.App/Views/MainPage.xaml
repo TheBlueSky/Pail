@@ -85,13 +85,13 @@
 
             <Border
                 Padding="24,8,24,8"
-                Visibility="{x:Bind HasSessionInfo, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}">
+                Visibility="{x:Bind HasSessionInfo, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneTime}">
                 <TextBlock
                     Style="{StaticResource CaptionTextBlockStyle}"
                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                    Text="{x:Bind SessionInfoText, Mode=OneWay}"
+                    Text="{x:Bind SessionInfoText, Mode=OneTime}"
                     TextTrimming="CharacterEllipsis"
-                    ToolTipService.ToolTip="{x:Bind SessionInfoToolTip, Mode=OneWay}" />
+                    ToolTipService.ToolTip="{x:Bind SessionInfoToolTip, Mode=OneTime}" />
             </Border>
 
             <Frame
