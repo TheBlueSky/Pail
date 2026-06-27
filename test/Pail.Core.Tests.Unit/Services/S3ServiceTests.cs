@@ -209,6 +209,32 @@ public sealed class S3ServiceTests
 	}
 
 	[Fact]
+	internal async Task GetObjectsAsync_ObjectLastModified_TreatsS3TimestampAsUtcDateTimeOffset()
+	{
+		// Arrange
+		var s3LastModified = new DateTime(2026, 6, 27, 14, 30, 45, DateTimeKind.Unspecified);
+		_s3Client
+			.ListObjectsV2Async(Arg.Any<ListObjectsV2Request>(), Arg.Any<CancellationToken>())
+			.Returns(Task.FromResult(
+				CreateResponse(
+					[
+						new S3Object { Key = "logs/report.txt", Size = 1, LastModified = s3LastModified },
+					],
+					isTruncated: false,
+					nextContinuationToken: null)));
+
+		var service = CreateService(_s3Client);
+
+		// Act
+		var page = await service.GetObjectsAsync("bucket-a", "logs/", pageSize: 1000);
+
+		// Assert
+		var item = Assert.Single(page.Items);
+		Assert.True(item.LastModified.HasValue);
+		Assert.Equal(new DateTimeOffset(2026, 6, 27, 14, 30, 45, TimeSpan.Zero), item.LastModified.Value);
+	}
+
+	[Fact]
 	internal async Task DownloadObjectAsync_ReportsProgressAndThrottles()
 	{
 		// Arrange

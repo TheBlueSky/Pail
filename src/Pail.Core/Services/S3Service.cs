@@ -273,9 +273,14 @@ public sealed class S3Service : IS3Service
 					Key = s3Object.Key,
 					Name = s3Object.Key[prefix.Length..],
 					Size = s3Object.Size ?? -1,
-					LastModified = s3Object.LastModified ?? new DateTime(),
+					LastModified = ToUtcDateTimeOffset(s3Object.LastModified),
 				});
 		}
 	}
+
+	private static DateTimeOffset? ToUtcDateTimeOffset(DateTime? dateTime) =>
+		dateTime is { } value
+			? new DateTimeOffset(DateTime.SpecifyKind(value, DateTimeKind.Utc))
+			: null;
 
 }

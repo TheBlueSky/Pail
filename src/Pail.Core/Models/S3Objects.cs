@@ -16,7 +16,7 @@ public sealed class S3ObjectItem
 
 	public long? Size { get; init; }
 
-	public DateTime? LastModified { get; init; }
+	public DateTimeOffset? LastModified { get; init; }
 
 	public bool IsFolder { get; init; }
 
