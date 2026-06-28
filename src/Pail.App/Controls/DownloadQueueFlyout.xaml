@@ -263,6 +263,17 @@
                                     Width="32"
                                     Height="32"
                                     Padding="0"
+                                    Command="{x:Bind ShowInFileManagerCommand, Mode=OneWay}"
+                                    Visibility="{x:Bind CanShowInFileManager, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"
+                                    ToolTipService.ToolTip="{x:Bind ShowInFileManagerAutomationName, Mode=OneWay}"
+                                    AutomationProperties.Name="{x:Bind ShowInFileManagerAutomationName, Mode=OneWay}">
+                                    <SymbolIcon Symbol="Folder" AutomationProperties.AccessibilityView="Raw" />
+                                </Button>
+
+                                <Button
+                                    Width="32"
+                                    Height="32"
+                                    Padding="0"
                                     Command="{x:Bind CancelCommand, Mode=OneWay}"
                                     Visibility="{x:Bind CanCancel, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"
                                     ToolTipService.ToolTip="{x:Bind CancelAutomationName, Mode=OneWay}"
