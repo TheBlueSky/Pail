@@ -12,18 +12,27 @@ public sealed partial class DownloadManagerViewModel : ObservableObject, IDispos
 
 	private readonly IDownloadManager _downloadManager;
 	private readonly IDispatcherService _dispatcherService;
+	private readonly IFileManagerService _fileManagerService;
 	private readonly ILocalizationService _localizationService;
+	private readonly IStatusMessageService _statusMessageService;
 	private readonly Dictionary<Guid, DownloadItemViewModel> _downloads = [];
 	private readonly Dictionary<Guid, int> _sortOrder = [];
 
 	private bool _disposed;
 	private int _nextSortOrder;
 
-	public DownloadManagerViewModel(IDownloadManager downloadManager, IDispatcherService dispatcherService, ILocalizationService localizationService)
+	public DownloadManagerViewModel(
+		IDownloadManager downloadManager,
+		IDispatcherService dispatcherService,
+		IFileManagerService fileManagerService,
+		ILocalizationService localizationService,
+		IStatusMessageService statusMessageService)
 	{
 		_downloadManager = downloadManager;
 		_dispatcherService = dispatcherService;
+		_fileManagerService = fileManagerService;
 		_localizationService = localizationService;
+		_statusMessageService = statusMessageService;
 
 		foreach (var item in _downloadManager.GetActiveDownloads())
 		{
@@ -153,7 +162,7 @@ public sealed partial class DownloadManagerViewModel : ObservableObject, IDispos
 
 	private void AddItem(DownloadItem item)
 	{
-		var downloadItemViewModel = new DownloadItemViewModel(item, _downloadManager, _localizationService);
+		var downloadItemViewModel = new DownloadItemViewModel(item, _downloadManager, _fileManagerService, _localizationService, _statusMessageService);
 		_downloads[item.Id] = downloadItemViewModel;
 		_sortOrder[item.Id] = _nextSortOrder++;
 		Items.Add(downloadItemViewModel);

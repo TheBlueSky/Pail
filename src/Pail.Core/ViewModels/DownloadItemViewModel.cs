@@ -12,18 +12,29 @@ public sealed partial class DownloadItemViewModel : ObservableObject
 	private static readonly string[] ByteSuffixes = ["B", "KB", "MB", "GB", "TB", "PB"];
 
 	private readonly IDownloadManager _manager;
+	private readonly IFileManagerService _fileManagerService;
 	private readonly ILocalizationService _localizationService;
+	private readonly IStatusMessageService _statusMessageService;
 
-	public DownloadItemViewModel(DownloadItem item, IDownloadManager manager, ILocalizationService localizationService)
+	public DownloadItemViewModel(
+		DownloadItem item,
+		IDownloadManager manager,
+		IFileManagerService fileManagerService,
+		ILocalizationService localizationService,
+		IStatusMessageService statusMessageService)
 	{
 		ArgumentNullException.ThrowIfNull(item);
 		ArgumentNullException.ThrowIfNull(manager);
+		ArgumentNullException.ThrowIfNull(fileManagerService);
 		ArgumentNullException.ThrowIfNull(localizationService);
+		ArgumentNullException.ThrowIfNull(statusMessageService);
 
 		Item = item;
 
 		_manager = manager;
+		_fileManagerService = fileManagerService;
 		_localizationService = localizationService;
+		_statusMessageService = statusMessageService;
 
 		Refresh();
 	}
@@ -39,11 +50,13 @@ public sealed partial class DownloadItemViewModel : ObservableObject
 	[ObservableProperty]
 	[NotifyPropertyChangedFor(nameof(CanCancel))]
 	[NotifyPropertyChangedFor(nameof(CanRetry))]
+	[NotifyPropertyChangedFor(nameof(CanShowInFileManager))]
 	[NotifyPropertyChangedFor(nameof(StatusText))]
 	[NotifyPropertyChangedFor(nameof(IsByteProgressIndeterminate))]
 	[NotifyPropertyChangedFor(nameof(ProgressBarValue))]
 	[NotifyCanExecuteChangedFor(nameof(CancelCommand))]
 	[NotifyCanExecuteChangedFor(nameof(RetryCommand))]
+	[NotifyCanExecuteChangedFor(nameof(ShowInFileManagerCommand))]
 	public partial DownloadStatus Status { get; set; }
 
 	[ObservableProperty]
@@ -82,6 +95,8 @@ public sealed partial class DownloadItemViewModel : ObservableObject
 
 	public string CancelAutomationName => _localizationService.FormatString("DownloadCancelAutomationName", "Cancel download {0}", FileName);
 
+	public string ShowInFileManagerAutomationName => _localizationService.FormatString("DownloadShowInFileManagerAutomationName", "Show download {0} in File Explorer", FileName);
+
 	public string StatusText => Status switch
 	{
 		DownloadStatus.Queued => _localizationService.GetString("DownloadStatusQueued", "Queued"),
@@ -95,6 +110,8 @@ public sealed partial class DownloadItemViewModel : ObservableObject
 	public bool CanCancel => Status is DownloadStatus.Queued or DownloadStatus.Downloading;
 
 	public bool CanRetry => Status is DownloadStatus.Failed;
+
+	public bool CanShowInFileManager => Status is DownloadStatus.Completed;
 
 	internal void Refresh()
 	{
@@ -113,6 +130,20 @@ public sealed partial class DownloadItemViewModel : ObservableObject
 
 	[RelayCommand(CanExecute = nameof(CanRetry))]
 	private Task RetryAsync() => _manager.RetryAsync(Item.Id);
+
+	[RelayCommand(CanExecute = nameof(CanShowInFileManager))]
+	private async Task ShowInFileManagerAsync()
+	{
+		var shown = await _fileManagerService.ShowInFileManagerAsync(Item.DestinationPath);
+
+		if (!shown)
+		{
+			_statusMessageService.ShowError(_localizationService.FormatString(
+				"DownloadShowInFileManagerFailed",
+				"Could not show {0} in File Explorer. The file or folder may have been moved or deleted.",
+				FileName));
+		}
+	}
 
 	public string RetryAutomationName => _localizationService.FormatString("DownloadRetryAutomationName", "Retry download {0}", FileName);
 

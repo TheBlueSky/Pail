@@ -10,7 +10,9 @@ public sealed class DownloadManagerViewModelTests
 {
 	private readonly IDownloadManager _manager = Substitute.For<IDownloadManager>();
 	private readonly IDispatcherService _dispatcherService = CreateSynchronousDispatcher();
+	private readonly IFileManagerService _fileManagerService = Substitute.For<IFileManagerService>();
 	private readonly ILocalizationService _localizationService = Substitute.For<ILocalizationService>();
+	private readonly IStatusMessageService _statusMessageService = Substitute.For<IStatusMessageService>();
 
 	public DownloadManagerViewModelTests()
 	{
@@ -18,6 +20,7 @@ public sealed class DownloadManagerViewModelTests
 		_manager.CancelAsync(Arg.Any<Guid>()).Returns(Task.CompletedTask);
 		_manager.CancelAllAsync().Returns(Task.CompletedTask);
 		_manager.RetryAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>()).Returns(Task.CompletedTask);
+		_fileManagerService.ShowInFileManagerAsync(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(Task.FromResult(true));
 		_localizationService.ReturnsFallbackStrings();
 	}
 
@@ -236,7 +239,7 @@ public sealed class DownloadManagerViewModelTests
 		Assert.False(viewModel.HasItems);
 	}
 
-	private DownloadManagerViewModel CreateViewModel() => new(_manager, _dispatcherService, _localizationService);
+	private DownloadManagerViewModel CreateViewModel() => new(_manager, _dispatcherService, _fileManagerService, _localizationService, _statusMessageService);
 
 	private void RaiseProgressChanged(DownloadItem item) =>
 		_manager.ProgressChanged += Raise.Event<EventHandler<DownloadProgressEventArgs>>(_manager, new DownloadProgressEventArgs(item));

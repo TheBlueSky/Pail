@@ -737,6 +737,14 @@
     <value>Retry download {0}</value>
     <comment>Accessible name and tooltip for retrying a failed download. {0} is the file or folder name.</comment>
   </data>
+  <data name="DownloadShowInFileManagerAutomationName" xml:space="preserve">
+    <value>Show download {0} in File Explorer</value>
+    <comment>Accessible name and tooltip for showing a completed download in File Explorer. {0} is the file or folder name.</comment>
+  </data>
+  <data name="DownloadShowInFileManagerFailed" xml:space="preserve">
+    <value>Could not show {0} in File Explorer. The file or folder may have been moved or deleted.</value>
+    <comment>Status error shown when Pail cannot reveal a completed download in File Explorer. {0} is the file or folder name.</comment>
+  </data>
   <data name="DownloadErrorPermission" xml:space="preserve">
     <value>Pail could not read this object from S3. Check permissions and try again.</value>
     <comment>Friendly download failure shown for S3 permission errors.</comment>

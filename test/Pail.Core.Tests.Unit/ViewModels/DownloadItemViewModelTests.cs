@@ -10,13 +10,18 @@ namespace Pail.Core.Tests.Unit.ViewModels;
 
 public sealed class DownloadItemViewModelTests
 {
+	const string TestFileName = "file.bin";
+
 	private readonly IDownloadManager _manager = Substitute.For<IDownloadManager>();
+	private readonly IFileManagerService _fileManagerService = Substitute.For<IFileManagerService>();
 	private readonly ILocalizationService _localizationService = Substitute.For<ILocalizationService>();
+	private readonly IStatusMessageService _statusMessageService = Substitute.For<IStatusMessageService>();
 
 	public DownloadItemViewModelTests()
 	{
 		_manager.CancelAsync(Arg.Any<Guid>()).Returns(Task.CompletedTask);
 		_manager.RetryAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>()).Returns(Task.CompletedTask);
+		_fileManagerService.ShowInFileManagerAsync(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(Task.FromResult(true));
 		_localizationService.ReturnsFallbackStrings();
 	}
 
@@ -168,6 +173,28 @@ public sealed class DownloadItemViewModelTests
 	}
 
 	[Fact]
+	internal void CanShowInFileManager_TracksStatusTransitions()
+	{
+		// Arrange
+		var item = CreateItem();
+		var viewModel = CreateViewModel(item);
+
+		// Act & Assert
+		Assert.False(viewModel.CanShowInFileManager);
+		Assert.False(viewModel.ShowInFileManagerCommand.CanExecute(null));
+
+		item.TransitionTo(DownloadStatus.Downloading);
+		viewModel.Refresh();
+		Assert.False(viewModel.CanShowInFileManager);
+		Assert.False(viewModel.ShowInFileManagerCommand.CanExecute(null));
+
+		item.TransitionTo(DownloadStatus.Completed);
+		viewModel.Refresh();
+		Assert.True(viewModel.CanShowInFileManager);
+		Assert.True(viewModel.ShowInFileManagerCommand.CanExecute(null));
+	}
+
+	[Fact]
 	internal async Task CancelCommand_CallsManager()
 	{
 		// Arrange
@@ -202,6 +229,7 @@ public sealed class DownloadItemViewModelTests
 		Assert.Contains(nameof(DownloadItemViewModel.Status), changedProperties);
 		Assert.Contains(nameof(DownloadItemViewModel.StatusText), changedProperties);
 		Assert.Contains(nameof(DownloadItemViewModel.CanCancel), changedProperties);
+		Assert.Contains(nameof(DownloadItemViewModel.CanShowInFileManager), changedProperties);
 		Assert.Contains(nameof(DownloadItemViewModel.ByteProgress), changedProperties);
 		Assert.Contains(nameof(DownloadItemViewModel.ProgressText), changedProperties);
 		Assert.Contains(nameof(DownloadItemViewModel.SpeedText), changedProperties);
@@ -250,7 +278,41 @@ public sealed class DownloadItemViewModelTests
 		await _manager.Received(1).RetryAsync(item.Id, Arg.Any<CancellationToken>());
 	}
 
-	private DownloadItemViewModel CreateViewModel(DownloadItem item) => new(item, _manager, _localizationService);
+	[Fact]
+	internal async Task ShowInFileManagerCommand_CompletedDownload_CallsFileManagerService()
+	{
+		// Arrange
+		var item = CreateItem();
+		item.TransitionTo(DownloadStatus.Downloading);
+		item.TransitionTo(DownloadStatus.Completed);
+		var viewModel = CreateViewModel(item);
+
+		// Act
+		await viewModel.ShowInFileManagerCommand.ExecuteAsync(null);
+
+		// Assert
+		await _fileManagerService.Received(1).ShowInFileManagerAsync(item.DestinationPath, Arg.Any<CancellationToken>());
+		_statusMessageService.DidNotReceive().ShowError(Arg.Any<string>());
+	}
+
+	[Fact]
+	internal async Task ShowInFileManagerCommand_WhenServiceFails_ShowsError()
+	{
+		// Arrange
+		_fileManagerService.ShowInFileManagerAsync(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(Task.FromResult(false));
+		var item = CreateItem();
+		item.TransitionTo(DownloadStatus.Downloading);
+		item.TransitionTo(DownloadStatus.Completed);
+		var viewModel = CreateViewModel(item);
+
+		// Act
+		await viewModel.ShowInFileManagerCommand.ExecuteAsync(null);
+
+		// Assert
+		_statusMessageService.Received(1).ShowError($"Could not show {TestFileName} in File Explorer. The file or folder may have been moved or deleted.");
+	}
+
+	private DownloadItemViewModel CreateViewModel(DownloadItem item) => new(item, _manager, _fileManagerService, _localizationService, _statusMessageService);
 
 	private static DownloadItem CreateItem(
 		long? totalBytes = null,
@@ -262,9 +324,9 @@ public sealed class DownloadItemViewModelTests
 		new()
 		{
 			BucketName = "bucket-a",
-			Key = isFolder ? "logs/" : "file.bin",
+			Key = isFolder ? "logs/" : TestFileName,
 			DestinationPath = Path.Combine(Path.GetTempPath(), "pail-test-" + Guid.NewGuid()),
-			FileName = isFolder ? "logs" : "file.bin",
+			FileName = isFolder ? "logs" : TestFileName,
 			TotalBytes = totalBytes,
 			BytesDownloaded = bytesDownloaded,
 			Speed = speed,
