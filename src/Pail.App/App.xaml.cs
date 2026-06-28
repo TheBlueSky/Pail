@@ -47,6 +47,7 @@ public partial class PailApp : Application
 		services.AddSingleton<ICopyActionService, CopyActionService>();
 		services.AddSingleton<IDispatcherService>(_ => new DispatcherService(DispatcherQueue.GetForCurrentThread()));
 		services.AddSingleton<IDownloadManager, DownloadManager>();
+		services.AddSingleton<IFileManagerService, FileManagerService>();
 		services.AddSingleton<IFolderPickerService, FolderPickerService>();
 		services.AddSingleton<ILocalizationService, ResourceLocalizationService>();
 		services.AddSingleton<INavigationHostService, NavigationService>();
