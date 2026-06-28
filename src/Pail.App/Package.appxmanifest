@@ -1,4 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
+
 <Package
   xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
   xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
@@ -13,7 +14,7 @@
 
   <Properties>
     <DisplayName>ms-resource:AppDisplayName</DisplayName>
-    <PublisherDisplayName>ms-resource:AppPublisherDisplayName</PublisherDisplayName>
+    <PublisherDisplayName>TheBlueSky</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
 
@@ -22,7 +23,7 @@
   </Dependencies>
 
   <Resources>
-    <Resource Language="en-GB" />
+    <Resource Language="x-generate"/>
   </Resources>
 
   <Applications>
@@ -47,6 +48,7 @@
   </Applications>
 
   <Capabilities>
+    <Capability Name="internetClient" />
     <rescap:Capability Name="runFullTrust" />
   </Capabilities>
 </Package>

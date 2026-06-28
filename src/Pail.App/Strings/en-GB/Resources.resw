@@ -125,10 +125,6 @@
     <value>Pail</value>
     <comment>Application display name used by the Windows app manifest</comment>
   </data>
-  <data name="AppPublisherDisplayName" xml:space="preserve">
-    <value>TheBlueSky</value>
-    <comment>Publisher display name used by the Windows app manifest</comment>
-  </data>
   <data name="AppDescription" xml:space="preserve">
     <value>S3 Browser for Windows</value>
     <comment>Application description used by the Windows app manifest</comment>
