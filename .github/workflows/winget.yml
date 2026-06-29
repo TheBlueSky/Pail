@@ -45,6 +45,12 @@ jobs:
           $releaseTag = '${{ github.event.release.tag_name }}'
           $packageVersion = $releaseTag -replace '^releases/', '' -replace '^v', ''
 
+          # wingetcreate can only auto-fill these from the GitHub release when it can
+          # parse the release from the installer URL. The 'releases/vX.Y.Z' tag contains a
+          # slash, which breaks that parsing, so supply them explicitly.
+          $releaseNotesUrl = '${{ github.event.release.html_url }}'
+          $releaseDate = ([datetimeoffset]'${{ github.event.release.published_at }}').UtcDateTime.ToString('yyyy-MM-dd')
+
           $installerUrlX64 = $assets | Where-Object -Property name -eq 'Pail-win-x64.zip' | Select-Object -ExpandProperty browser_download_url
           $installerUrlX86 = $assets | Where-Object -Property name -eq 'Pail-win-x86.zip' | Select-Object -ExpandProperty browser_download_url
           $installerUrlArm64 = $assets | Where-Object -Property name -eq 'Pail-win-arm64.zip' | Select-Object -ExpandProperty browser_download_url
@@ -59,5 +65,7 @@ jobs:
           .\wingetcreate.exe update $env:WINGET_PACKAGE_IDENTIFIER `
             --version $packageVersion `
             --urls "$installerUrlX64|x64" "$installerUrlX86|x86" "$installerUrlArm64|arm64" `
+            --release-date $releaseDate `
+            --release-notes-url $releaseNotesUrl `
             --no-open `
             --submit
